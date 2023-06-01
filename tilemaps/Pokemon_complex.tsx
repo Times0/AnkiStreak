@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tileset version="1.10" tiledversion="1.10.1" name="tilesetcomplet_pokemon" tilewidth="32" tileheight="32" tilecount="21000" columns="140">
  <image source="../tilemaps_png/upscaled.png" width="4480" height="4800"/>
+ <tile id="3835">
+  <animation>
+   <frame tileid="3695" duration="230"/>
+   <frame tileid="3835" duration="230"/>
+  </animation>
+ </tile>
+ <tile id="3836">
+  <animation>
+   <frame tileid="3836" duration="230"/>
+   <frame tileid="3696" duration="230"/>
+  </animation>
+ </tile>
  <wangsets>
   <wangset name="Chill water" type="corner" tile="-1">
    <wangcolor name="Water" color="#ff0000" tile="-1" probability="1"/>
@@ -94,6 +106,31 @@
    <wangtile tileid="5215" wangid="0,1,0,1,0,2,0,1"/>
    <wangtile tileid="5354" wangid="0,2,0,1,0,1,0,1"/>
    <wangtile tileid="5355" wangid="0,1,0,1,0,1,0,2"/>
+  </wangset>
+  <wangset name="Terrain" type="corner" tile="-1">
+   <wangcolor name="Terrain" color="#ff0000" tile="-1" probability="1"/>
+   <wangcolor name="Bord" color="#00ff00" tile="-1" probability="1"/>
+   <wangtile tileid="2242" wangid="0,1,0,1,0,1,0,1"/>
+   <wangtile tileid="4532" wangid="0,2,0,1,0,2,0,2"/>
+   <wangtile tileid="4533" wangid="0,2,0,1,0,1,0,2"/>
+   <wangtile tileid="4534" wangid="0,2,0,2,0,1,0,2"/>
+   <wangtile tileid="4672" wangid="0,1,0,1,0,2,0,2"/>
+   <wangtile tileid="4673" wangid="0,1,0,1,0,1,0,1"/>
+   <wangtile tileid="4674" wangid="0,2,0,2,0,1,0,1"/>
+   <wangtile tileid="4812" wangid="0,1,0,2,0,2,0,2"/>
+   <wangtile tileid="4813" wangid="0,1,0,2,0,2,0,1"/>
+   <wangtile tileid="4814" wangid="0,2,0,2,0,2,0,1"/>
+   <wangtile tileid="4951" wangid="0,2,0,2,0,2,0,2"/>
+   <wangtile tileid="4952" wangid="0,1,0,2,0,1,0,1"/>
+   <wangtile tileid="4953" wangid="0,1,0,1,0,2,0,1"/>
+   <wangtile tileid="4954" wangid="0,2,0,2,0,2,0,2"/>
+   <wangtile tileid="5091" wangid="0,2,0,2,0,2,0,2"/>
+   <wangtile tileid="5092" wangid="0,2,0,1,0,1,0,1"/>
+   <wangtile tileid="5093" wangid="0,1,0,1,0,1,0,2"/>
+   <wangtile tileid="5094" wangid="0,2,0,2,0,2,0,2"/>
+   <wangtile tileid="5231" wangid="0,2,0,2,0,2,0,2"/>
+   <wangtile tileid="5232" wangid="0,2,0,2,0,2,0,2"/>
+   <wangtile tileid="5233" wangid="0,2,0,2,0,2,0,2"/>
   </wangset>
  </wangsets>
 </tileset>
