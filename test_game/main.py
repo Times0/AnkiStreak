@@ -4,7 +4,7 @@ import sys
 import pygame
 
 sys.path.append(os.path.dirname(__file__))
-from constants import *
+from config import *
 from game import Game
 
 

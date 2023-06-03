@@ -1,16 +1,11 @@
 import os
-import random
+from colors import *
 import pyscroll
 import pygame.sprite
-from constants import *
+from config import *
 import pytmx
 
 cwd = os.path.dirname(__file__)
-
-MAX_ZOOM = 2
-MIN_ZOOM = 1
-FPS = 60
-ALLOW_SCROOLING = False
 
 
 class GameObject:
@@ -47,10 +42,20 @@ class Clickable:
     def handle_events(self, events):
         for event in events:
             if event.type == pygame.MOUSEMOTION:
-                if self.rect.collidepoint(event.pos):
-                    self.hovered = True
-                else:
-                    self.hovered = False
+                was_hover = self.hovered
+                self.hovered = self.rect.collidepoint(event.pos)
+                if self.hovered and not was_hover:
+                    self.on_hover()
+                elif not self.hovered and was_hover:
+                    self.on_hover_end()
+
+    def on_hover(self):
+        self.hovered = True
+        pygame.mouse.set_cursor(*pygame.cursors.broken_x)
+
+    def on_hover_end(self):
+        self.hovered = False
+        pygame.mouse.set_cursor(*pygame.cursors.arrow)
 
     def update(self, camera_rect):
         w, h = pygame.display.get_surface().get_size()
