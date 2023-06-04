@@ -8,6 +8,9 @@ import pytmx
 cwd = os.path.dirname(__file__)
 
 
+# dpi awareness
+
+
 class GameObject:
     def __init__(self, pos, size, img):
         self.pos = pos
@@ -83,17 +86,30 @@ class ClickableGameObject(GameObject, Clickable):
         Clickable.draw(self, win)
 
 
+class SortedGroup:
+    def __init__(self, *sprites):
+        self.sprites = list(sprites)
+
+    def add(self, sprite):
+        self.sprites.append(sprite)
+        self.sprites.sort(key=lambda x: x.rect.bottom)
+
+    def draw(self, surface):
+        for sprite in self.sprites:
+            sprite.draw(surface)
+
+
 class Game:
     def __init__(self, win):
         self.win = win
         self.running = True
 
         # ______________________TMX and pyscroll_____________________________________#
-        self.data_tmx = pytmx.load_pygame("../map_with_objects.tmx")
+        self.data_tmx = pytmx.load_pygame("data/map_with_objects.tmx")
         pyscroll_data = pyscroll.data.TiledMapData(self.data_tmx)
         self.map_layer = pyscroll.BufferedRenderer(pyscroll_data, self.win.get_size(), clamp_camera=True)
         self.clickable_objects = []
-        self.objects = []
+        self.objects = SortedGroup()
         self.load_objects()
 
         # _____________________IDK___________________________________#
@@ -113,12 +129,12 @@ class Game:
                 img = obj.image
                 o = ClickableGameObject(pos, size, img)
                 self.clickable_objects.append(o)
-                self.objects.append(o)
+                self.objects.add(o)
             elif obj.type in ["Tree", "Bridge", "Rock"]:
                 pos = (obj.x, obj.y)
                 size = (obj.width, obj.height)
                 img = obj.image
-                self.objects.append(GameObject(pos, size, img))
+                self.objects.add(GameObject(pos, size, img))
 
     def run(self):
         clock = pygame.time.Clock()
@@ -169,12 +185,11 @@ class Game:
         if self.map_layer.zoom != self.zoom_target:
             self.map_layer.zoom += (self.zoom_target - self.map_layer.zoom) / 5
             self.map_layer.center(self.map_layer.view_rect.center)
-        for obj in self.objects:
+        for obj in self.objects.sprites:
             obj.update(self.map_layer.view_rect)
 
     def draw(self):
         self.win.fill(BLACK)
         self.map_layer.draw(self.win, self.win.get_rect())
-        for obj in self.objects:
-            obj.draw(self.win)
+        self.objects.draw(self.win)
         pygame.display.update()
