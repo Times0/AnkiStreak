@@ -7,4 +7,4 @@ ctypes.windll.user32.SetProcessDPIAware()
 FPS = 60
 MAX_ZOOM = 2
 MIN_ZOOM = 1
-ALLOW_SCROOLING = False
+ALLOW_SCROOLING = True

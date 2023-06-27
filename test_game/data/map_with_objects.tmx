@@ -509,8 +509,8 @@
 </data>
  </layer>
  <objectgroup id="2" name="objects">
-  <object id="28" type="Building" gid="1425" x="146" y="660" width="130" height="163"/>
-  <object id="34" type="Building" gid="1433" x="359.25" y="653.583" width="240" height="238.333"/>
+  <object id="28" type="Farm" gid="1425" x="146" y="660" width="130" height="163"/>
+  <object id="34" type="Farm" gid="1433" x="359.25" y="653.583" width="240" height="238.333"/>
   <object id="36" type="Stairs" gid="1436" x="293.667" y="966.083" width="68" height="140"/>
   <object id="60" type="Bridge" gid="1438" x="735.333" y="891.666" width="55.6667" height="54"/>
   <object id="62" type="Bridge" gid="1438" x="785.583" y="891.333" width="43" height="54"/>

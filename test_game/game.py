@@ -8,9 +8,6 @@ import pytmx
 cwd = os.path.dirname(__file__)
 
 
-# dpi awareness
-
-
 class GameObject:
     def __init__(self, pos, size, img):
         self.pos = pos
@@ -76,14 +73,24 @@ class Clickable:
             pygame.draw.rect(win, GREEN, self.rect, 2)
 
 
-class ClickableGameObject(GameObject, Clickable):
+class Farm(GameObject, Clickable):
     def __init__(self, pos, size, img):
-        super().__init__(pos, size, img)
+        GameObject.__init__(self, pos, size, img)
         Clickable.__init__(self, pos, size)
+        self.menu_open = False
+
+    def handle_events(self, events):
+        Clickable.handle_events(self, events)
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                self.menu_open = False
+                if self.hovered:
+                    self.menu_open = True
 
     def draw(self, win):
         GameObject.draw(self, win)
-        Clickable.draw(self, win)
+        if self.menu_open:
+            pygame.draw.rect(win, RED, self.rect, 2)
 
 
 class SortedGroup:
@@ -105,7 +112,7 @@ class Game:
         self.running = True
 
         # ______________________TMX and pyscroll_____________________________________#
-        self.data_tmx = pytmx.load_pygame("data/map_with_objects.tmx")
+        self.data_tmx = pytmx.load_pygame(os.path.join(cwd, "data", "map_with_objects.tmx"))
         pyscroll_data = pyscroll.data.TiledMapData(self.data_tmx)
         self.map_layer = pyscroll.BufferedRenderer(pyscroll_data, self.win.get_size(), clamp_camera=True)
         self.clickable_objects = []
@@ -114,7 +121,7 @@ class Game:
 
         # _____________________IDK___________________________________#
         self.scrolling = False
-        self.map_layer.zoom = 1.8
+        self.map_layer.zoom = 2
         self.zoom_target = self.map_layer.zoom
 
     def load_objects(self):
@@ -123,14 +130,14 @@ class Game:
                 pos = (obj.x, obj.y)
                 size = (obj.width, obj.height)
                 self.clickable_objects.append(Clickable(pos, size))
-            elif obj.type == "Building":
+            elif obj.type == "Farm":
                 pos = (obj.x, obj.y)
                 size = (obj.width, obj.height)
                 img = obj.image
-                o = ClickableGameObject(pos, size, img)
+                o = Farm(pos, size, img)
                 self.clickable_objects.append(o)
                 self.objects.add(o)
-            elif obj.type in ["Tree", "Bridge", "Rock"]:
+            else:
                 pos = (obj.x, obj.y)
                 size = (obj.width, obj.height)
                 img = obj.image
@@ -182,7 +189,7 @@ class Game:
                 self.running = False
 
     def update(self):
-        if self.map_layer.zoom != self.zoom_target:
+        if abs(self.map_layer.zoom - self.zoom_target) > 0.01:
             self.map_layer.zoom += (self.zoom_target - self.map_layer.zoom) / 5
             self.map_layer.center(self.map_layer.view_rect.center)
         for obj in self.objects.sprites:
