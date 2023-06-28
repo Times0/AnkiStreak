@@ -1,6 +1,7 @@
 import ctypes
+TILE_SIZE = 32
 
-WIDTH, HEIGHT = 32 * 45, 32 * 30
+WIDTH, HEIGHT = TILE_SIZE * 45, TILE_SIZE * 30
 # dpi awareness
 ctypes.windll.user32.SetProcessDPIAware()
 

@@ -1,3 +1,4 @@
+import math
 import os
 from colors import *
 import pyscroll
@@ -73,24 +74,35 @@ class Clickable:
             pygame.draw.rect(win, GREEN, self.rect, 2)
 
 
+class Plant(GameObject):
+    def __init__(self, pos):
+        img = pygame.image.load(os.path.join(cwd, "data", "other", "plant.png")).convert_alpha()
+        GameObject.__init__(self, pos, (TILE_SIZE, TILE_SIZE), img)
+
+
 class Farm(GameObject, Clickable):
     def __init__(self, pos, size, img):
         GameObject.__init__(self, pos, size, img)
         Clickable.__init__(self, pos, size)
-        self.menu_open = False
+        self.is_menu_open = False
+
+        self.available_items = []
+        self.items = []
 
     def handle_events(self, events):
         Clickable.handle_events(self, events)
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                self.menu_open = False
+                self.is_menu_open = False
                 if self.hovered:
-                    self.menu_open = True
+                    self.is_menu_open = True
 
     def draw(self, win):
         GameObject.draw(self, win)
-        if self.menu_open:
-            pygame.draw.rect(win, RED, self.rect, 2)
+        menu_rect = pygame.Rect(self.rect.x, self.rect.y - 50, self.rect.w, 50)
+        if self.is_menu_open:
+            pygame.draw.rect(win, GREEN, menu_rect)
+            pygame.draw.rect(win, BLACK, menu_rect, 2)
 
 
 class SortedGroup:
@@ -116,38 +128,44 @@ class Game:
         pyscroll_data = pyscroll.data.TiledMapData(self.data_tmx)
         self.map_layer = pyscroll.BufferedRenderer(pyscroll_data, self.win.get_size(), clamp_camera=True)
         self.clickable_objects = []
+        self.special_tiles = []
         self.objects = SortedGroup()
         self.load_objects()
+        self.load_special_tiles()
 
         # _____________________IDK___________________________________#
         self.scrolling = False
-        self.map_layer.zoom = 2
+        self.map_layer.zoom = 1
         self.zoom_target = self.map_layer.zoom
 
     def load_objects(self):
-        for obj in self.data_tmx.objects:
-            if obj.type == "collision":
-                pos = (obj.x, obj.y)
-                size = (obj.width, obj.height)
-                self.clickable_objects.append(Clickable(pos, size))
-            elif obj.type == "Farm":
-                pos = (obj.x, obj.y)
-                size = (obj.width, obj.height)
-                img = obj.image
-                o = Farm(pos, size, img)
-                self.clickable_objects.append(o)
-                self.objects.add(o)
-            else:
-                pos = (obj.x, obj.y)
-                size = (obj.width, obj.height)
-                img = obj.image
-                self.objects.add(GameObject(pos, size, img))
+        for obj_layer in self.data_tmx.objectgroups:
+            if obj_layer.name == "objects":
+                for obj in obj_layer:
+                    if obj.type == "Farm":
+                        pos = (obj.x, obj.y)
+                        size = (obj.width, obj.height)
+                        img = obj.image
+                        o = Farm(pos, size, img)
+                        self.clickable_objects.append(o)
+                        self.objects.add(o)
+                    else:
+                        pos = (obj.x, obj.y)
+                        size = (obj.width, obj.height)
+                        img = obj.image
+                        self.objects.add(GameObject(pos, size, img))
+
+    def load_special_tiles(self):
+        for layer in self.data_tmx.layers:
+            if layer.name == "Plantations":
+                for x, y, gid in layer:
+                    if gid != 0:
+                        self.objects.add(Plant((x * self.data_tmx.tilewidth, y * self.data_tmx.tileheight)))
 
     def run(self):
         clock = pygame.time.Clock()
         while self.running:
             clock.tick(FPS)
-            print(f"\r{clock.get_fps()}", end="")
             self.events()
             self.update()
             self.draw()
@@ -159,10 +177,7 @@ class Game:
                     self.zoom_target += 0.05
                 elif event.y < 0:
                     self.zoom_target -= 0.05
-                if self.zoom_target < MIN_ZOOM:
-                    self.zoom_target = MIN_ZOOM
-                if self.zoom_target > MAX_ZOOM:
-                    self.zoom_target = MAX_ZOOM
+                self.zoom_target = clamp(self.zoom_target, MIN_ZOOM, MAX_ZOOM)
                 self.map_layer.center(self.map_layer.view_rect.center)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
@@ -189,9 +204,11 @@ class Game:
                 self.running = False
 
     def update(self):
-        if abs(self.map_layer.zoom - self.zoom_target) > 0.01:
-            self.map_layer.zoom += (self.zoom_target - self.map_layer.zoom) / 5
+        if abs(self.map_layer.zoom - self.zoom_target) > 10 ** (-3):
+            self.map_layer.zoom += (self.zoom_target - self.map_layer.zoom) / 2
             self.map_layer.center(self.map_layer.view_rect.center)
+
+
         for obj in self.objects.sprites:
             obj.update(self.map_layer.view_rect)
 
@@ -199,4 +216,15 @@ class Game:
         self.win.fill(BLACK)
         self.map_layer.draw(self.win, self.win.get_rect())
         self.objects.draw(self.win)
+        for obj in self.special_tiles:
+            obj.draw(self.win)
         pygame.display.update()
+
+
+def clamp(n, minn, maxn):
+    if n < minn:
+        return minn
+    elif n > maxn:
+        return maxn
+    else:
+        return n
