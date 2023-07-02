@@ -7,10 +7,11 @@ from config import *
 import pytmx
 from utils import clamp
 
-from farms import Farm, Plant
+from farms import Farm, PlantSpot
 from objects import *
 
 cwd = os.path.dirname(__file__)
+
 
 
 class Game:
@@ -38,11 +39,20 @@ class Game:
         self.update(force=True)
 
     def load_objects(self):
+        dict_future_rects = {}
+        print(list(self.data_tmx.objectgroups))
         for obj_layer in self.data_tmx.objectgroups:
-            if obj_layer.name == "objects":
+            if obj_layer.name == "Rects":
+                for obj in obj_layer:
+                    # retrieve pytmx rect object
+                    points = [PointWithZoom((p.x, p.y)) for p in obj.points]
+                    dict_future_rects[obj.name] = points
+
+            if obj_layer.name == "Objects":
                 for obj in obj_layer:
                     if obj.type == "Farm":
-                        o = Farm((obj.x, obj.y), (obj.width, obj.height), obj.image)
+                        associated_rect = dict_future_rects[obj.name]
+                        o = Farm((obj.x, obj.y), (obj.width, obj.height), obj.image, associated_rect)
                         self.interactable_objects.append(o)
                         self.objects.add(o)
                         if obj.name == "Farm1":
@@ -57,19 +67,19 @@ class Game:
             if layer.name == "Plantations1":
                 for x, y, gid in layer:
                     if gid != 0:
-                        self.objects.add(
-                            Plant((x * self.data_tmx.tilewidth, y * self.data_tmx.tileheight), self.farms[0]))
+                        plant = PlantSpot((x * self.data_tmx.tilewidth, y * self.data_tmx.tileheight))
+                        self.farms[0].add_plant_location(plant)
             elif layer.name == "Plantations2":
                 for x, y, gid in layer:
                     if gid != 0:
-                        self.objects.add(
-                            Plant((x * self.data_tmx.tilewidth, y * self.data_tmx.tileheight), self.farms[1]))
+                        plant = PlantSpot((x * self.data_tmx.tilewidth, y * self.data_tmx.tileheight))
+                        self.farms[1].add_plant_location(plant)
 
     def run(self):
         clock = pygame.time.Clock()
         while self.running:
             clock.tick(FPS)
-            self.needs_update = False # Modified if scrolling the map or zooming
+            self.needs_update = False  # Modified if scrolling the map or zooming
             self.events()
             self.update()
             self.draw()
@@ -84,11 +94,12 @@ class Game:
                 self.zoom_target = clamp(self.zoom_target, MIN_ZOOM, MAX_ZOOM)
                 self.map_layer.center(self.map_layer.view_rect.center)
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
+                self.needs_update = True
+                if event.button == 2:
                     self.is_scrolling = True
 
             if event.type == pygame.MOUSEBUTTONUP:
-                if event.button == 1:
+                if event.button == 2:
                     self.is_scrolling = False
 
             if event.type == pygame.MOUSEMOTION:

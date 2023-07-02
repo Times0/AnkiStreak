@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="right-down" width="45" height="30" tilewidth="32" tileheight="32" infinite="0" nextlayerid="28" nextobjectid="204">
+<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="right-down" width="45" height="30" tilewidth="32" tileheight="32" infinite="0" nextlayerid="29" nextobjectid="208">
  <tileset firstgid="1" name="simple_pokemon" tilewidth="32" tileheight="32" tilecount="1424" columns="8">
   <image source="tilemaps_png/tile_pokemon.png" width="256" height="5697"/>
  </tileset>
@@ -542,7 +542,15 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7254,0,0,7255,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup id="2" name="objects">
+ <objectgroup id="28" name="Rects">
+  <object id="206" name="Farm2" type="farm_zone" x="392" y="293">
+   <polygon points="0,0 300,1 304,524 -6,527 -2,319 159,318 159,219 -3,214"/>
+  </object>
+  <object id="207" name="Farm1" type="farm_zone" x="6" y="388">
+   <polygon points="0,0 272,2 276,210 227,210 227,182 148,181 145,332 5,335"/>
+  </object>
+ </objectgroup>
+ <objectgroup id="2" name="Objects">
   <object id="28" name="Farm1" type="Farm" gid="1425" x="146" y="660" width="130" height="163"/>
   <object id="34" name="Farm2" type="Farm" gid="1433" x="359.25" y="653.583" width="240" height="238.333"/>
   <object id="36" type="Stairs" gid="1436" x="293.667" y="966.083" width="68" height="140"/>

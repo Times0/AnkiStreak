@@ -6,6 +6,18 @@ from config import *
 import imgs
 
 
+class PointWithZoom:
+    def __init__(self, coords):
+        self.coords_init = coords
+        self.coords = coords
+
+    def update(self, camera_rect):
+        w, h = pygame.display.get_surface().get_size()
+        zoom = 1 / (camera_rect.w / w)
+        self.coords = (self.coords_init[0] / (camera_rect.w / w) - camera_rect.x * zoom,
+                       self.coords_init[1] / (camera_rect.h / h) - camera_rect.y * zoom)
+
+
 class GameObject_no_img:
     def __init__(self, pos, size):
         self.pos = pos
@@ -17,6 +29,23 @@ class GameObject_no_img:
         zoom = 1 / (camera_rect.w / w)
         self.rect.x = self.pos[0] / (camera_rect.w / w) - camera_rect.x * zoom
         self.rect.y = self.pos[1] / (camera_rect.h / h) - camera_rect.y * zoom
+        self.rect.width = self.size[0] * zoom
+        self.rect.height = self.size[1] * zoom
+
+
+class GameObject_no_pos:
+    def __init__(self, size, img):
+        self.size = size
+        self.img = img
+        self.zoom_buffer = pygame.transform.scale(self.img, size)
+        self.rect = pygame.Rect((0, 0), size)
+
+    def update(self, camera_rect):
+        w, h = pygame.display.get_surface().get_size()
+        zoom = 1 / (camera_rect.w / w)
+        self.rect.width = self.size[0] * zoom
+        self.rect.height = self.size[1] * zoom
+        self.zoom_buffer = pygame.transform.scale(self.img, (int(self.size[0] * zoom), int(self.size[1] * zoom)))
 
 
 class GameObject(GameObject_no_img):
@@ -90,5 +119,3 @@ class SortedGroup:
     def draw(self, surface):
         for sprite in self.sprites:
             sprite.draw(surface)
-
-

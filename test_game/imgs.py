@@ -8,5 +8,10 @@ def load(path):
     return pygame.image.load(os.path.join(cwd, "data", path)).convert_alpha()
 
 
-img_plant1 = load("other/plant.png")
-img_plant2 = load("other/plant2.png")
+empty_plant = load("other/plant.png")
+plant1 = load("other/plant.png")
+plant2 = load("other/plant2.png")
+
+seeds = load("other/farm/seeds.png")
+bucket = load("other/farm/bucket.png")
+faux = load("other/farm/faux.png")
