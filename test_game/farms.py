@@ -1,9 +1,11 @@
 import pygame
+
+import colors
 from objects import GameObject_no_img, GameObject, GameObject_no_pos, Clickable, PointWithZoom
 from config import *
 from colors import *
 import imgs
-from utils import is_point_inside_polygon
+from utils import is_point_inside_polygon, draw_menu_rect
 
 
 class Item(GameObject_no_pos):
@@ -26,29 +28,33 @@ class FarmMenuItem(Item):
 
 
 class Menu(GameObject_no_img):
-    def __init__(self, pos, size, items):
+    def __init__(self, linked_bat, size, items):
+        x_menu = linked_bat.rect.x + (linked_bat.rect.width - size[0]) // 2
+        y_menu = linked_bat.rect.y - size[1] - 10
+        pos = (x_menu, y_menu)
         super().__init__(pos, size)
         self.items = items
         self.is_open = False
 
         self.hovered_item_index = -1
 
-        self.item_size = 50
+        self.item_size = -1
         self.item_padding = 10
 
-        self.items_rects = []
+        self.items_rects: list[pygame.Rect] = []
 
-        self.init_rects(pygame.Rect((0, 0), (WIDTH, HEIGHT)))
+        self.update_items_rect()
         self.selected_item = None
 
-    def init_rects(self, camera_rect):
+    def update_items_rect(self):
         self.items_rects = []
-        new_item_size = int(self.item_size * (1 / (camera_rect.w / WIDTH)))
+        self.item_size = (self.rect.width - (len(self.items) + 1) * self.item_padding) // len(self.items)
+        y = self.rect.y + (self.rect.height - self.item_size) // 2
+
         for i, item in enumerate(self.items):
             self.items_rects.append(
-                pygame.Rect((self.rect.x + self.item_padding + i * (new_item_size + self.item_padding),
-                             self.rect.y + self.item_padding),
-                            (new_item_size, new_item_size)))
+                pygame.Rect((self.rect.x + self.item_padding + i * (self.item_size + self.item_padding), y),
+                            (self.item_size, self.item_size)))
 
     def add_item(self, item):
         self.items.append(item)
@@ -57,7 +63,7 @@ class Menu(GameObject_no_img):
         GameObject_no_img.update(self, camera_rect)
         for i, item in enumerate(self.items):
             item.update(camera_rect)
-        self.init_rects(camera_rect)
+        self.update_items_rect()
 
     def handle_events(self, events):
         for event in events:
@@ -79,14 +85,13 @@ class Menu(GameObject_no_img):
                         self.selected_item = item
 
     def draw(self, win):
-        if self.is_open:
-            pygame.draw.rect(win, GREEN, self.rect)
-            for i, item in enumerate(self.items):
-                if self.hovered_item_index == i:
-                    pygame.draw.rect(win, RED, self.items_rects[i], 2)
-                else:
-                    pygame.draw.rect(win, BLUE, self.items_rects[i], 2)
-                win.blit(item.zoom_buffer, self.items_rects[i])
+        # draw menu background slightly transparent black with white border
+        draw_menu_rect(win, self.rect, colors.MENU_BACKGROUND)
+        for i, item in enumerate(self.items):
+            if self.hovered_item_index == i:
+                pygame.draw.rect(win, colors.MENU_SELECTED, self.items_rects[i].inflate(10, 10), border_radius=10)
+
+            win.blit(item.zoom_buffer, self.items_rects[i])
 
 
 seeds = FarmMenuItem("Seeds", imgs.seeds, FarmMenuItem.seed)
@@ -98,10 +103,8 @@ class Farm(GameObject, Clickable):
     def __init__(self, pos, size, img, farm_zone):
         GameObject.__init__(self, pos, size, img)
         Clickable.__init__(self, pos, size)
-        self.menu = Menu((self.rect.x, self.rect.y - 50),
-                         (200, 100),
-                         [seeds, bucket, faux])
-
+        menu_items = [seeds, bucket, faux]
+        self.menu = Menu(self, (66 * len(menu_items), 75), menu_items)
         self.plants_location = []
         self.farm_zone: list[PointWithZoom] = farm_zone
 
@@ -148,7 +151,6 @@ class Farm(GameObject, Clickable):
                     elif selected_tool.type == FarmMenuItem.water:
                         pass
 
-
     def update(self, camera_rect):
         GameObject.update(self, camera_rect)
         self.menu.update(camera_rect)
@@ -157,19 +159,21 @@ class Farm(GameObject, Clickable):
         for point in self.farm_zone:
             point.update(camera_rect)
 
-    def draw(self, win):
+    def draw(self, win, debug=False):
         selected_tool = self.menu.selected_item
         for plant in self.plants_location:
             plant.draw(win)
         GameObject.draw(self, win)
-        self.menu.draw(win)
-        # draw cursor
+        if self.menu.is_open:
+            self.menu.draw(win)
+        # draw cursor tool
         if selected_tool is not None:
             img = selected_tool.zoom_buffer
             win.blit(img, img.get_rect(center=pygame.mouse.get_pos()))
 
         points = [p.coords for p in self.farm_zone]
-        pygame.draw.polygon(win, RED, points, 2)
+        if debug:
+            pygame.draw.polygon(win, RED, points, 2)
 
     def is_click_on_farmable_zone(self, pos):
         points = [p.coords for p in self.farm_zone]

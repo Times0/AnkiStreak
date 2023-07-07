@@ -28,3 +28,9 @@ def is_point_inside_polygon(polygon_points, position):
         p1x, p1y = p2x, p2y
 
     return inside
+
+
+def draw_menu_rect(win, rect, main_color):
+    """Draw a rectangle with rounded corners with alpha transparency and a border"""
+    pygame.draw.rect(win, main_color, rect, border_radius=10)
+    pygame.draw.rect(win, (0, 0, 0), rect, 2, border_radius=10)
