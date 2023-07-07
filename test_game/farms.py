@@ -38,13 +38,13 @@ class Menu(GameObject_no_img):
 
         self.hovered_item_index = -1
 
-        self.item_size = -1
+        self.item_size = -1  # will be calculated in update_items_rect
         self.item_padding = 10
 
         self.items_rects: list[pygame.Rect] = []
+        self.selected_item = None
 
         self.update_items_rect()
-        self.selected_item = None
 
     def update_items_rect(self):
         self.items_rects = []
@@ -79,10 +79,11 @@ class Menu(GameObject_no_img):
                     self.is_open = not self.is_open
                 else:
                     self.is_open = False
+                # Check if an item is clicked
                 for i, item in enumerate(self.items):
                     if self.items_rects[i].collidepoint(event.pos):
-                        print(f"Clicked {item.name}")
                         self.selected_item = item
+                        return
 
     def draw(self, win):
         # draw menu background slightly transparent black with white border
@@ -95,15 +96,17 @@ class Menu(GameObject_no_img):
 
 
 seeds = FarmMenuItem("Seeds", imgs.seeds, FarmMenuItem.seed)
+water_seeds = FarmMenuItem("Water Seeds", imgs.water_seeds, FarmMenuItem.seed)
+fire_seeds = FarmMenuItem("Fire Seeds", imgs.fire_seeds, FarmMenuItem.seed)
 bucket = FarmMenuItem("Bucket", imgs.bucket, FarmMenuItem.water)
 faux = FarmMenuItem("Faux", imgs.faux, FarmMenuItem.recolter)
+menu_items = [seeds, water_seeds, fire_seeds, bucket, faux]
 
 
 class Farm(GameObject, Clickable):
     def __init__(self, pos, size, img, farm_zone):
         GameObject.__init__(self, pos, size, img)
         Clickable.__init__(self, pos, size)
-        menu_items = [seeds, bucket, faux]
         self.menu = Menu(self, (66 * len(menu_items), 75), menu_items)
         self.plants_location = []
         self.farm_zone: list[PointWithZoom] = farm_zone
@@ -116,9 +119,14 @@ class Farm(GameObject, Clickable):
             if plant_loc.rect.collidepoint(pos):
                 if plant_loc.plant is not None:
                     return
-                default_plant = Plant(imgs.plant1)
-                plant_loc.add_plant(default_plant)
-                break
+                if self.menu.selected_item.name == "Fire Seeds":
+                    plant_loc.add_plant(imgs.fire_plant)
+                elif self.menu.selected_item.name == "Water Seeds":
+                    plant_loc.add_plant(imgs.water_plant)
+                elif self.menu.selected_item.name == "Ice Seeds":
+                    plant_loc.add_plant(imgs.ice_plant)
+                else:
+                    return
 
     def remove_plant_at(self, pos):
         for plant_loc in self.plants_location:
@@ -141,7 +149,7 @@ class Farm(GameObject, Clickable):
 
         if self.menu.is_open and was_open:
             self.menu.handle_events(events)
-        else:
+        elif not self.menu.is_open and not was_open:
             if pygame.mouse.get_pressed()[0]:
                 if selected_tool is not None:
                     if selected_tool.type == FarmMenuItem.seed:
@@ -149,7 +157,7 @@ class Farm(GameObject, Clickable):
                     elif selected_tool.type == FarmMenuItem.recolter:
                         self.remove_plant_at(pygame.mouse.get_pos())
                     elif selected_tool.type == FarmMenuItem.water:
-                        pass
+                        self.water_plant_at(pygame.mouse.get_pos())
 
     def update(self, camera_rect):
         GameObject.update(self, camera_rect)
@@ -179,6 +187,12 @@ class Farm(GameObject, Clickable):
         points = [p.coords for p in self.farm_zone]
         return is_point_inside_polygon(points, pos)
 
+    def water_plant_at(self, pos):
+        for plant_loc in self.plants_location:
+            if plant_loc.rect.collidepoint(pos):
+                if plant_loc.plant is not None:
+                    plant_loc.plant.water()
+
 
 class PlantSpot(GameObject_no_img):
     def __init__(self, pos):
@@ -198,11 +212,31 @@ class PlantSpot(GameObject_no_img):
 
     def draw(self, win):
         if self.plant is not None:
-            win.blit(self.plant.zoom_buffer, self.rect)
-        else:
-            pygame.draw.rect(win, GREEN, self.rect, 2)
+            win.blit(self.plant.zoom_buffer, self.plant.zoom_buffer.get_rect(midbottom=self.rect.midbottom))
 
 
-class Plant(GameObject_no_pos):
-    def __init__(self, img):
-        super().__init__((TILE_SIZE, TILE_SIZE), img)
+
+class Plant:
+    def __init__(self, imgs):
+        self.current_img_index = 0
+        self.imgs = imgs
+
+        max_widht = TILE_SIZE * 1.5
+
+        for i in range(len(self.imgs)):
+            if self.imgs[i].get_width() > max_widht:
+                self.imgs[i] = scale_img(self.imgs[i], max_widht / self.imgs[i].get_width())
+        self.zoom_buffer = self.imgs[self.current_img_index]
+
+    def water(self):
+        if self.current_img_index < len(self.imgs) - 1:
+            self.current_img_index += 1
+
+    def update(self, camera_rect):
+        w, h = pygame.display.get_surface().get_size()
+        zoom = 1 / (camera_rect.w / w)
+        self.zoom_buffer = scale_img(self.imgs[self.current_img_index], zoom)
+
+
+def scale_img(img, zoom):
+    return pygame.transform.scale(img, (int(img.get_width() * zoom), int(img.get_height() * zoom)))

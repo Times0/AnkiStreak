@@ -20,7 +20,7 @@ class Game:
         self.running = True
 
         # ______________________TMX and pyscroll_____________________________________#
-        self.data_tmx = pytmx.load_pygame(os.path.join(cwd, "data", "map_with_objects.tmx"))
+        self.data_tmx = pytmx.load_pygame(os.path.join(cwd, "data","map", "map_with_objects.tmx"))
         pyscroll_data = pyscroll.data.TiledMapData(self.data_tmx)
         self.map_layer = pyscroll.BufferedRenderer(pyscroll_data, self.win.get_size(), clamp_camera=True)
         self.farms = []
@@ -103,11 +103,11 @@ class Game:
                     self.is_scrolling = False
 
             if event.type == pygame.MOUSEMOTION:
+                self.needs_update = True
                 if self.is_scrolling:
                     self.map_layer.view_rect.x -= event.rel[0] / self.map_layer.zoom
                     self.map_layer.view_rect.y -= event.rel[1] / self.map_layer.zoom
                     self.map_layer.center(self.map_layer.view_rect.center)
-                    self.needs_update = True
 
     def events(self):
         events = pygame.event.get()

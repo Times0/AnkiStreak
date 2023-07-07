@@ -37,8 +37,13 @@ class GameObject_no_pos:
     def __init__(self, size, img):
         self.size = size
         self.img = img
-        self.zoom_buffer = pygame.transform.scale(self.img, size)
+        self.zoom_buffer = self.img
         self.rect = pygame.Rect((0, 0), size)
+
+        if size[0] == -1:
+            self.rect.width = self.img.get_width()
+        if size[1] == -1:
+            self.rect.height = self.img.get_height()
 
     def update(self, camera_rect):
         w, h = pygame.display.get_surface().get_size()
