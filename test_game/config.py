@@ -9,3 +9,5 @@ FPS = 60
 MAX_ZOOM = 2
 MIN_ZOOM = 1
 ALLOW_SCROOLING = True
+
+save_path = "data/game_data/game_state.json"

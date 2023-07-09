@@ -17,6 +17,42 @@ class Item(GameObject_no_pos):
         win.blit(self.zoom_buffer, self.rect)
 
 
+class Inventory:
+    def __init__(self):
+        self.items = {}
+        self.items_data = {}
+
+    def add_item(self, item: Item):
+        if item.name in self.items:
+            self.items[item.name] += 1
+        else:
+            self.items[item.name] = 1
+            self.items_data[item.name] = item
+
+    def remove_item(self, item):
+        if item.name in self.items:
+            self.items[item.name] -= 1
+            if self.items[item.name] == 0:
+                del self.items[item.name]
+        else:
+            raise Exception("Item not found in inventory")
+
+    def __getitem__(self, item_name):
+        return self.items[item_name]
+
+    def __setitem__(self, item_name, value):
+        self.items[item_name] = value
+
+    def __contains__(self, item_name):
+        return item_name in self.items
+
+    def __iter__(self):
+        return iter(self.items)
+
+    def get_item_image(self, item_name)->pygame.Surface:
+        return self.items_data[item_name].img
+
+
 class FarmMenuItem(Item):
     seed = 0
     recolter = 1
@@ -95,44 +131,42 @@ class Menu(GameObject_no_img):
             win.blit(item.zoom_buffer, self.items_rects[i])
 
 
-seeds = FarmMenuItem("Seeds", imgs.seeds, FarmMenuItem.seed)
-water_seeds = FarmMenuItem("Water Seeds", imgs.water_seeds, FarmMenuItem.seed)
-fire_seeds = FarmMenuItem("Fire Seeds", imgs.fire_seeds, FarmMenuItem.seed)
-bucket = FarmMenuItem("Bucket", imgs.bucket, FarmMenuItem.water)
-faux = FarmMenuItem("Faux", imgs.faux, FarmMenuItem.recolter)
+seeds = FarmMenuItem("seeds", imgs.seeds, FarmMenuItem.seed)
+water_seeds = FarmMenuItem("water Seeds", imgs.water_seeds, FarmMenuItem.seed)
+fire_seeds = FarmMenuItem("fire Seeds", imgs.fire_seeds, FarmMenuItem.seed)
+bucket = FarmMenuItem("bucket", imgs.bucket, FarmMenuItem.water)
+faux = FarmMenuItem("faux", imgs.faux, FarmMenuItem.recolter)
 menu_items = [seeds, water_seeds, fire_seeds, bucket, faux]
 
 
 class Farm(GameObject, Clickable):
-    def __init__(self, pos, size, img, farm_zone):
+    def __init__(self, pos, size, img, farm_zone, farm_inventory: Inventory, name="Farm"):
         GameObject.__init__(self, pos, size, img)
         Clickable.__init__(self, pos, size)
         self.menu = Menu(self, (66 * len(menu_items), 75), menu_items)
-        self.plants_location = []
+        self.plants_location: dict[int, PlantSpot] = {}
         self.farm_zone: list[PointWithZoom] = farm_zone
+        self.name = name
+        self.farm_inventory: Inventory = farm_inventory
 
     def add_plant_location(self, plant):
-        self.plants_location.append(plant)
+        self.plants_location[plant.id] = plant
 
-    def add_plant_at(self, pos):
-        for plant_loc in self.plants_location:
+    def get_plant_spot_id_at(self, pos) -> int | None:
+        for plant_loc in self.plants_location.values():
             if plant_loc.rect.collidepoint(pos):
-                if plant_loc.plant is not None:
-                    return
-                if self.menu.selected_item.name == "Fire Seeds":
-                    plant_loc.add_plant(imgs.fire_plant)
-                elif self.menu.selected_item.name == "Water Seeds":
-                    plant_loc.add_plant(imgs.water_plant)
-                elif self.menu.selected_item.name == "Ice Seeds":
-                    plant_loc.add_plant(imgs.ice_plant)
-                else:
-                    return
+                return plant_loc.id
+        return None
 
-    def remove_plant_at(self, pos):
-        for plant_loc in self.plants_location:
-            if plant_loc.rect.collidepoint(pos):
-                plant_loc.remove_plant()
-                break
+    def add_plant_at_pos(self, pos, plant) -> None:
+        plant_id = self.get_plant_spot_id_at(pos)
+        self.add_plant_at_id(plant_id, plant)
+
+    def add_plant_at_id(self, id, plant):
+        self.plants_location[id].add_plant(plant)
+
+    def remove_plant_at_id(self, id):
+        self.plants_location[id].remove_plant()
 
     def handle_events(self, events):
         selected_tool = self.menu.selected_item
@@ -152,24 +186,25 @@ class Farm(GameObject, Clickable):
         elif not self.menu.is_open and not was_open:
             if pygame.mouse.get_pressed()[0]:
                 if selected_tool is not None:
+                    pos = pygame.mouse.get_pos()
                     if selected_tool.type == FarmMenuItem.seed:
-                        self.add_plant_at(pygame.mouse.get_pos())
+                        self.on_seed_planting(pos)
                     elif selected_tool.type == FarmMenuItem.recolter:
-                        self.remove_plant_at(pygame.mouse.get_pos())
+                        self.on_recolt(pos)
                     elif selected_tool.type == FarmMenuItem.water:
-                        self.water_plant_at(pygame.mouse.get_pos())
+                        self.on_watering(pos)
 
     def update(self, camera_rect):
         GameObject.update(self, camera_rect)
         self.menu.update(camera_rect)
-        for plant_loc in self.plants_location:
+        for plant_loc in self.plants_location.values():
             plant_loc.update(camera_rect)
         for point in self.farm_zone:
             point.update(camera_rect)
 
     def draw(self, win, debug=False):
         selected_tool = self.menu.selected_item
-        for plant in self.plants_location:
+        for plant in self.plants_location.values():
             plant.draw(win)
         GameObject.draw(self, win)
         if self.menu.is_open:
@@ -187,17 +222,72 @@ class Farm(GameObject, Clickable):
         points = [p.coords for p in self.farm_zone]
         return is_point_inside_polygon(points, pos)
 
-    def water_plant_at(self, pos):
-        for plant_loc in self.plants_location:
-            if plant_loc.rect.collidepoint(pos):
-                if plant_loc.plant is not None:
-                    plant_loc.plant.water()
+    def get_plant_at_pos(self, pos):
+        plant_id = self.get_plant_spot_id_at(pos)
+        if plant_id is None:
+            return None
+        return self.plants_location[plant_id].plant
+
+    # ____ON EVENTS____#
+    def on_seed_planting(self, pos):
+        spot_id = self.get_plant_spot_id_at(pos)
+        if spot_id is None:
+            return
+        if self.plants_location[spot_id].plant is not None:
+            return
+        if "fire" in self.menu.selected_item.name:
+            plant = Plant("fire", self.plants_location[spot_id])
+        elif "water" in self.menu.selected_item.name:
+            plant = Plant("water", self.plants_location[spot_id])
+        elif "ice" in self.menu.selected_item.name:
+            plant = Plant("ice", self.plants_location[spot_id])
+        else:
+            raise Exception(f"Plant {self.menu.selected_item.name} not found")
+        self.add_plant_at_id(spot_id, plant)
+
+    def on_watering(self, pos):
+        plant_id = self.get_plant_spot_id_at(pos)
+        if plant_id is None:
+            return
+        plant = self.plants_location[plant_id].plant
+        if plant is not None:
+            plant.water()
+
+    def on_recolt(self, pos):
+        plant = self.get_plant_at_pos(pos)
+        if not plant:
+            return
+        if plant is not None and plant.is_ready_to_harvest():
+            item = plant.get_item()
+            self.farm_inventory.add_item(item)
+            plant.recolt()
+
+    # ____SAVE____#
+    def dump(self):
+        """ Dump all the data of the farm to a json file to keep the farm state """
+        data = {"plants": [plant.dump() for plant in self.plants_location.values()], }
+
+        return data
+
+    def load(self, data):
+        """ Load the farm state from a json file """
+        for plants_data in data["plants"]:
+            plant_id = plants_data["id"]
+            if plants_data["plant"]:
+                plant_type = plants_data["plant"]["type"]
+                img_index = plants_data["plant"]["development_index"]
+                plant = Plant(plant_type, self.plants_location[plant_id], development_index=img_index)
+                self.add_plant_at_id(plant_id, plant)
 
 
 class PlantSpot(GameObject_no_img):
+    counter = 0
+
     def __init__(self, pos):
         super().__init__(pos, (TILE_SIZE, TILE_SIZE))
         self.plant = None
+        self.id = PlantSpot.counter
+        PlantSpot.counter += 1
 
     def add_plant(self, plant):
         self.plant = plant
@@ -214,28 +304,55 @@ class PlantSpot(GameObject_no_img):
         if self.plant is not None:
             win.blit(self.plant.zoom_buffer, self.plant.zoom_buffer.get_rect(midbottom=self.rect.midbottom))
 
+    def dump(self):
+        """
+        Dump the plant spot data to a json file
+        """
+        return {"id": self.id, "plant": self.plant.dump() if self.plant is not None else None, }
 
 
 class Plant:
-    def __init__(self, imgs):
-        self.current_img_index = 0
-        self.imgs = imgs
+    def __init__(self, plant_type, spot, development_index=0):
+        self.development_index = development_index
+        self.max_development_index = len(imgs.plants[plant_type]) - 1
+        self.type = plant_type  # Fire, Water, Ice
+        self.imgs = imgs.plants[plant_type]
+        self.spot = spot
 
         max_widht = TILE_SIZE * 1.5
-
         for i in range(len(self.imgs)):
             if self.imgs[i].get_width() > max_widht:
                 self.imgs[i] = scale_img(self.imgs[i], max_widht / self.imgs[i].get_width())
-        self.zoom_buffer = self.imgs[self.current_img_index]
+        self.zoom_buffer = self.imgs[self.development_index]
+
+    def is_ready_to_harvest(self):
+        return self.development_index == self.max_development_index
 
     def water(self):
-        if self.current_img_index < len(self.imgs) - 1:
-            self.current_img_index += 1
+        if self.development_index < len(self.imgs) - 1:
+            self.development_index += 1
 
     def update(self, camera_rect):
         w, h = pygame.display.get_surface().get_size()
         zoom = 1 / (camera_rect.w / w)
-        self.zoom_buffer = scale_img(self.imgs[self.current_img_index], zoom)
+        self.zoom_buffer = scale_img(self.imgs[self.development_index], zoom)
+
+    def dump(self):
+        return {"type": self.type,
+                "development_index": self.development_index}
+
+    def recolt(self):
+        self.spot.plant = None
+
+    def get_item(self):
+        if self.type == "fire":
+            return Item("fire", imgs.fire_seeds)
+        elif self.type == "fire":
+            return Item("fire", imgs.water_seeds)
+        elif self.type == "fire":
+            return Item("fire", imgs.ice_seeds)
+        else:
+            raise Exception(f"Plant type {self.type} not found")
 
 
 def scale_img(img, zoom):

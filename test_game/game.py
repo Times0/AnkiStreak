@@ -1,17 +1,21 @@
+import json
 import math
 import os
+
+import colors
 from colors import *
 import pyscroll
 import pygame.sprite
 from config import *
 import pytmx
 from utils import clamp
-
-from farms import Farm, PlantSpot
+from ui import *
+from farms import Farm, PlantSpot, Inventory
 from objects import *
 
-cwd = os.path.dirname(__file__)
+from PygameUIKit import button, Group
 
+cwd = os.path.dirname(__file__)
 
 
 class Game:
@@ -19,8 +23,9 @@ class Game:
         self.win = win
         self.running = True
 
+        self.inventory = Inventory()
         # ______________________TMX and pyscroll_____________________________________#
-        self.data_tmx = pytmx.load_pygame(os.path.join(cwd, "data","map", "map_with_objects.tmx"))
+        self.data_tmx = pytmx.load_pygame(os.path.join(cwd, "data", "map", "map_with_objects.tmx"))
         pyscroll_data = pyscroll.data.TiledMapData(self.data_tmx)
         self.map_layer = pyscroll.BufferedRenderer(pyscroll_data, self.win.get_size(), clamp_camera=True)
         self.farms = []
@@ -29,18 +34,23 @@ class Game:
         self.objects = SortedGroup()
         self.load_objects()
         self.load_special_tiles()
+        self.load_data()
 
         # _____________________IDK___________________________________#
         self.is_scrolling = False
         self.map_layer.zoom = 1
         self.zoom_target = self.map_layer.zoom
         self.needs_update = False
-
         self.update(force=True)
+        # _____________________UI___________________________________#
+        self.ui = Group()
+        self.btn_menu = button.ButtonPngIcon(imgs.btn_menu, colors.GRAY, self.toggle_menu)
+        self.ui.add(self.btn_menu)
+
+        self.menu = InventoryUI(self.inventory)
 
     def load_objects(self):
         dict_future_rects = {}
-        print(list(self.data_tmx.objectgroups))
         for obj_layer in self.data_tmx.objectgroups:
             if obj_layer.name == "Rects":
                 for obj in obj_layer:
@@ -52,7 +62,12 @@ class Game:
                 for obj in obj_layer:
                     if obj.type == "Farm":
                         associated_rect = dict_future_rects[obj.name]
-                        o = Farm((obj.x, obj.y), (obj.width, obj.height), obj.image, associated_rect)
+                        o = Farm((obj.x, obj.y),
+                                 (obj.width, obj.height),
+                                 obj.image,
+                                 associated_rect,
+                                 self.inventory,
+                                 name=obj.name)
                         self.interactable_objects.append(o)
                         self.objects.add(o)
                         if obj.name == "Farm1":
@@ -79,10 +94,11 @@ class Game:
         clock = pygame.time.Clock()
         while self.running:
             clock.tick(FPS)
+            # print(f"FPS: {clock.get_fps()}")
             self.needs_update = False  # Modified if scrolling the map or zooming
             self.events()
             self.update()
-            self.draw()
+            self.draw(self.win)
 
     def handle_camera_events(self, events):
         for event in events:
@@ -111,13 +127,19 @@ class Game:
 
     def events(self):
         events = pygame.event.get()
-        self.handle_camera_events(events)
-        for obj in self.interactable_objects:
-            obj.handle_events(events)
+        self.ui.handle_events(events)
+        if self.menu.is_open:
+            pass
+        else:
+            self.handle_camera_events(events)
+            for obj in self.interactable_objects:
+                obj.handle_events(events)
 
+        # important events
         for event in events:
             if event.type == pygame.QUIT:
                 self.running = False
+                self.dump_data()
 
     def update(self, force=False):
         if abs(self.map_layer.zoom - self.zoom_target) > 10 ** (-3):
@@ -128,10 +150,42 @@ class Game:
             for obj in self.objects.sprites + self.interactable_objects:
                 obj.update(self.map_layer.view_rect)
 
-    def draw(self):
+    def draw(self, win):
         self.win.fill(BLACK)
-        self.map_layer.draw(self.win, self.win.get_rect())
-        self.objects.draw(self.win)
+        self.map_layer.draw(win, win.get_rect())
+        self.objects.draw(win)
         for obj in self.special_tiles:
-            obj.draw(self.win)
+            obj.draw(win)
+        self.draw_ui(win)
         pygame.display.update()
+
+    def draw_ui(self, win):
+        W = win.get_width()
+        self.btn_menu.draw(win, W - self.btn_menu.rect.width - 10, 10)
+
+        if self.menu.is_open:
+            self.menu.draw(win)
+
+    def dump_data(self):
+        data = {}
+        for farm in self.farms:
+            data[farm.name] = farm.dump()
+        with open(save_path, "w") as f:
+            json.dump(data, f, indent=4)
+        print(f"Data dumped to {save_path} !")
+
+    def load_data(self):
+        try:
+            with open(os.path.join(cwd, "data", "game_data", "game_state.json"), "r") as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            # Handle the case when the file is not found
+            print("File not found. Initializing with default data.")
+            data = {}  # or any other default data structure you want to use
+
+        for farm in self.farms:
+            if farm.name in data.keys():
+                farm.load(data[farm.name])
+
+    def toggle_menu(self):
+        self.menu.is_open = not self.menu.is_open
