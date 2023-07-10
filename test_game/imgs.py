@@ -38,6 +38,12 @@ fire_plant = load_multiple("assets/plants/fire")
 water_plant = load_multiple("assets/plants/water")
 ice_plant = load_multiple("assets/plants/ice")
 
+items = {
+    "fire": fire_seeds,
+    "water": water_seeds,
+    "ice": ice_seeds
+}
+
 plants = {
     "fire": fire_plant,
     "water": water_plant,

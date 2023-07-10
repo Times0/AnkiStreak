@@ -19,8 +19,8 @@ class Item(GameObject_no_pos):
 
 class Inventory:
     def __init__(self):
-        self.items = {}
-        self.items_data = {}
+        self.items = {}  # name: quantity
+        self.items_data = {}  # name: Item
 
     def add_item(self, item: Item):
         if item.name in self.items:
@@ -37,6 +37,14 @@ class Inventory:
         else:
             raise Exception("Item not found in inventory")
 
+    def dump(self) -> dict:
+        return self.items
+
+    def load(self, items: dict):
+        self.items = items
+        for item_name in items:
+            self.items_data[item_name] = Item(item_name, imgs.items[item_name])
+
     def __getitem__(self, item_name):
         return self.items[item_name]
 
@@ -49,7 +57,7 @@ class Inventory:
     def __iter__(self):
         return iter(self.items)
 
-    def get_item_image(self, item_name)->pygame.Surface:
+    def get_item_image(self, item_name) -> pygame.Surface:
         return self.items_data[item_name].img
 
 
@@ -152,7 +160,7 @@ class Farm(GameObject, Clickable):
     def add_plant_location(self, plant):
         self.plants_location[plant.id] = plant
 
-    def get_plant_spot_id_at(self, pos) -> int | None:
+    def get_plant_spot_id_at(self, pos):
         for plant_loc in self.plants_location.values():
             if plant_loc.rect.collidepoint(pos):
                 return plant_loc.id
@@ -184,7 +192,7 @@ class Farm(GameObject, Clickable):
         if self.menu.is_open and was_open:
             self.menu.handle_events(events)
         elif not self.menu.is_open and not was_open:
-            if pygame.mouse.get_pressed()[0]:
+            if pygame.mouse.get_pressed(3)[0]:
                 if selected_tool is not None:
                     pos = pygame.mouse.get_pos()
                     if selected_tool.type == FarmMenuItem.seed:

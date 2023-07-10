@@ -139,7 +139,7 @@ class Game:
         for event in events:
             if event.type == pygame.QUIT:
                 self.running = False
-                self.dump_data()
+                self.dump_data(save_path)
 
     def update(self, force=False):
         if abs(self.map_layer.zoom - self.zoom_target) > 10 ** (-3):
@@ -166,26 +166,56 @@ class Game:
         if self.menu.is_open:
             self.menu.draw(win)
 
-    def dump_data(self):
-        data = {}
-        for farm in self.farms:
-            data[farm.name] = farm.dump()
-        with open(save_path, "w") as f:
-            json.dump(data, f, indent=4)
-        print(f"Data dumped to {save_path} !")
+    def dump_data(self, path):
+        # Check if save_path is a valid path
+        if not os.path.isdir(os.path.dirname(path)):
+            raise ValueError(f"Invalid path: {os.path.dirname(path)} does not exist.")
+
+        try:
+            data = {}
+
+            # save farm state
+            try:
+                for farm in self.farms:
+                    data[farm.name] = farm.dump()
+            except Exception as e:
+                raise RuntimeError(f"Error while dumping farm data: {str(e)}")
+
+            # save inventory state
+            try:
+                data["inventory"] = self.inventory.dump()
+            except Exception as e:
+                raise RuntimeError(f"Error while dumping inventory data: {str(e)}")
+
+            # Save data to JSON file
+            try:
+                with open(path, "w") as f:
+                    json.dump(data, f, indent=4)
+            except Exception as e:
+                raise RuntimeError(f"Error while writing data to file: {str(e)}")
+
+            print(f"Data dumped to {path} !")
+
+        except Exception as e:
+            print(f"An error occurred while dumping data: {str(e)}")
 
     def load_data(self):
         try:
-            with open(os.path.join(cwd, "data", "game_data", "game_state.json"), "r") as f:
+            with open(save_path, "r") as f:
                 data = json.load(f)
         except FileNotFoundError:
             # Handle the case when the file is not found
             print("File not found. Initializing with default data.")
             data = {}  # or any other default data structure you want to use
 
+        # load farm state
         for farm in self.farms:
             if farm.name in data.keys():
                 farm.load(data[farm.name])
+
+        # load inventory state
+        if "inventory" in data.keys():
+            self.inventory.load(data["inventory"])
 
     def toggle_menu(self):
         self.menu.is_open = not self.menu.is_open

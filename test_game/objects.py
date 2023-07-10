@@ -56,6 +56,7 @@ class GameObject_no_pos:
 class GameObject(GameObject_no_img):
     def __init__(self, pos, size, img):
         super().__init__(pos, size)
+        size = int(size[0]), int(size[1])
         self.size = size
         self.img = pygame.transform.scale(img, size)
         self.zoom_buffer = img
