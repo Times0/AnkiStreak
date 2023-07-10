@@ -20,6 +20,7 @@ cwd = os.path.dirname(__file__)
 
 class Game:
     def __init__(self, win):
+        self.time_since_last_late_update = 1000  # for late update now
         self.win = win
         self.running = True
 
@@ -34,11 +35,10 @@ class Game:
         self.objects = SortedGroup()
         self.load_objects()
         self.load_special_tiles()
-        self.load_data()
 
         # _____________________IDK___________________________________#
         self.is_scrolling = False
-        self.map_layer.zoom = 1
+        self.map_layer.zoom = START_ZOOM
         self.zoom_target = self.map_layer.zoom
         self.needs_update = False
         self.update(force=True)
@@ -47,7 +47,10 @@ class Game:
         self.btn_menu = button.ButtonPngIcon(imgs.btn_menu, colors.GRAY, self.toggle_menu)
         self.ui.add(self.btn_menu)
 
+        self.learning_indicator = CardIndicators()
         self.menu = InventoryUI(self.inventory)
+
+        self.load_save()
 
     def load_objects(self):
         dict_future_rects = {}
@@ -93,16 +96,19 @@ class Game:
     def run(self):
         clock = pygame.time.Clock()
         while self.running:
-            clock.tick(FPS)
+            self.time_since_last_late_update += clock.tick(FPS)
             # print(f"FPS: {clock.get_fps()}")
             self.needs_update = False  # Modified if scrolling the map or zooming
             self.events()
             self.update()
+            if self.time_since_last_late_update >= 1000 / LATE_UPDATE_FPS:
+                self.time_since_last_late_update = 0
+                self.late_update()
             self.draw(self.win)
 
     def handle_camera_events(self, events):
         for event in events:
-            if event.type == pygame.MOUSEWHEEL and ALLOW_SCROOLING:
+            if event.type == pygame.MOUSEWHEEL and ALLOW_SCROLLING:
                 if event.y > 0:
                     self.zoom_target += 0.05
                 elif event.y < 0:
@@ -141,6 +147,24 @@ class Game:
                 self.running = False
                 self.dump_data(save_path)
 
+    def late_update(self):
+        """Ran every seconds"""
+        prev = self.learning_indicator.counter
+        with open(cards_learned_path, "r") as f:
+            # save second line
+            second_line = f.readlines()[1]
+            nb = int(second_line)
+            if nb > prev:
+                self.learning_indicator.counter = nb
+                self.learning_indicator.render()
+                for i in range(nb - prev):
+                    for farm in self.farms:
+                        farm.water_all()
+            elif nb < prev:
+                print("Must be new day")
+                self.learning_indicator.counter = nb
+                self.learning_indicator.render()
+
     def update(self, force=False):
         if abs(self.map_layer.zoom - self.zoom_target) > 10 ** (-3):
             self.map_layer.zoom += (self.zoom_target - self.map_layer.zoom) / 2
@@ -149,6 +173,9 @@ class Game:
         if self.needs_update or force:
             for obj in self.objects.sprites + self.interactable_objects:
                 obj.update(self.map_layer.view_rect)
+        else:
+            for farm in self.farms:
+                farm.update(self.map_layer.view_rect)
 
     def draw(self, win):
         self.win.fill(BLACK)
@@ -162,6 +189,7 @@ class Game:
     def draw_ui(self, win):
         W = win.get_width()
         self.btn_menu.draw(win, W - self.btn_menu.rect.width - 10, 10)
+        self.learning_indicator.draw(win)
 
         if self.menu.is_open:
             self.menu.draw(win)
@@ -187,6 +215,12 @@ class Game:
             except Exception as e:
                 raise RuntimeError(f"Error while dumping inventory data: {str(e)}")
 
+            # save learning indicator state
+            try:
+                data["cards_learned_today"] = self.learning_indicator.counter
+            except Exception as e:
+                raise RuntimeError(f"Error while dumping learning indicator data: {str(e)}")
+
             # Save data to JSON file
             try:
                 with open(path, "w") as f:
@@ -196,10 +230,11 @@ class Game:
 
             print(f"Data dumped to {path} !")
 
+
         except Exception as e:
             print(f"An error occurred while dumping data: {str(e)}")
 
-    def load_data(self):
+    def load_save(self):
         try:
             with open(save_path, "r") as f:
                 data = json.load(f)
@@ -216,6 +251,11 @@ class Game:
         # load inventory state
         if "inventory" in data.keys():
             self.inventory.load(data["inventory"])
+
+        # load learning indicator state
+        if "cards_learned_today" in data.keys():
+            self.learning_indicator.counter = data["cards_learned_today"]
+            self.learning_indicator.render()
 
     def toggle_menu(self):
         self.menu.is_open = not self.menu.is_open

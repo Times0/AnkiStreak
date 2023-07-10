@@ -1,5 +1,10 @@
+import os.path
+
 import pygame
+
+import colors
 from farms import Inventory
+from config import *
 
 
 class InventoryUI:
@@ -52,3 +57,36 @@ class InventoryUI:
 
             # Update the item Y position for the next item
             item_y += 60  # Adjust the spacing between items
+
+
+class CardIndicators:
+    def __init__(self):
+        self.counter = 0
+
+        self.font = pygame.font.Font(os.path.join(font_path_dir, "farm_font2.ttf"), 30)
+        self.text_render = None
+        self.text_render_2 = None
+        self.text_render_3 = None
+
+        self.render()
+
+    def render(self):
+        self.text_render = self.font.render("Keep learning, ", True, colors.BLACK)
+        self.text_render_2 = self.font.render(f"{self.counter}/10 ", True, colors.RED)
+        self.text_render_3 = self.font.render("cards learned today", True, colors.BLACK)
+
+    def draw(self, win):
+        renders = [self.text_render, self.text_render_2, self.text_render_3]
+        total_width = sum([render.get_width() for render in renders])
+        surf = pygame.Surface((total_width, self.text_render.get_height()), pygame.SRCALPHA)
+        surf.fill((255, 255, 255, 100))
+        win.blit(surf, (10, 10))
+
+        render_multiples_texts(win, renders)
+
+
+def render_multiples_texts(win, renders):
+    x = 10
+    for render in renders:
+        win.blit(render, (x, 10))
+        x += render.get_width()

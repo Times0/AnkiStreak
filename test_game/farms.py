@@ -139,12 +139,14 @@ class Menu(GameObject_no_img):
             win.blit(item.zoom_buffer, self.items_rects[i])
 
 
-seeds = FarmMenuItem("seeds", imgs.seeds, FarmMenuItem.seed)
+ice_seeds = FarmMenuItem("ice_seeds", imgs.ice_seeds, FarmMenuItem.seed)
 water_seeds = FarmMenuItem("water Seeds", imgs.water_seeds, FarmMenuItem.seed)
 fire_seeds = FarmMenuItem("fire Seeds", imgs.fire_seeds, FarmMenuItem.seed)
+
 bucket = FarmMenuItem("bucket", imgs.bucket, FarmMenuItem.water)
 faux = FarmMenuItem("faux", imgs.faux, FarmMenuItem.recolter)
-menu_items = [seeds, water_seeds, fire_seeds, bucket, faux]
+
+menu_items = [ice_seeds, water_seeds, fire_seeds, faux]
 
 
 class Farm(GameObject, Clickable):
@@ -236,7 +238,13 @@ class Farm(GameObject, Clickable):
             return None
         return self.plants_location[plant_id].plant
 
+    def water_all(self):
+        for plant_loc in self.plants_location.values():
+            if plant_loc.plant is not None:
+                plant_loc.plant.water()
+
     # ____ON EVENTS____#
+
     def on_seed_planting(self, pos):
         spot_id = self.get_plant_spot_id_at(pos)
         if spot_id is None:
@@ -333,17 +341,26 @@ class Plant:
                 self.imgs[i] = scale_img(self.imgs[i], max_widht / self.imgs[i].get_width())
         self.zoom_buffer = self.imgs[self.development_index]
 
+        self.last_zoom = 1
+        self.requires_update = True
+
     def is_ready_to_harvest(self):
         return self.development_index == self.max_development_index
 
     def water(self):
         if self.development_index < len(self.imgs) - 1:
             self.development_index += 1
+            self.requires_update = True
 
     def update(self, camera_rect):
         w, h = pygame.display.get_surface().get_size()
         zoom = 1 / (camera_rect.w / w)
+        if not self.requires_update and zoom == self.last_zoom:
+            return
+
         self.zoom_buffer = scale_img(self.imgs[self.development_index], zoom)
+        self.last_zoom = zoom
+        self.requires_update = False
 
     def dump(self):
         return {"type": self.type,

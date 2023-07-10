@@ -15,9 +15,7 @@ def load(path):
 
 def load_multiple(path):
     l = []
-    print(os.path.join(cwd, "data", path, "*.png"))
     for p in glob.glob(os.path.join(cwd, "data", path, "*.png")):
-        print(p)
         l.append(pygame.image.load(p).convert_alpha())
     return l
 
@@ -26,7 +24,6 @@ empty_plant = load("assets/plant.png")
 plant1 = load("assets/plant.png")
 plant2 = load("assets/plant2.png")
 
-seeds = load("assets/farm/seeds.png")
 fire_seeds = load("assets/farm/fire_seeds.png")
 water_seeds = load("assets/farm/water_seeds.png")
 ice_seeds = load("assets/farm/ice_seeds.png")
