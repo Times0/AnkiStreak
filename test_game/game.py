@@ -1,6 +1,7 @@
 import json
 import math
 import os
+from datetime import datetime
 
 import colors
 from colors import *
@@ -41,7 +42,7 @@ class Game:
         self.map_layer.zoom = START_ZOOM
         self.zoom_target = self.map_layer.zoom
         self.needs_update = False
-        self.update(force=True)
+        self.update_camera(force=True)
         # _____________________UI___________________________________#
         self.ui = Group()
         self.btn_menu = button.ButtonPngIcon(imgs.btn_menu, colors.GRAY, self.toggle_menu)
@@ -96,11 +97,13 @@ class Game:
     def run(self):
         clock = pygame.time.Clock()
         while self.running:
-            self.time_since_last_late_update += clock.tick(FPS)
+            dt = clock.tick(FPS)
+            self.time_since_last_late_update += dt
             # print(f"FPS: {clock.get_fps()}")
             self.needs_update = False  # Modified if scrolling the map or zooming
             self.events()
-            self.update()
+            self.update(dt)
+            self.update_camera()
             if self.time_since_last_late_update >= 1000 / LATE_UPDATE_FPS:
                 self.time_since_last_late_update = 0
                 self.late_update()
@@ -145,14 +148,21 @@ class Game:
         for event in events:
             if event.type == pygame.QUIT:
                 self.running = False
-                self.dump_data(save_path)
+                self.dump_save(save_path)
 
     def late_update(self):
         """Ran every seconds"""
         prev = self.learning_indicator.counter
         with open(cards_learned_path, "r") as f:
-            # save second line
-            second_line = f.readlines()[1]
+            # Check if first line is today's ordinal
+            lines = f.readlines()
+
+            first_line = lines[0]
+            today = datetime.today().toordinal()
+            if int(first_line) != today:
+                self.learning_indicator.set(0)
+                return
+            second_line = lines[1]
             nb = int(second_line)
             if nb > prev:
                 self.learning_indicator.counter = nb
@@ -165,17 +175,21 @@ class Game:
                 self.learning_indicator.counter = nb
                 self.learning_indicator.render()
 
-    def update(self, force=False):
+    def update(self, dt):
+        for obj in self.objects.sprites + self.interactable_objects+ self.farms:
+            obj.update(dt)
+
+    def update_camera(self, force=False):
         if abs(self.map_layer.zoom - self.zoom_target) > 10 ** (-3):
             self.map_layer.zoom += (self.zoom_target - self.map_layer.zoom) / 2
             self.map_layer.center(self.map_layer.view_rect.center)
             self.needs_update = True
         if self.needs_update or force:
             for obj in self.objects.sprites + self.interactable_objects:
-                obj.update(self.map_layer.view_rect)
+                obj.update_camera(self.map_layer.view_rect)
         else:
             for farm in self.farms:
-                farm.update(self.map_layer.view_rect)
+                farm.update_camera(self.map_layer.view_rect)
 
     def draw(self, win):
         self.win.fill(BLACK)
@@ -194,7 +208,7 @@ class Game:
         if self.menu.is_open:
             self.menu.draw(win)
 
-    def dump_data(self, path):
+    def dump_save(self, path):
         # Check if save_path is a valid path
         if not os.path.isdir(os.path.dirname(path)):
             raise ValueError(f"Invalid path: {os.path.dirname(path)} does not exist.")
@@ -220,6 +234,12 @@ class Game:
                 data["cards_learned_today"] = self.learning_indicator.counter
             except Exception as e:
                 raise RuntimeError(f"Error while dumping learning indicator data: {str(e)}")
+
+            # save time
+            try:
+                data["time"] = datetime.now().toordinal()
+            except Exception as e:
+                raise RuntimeError(f"Error while dumping time data: {str(e)}")
 
             # Save data to JSON file
             try:
@@ -254,8 +274,10 @@ class Game:
 
         # load learning indicator state
         if "cards_learned_today" in data.keys():
-            self.learning_indicator.counter = data["cards_learned_today"]
-            self.learning_indicator.render()
+            if data["time"] != datetime.now().toordinal():
+                self.learning_indicator.set(0)
+            else:
+                self.learning_indicator.set(data["cards_learned_today"])
 
     def toggle_menu(self):
         self.menu.is_open = not self.menu.is_open

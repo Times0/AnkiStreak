@@ -11,7 +11,7 @@ class PointWithZoom:
         self.coords_init = coords
         self.coords = coords
 
-    def update(self, camera_rect):
+    def update_camera(self, camera_rect):
         w, h = pygame.display.get_surface().get_size()
         zoom = 1 / (camera_rect.w / w)
         self.coords = (self.coords_init[0] / (camera_rect.w / w) - camera_rect.x * zoom,
@@ -19,18 +19,24 @@ class PointWithZoom:
 
 
 class GameObject_no_img:
+    """
+    Use pos, don't use rect when using the object
+    """
     def __init__(self, pos, size):
         self.pos = pos
         self.size = size
         self.rect = pygame.Rect(pos, size)
 
-    def update(self, camera_rect):
+    def update_camera(self, camera_rect):
         w, h = pygame.display.get_surface().get_size()
         zoom = 1 / (camera_rect.w / w)
         self.rect.x = self.pos[0] / (camera_rect.w / w) - camera_rect.x * zoom
         self.rect.y = self.pos[1] / (camera_rect.h / h) - camera_rect.y * zoom
         self.rect.width = self.size[0] * zoom
         self.rect.height = self.size[1] * zoom
+
+    def update(self, dt):
+        pass
 
 
 class GameObject_no_pos:
@@ -45,13 +51,12 @@ class GameObject_no_pos:
         if size[1] == -1:
             self.rect.height = self.img.get_height()
 
-    def update(self, camera_rect):
+    def update_camera(self, camera_rect):
         w, h = pygame.display.get_surface().get_size()
         zoom = 1 / (camera_rect.w / w)
         self.rect.width = self.size[0] * zoom
         self.rect.height = self.size[1] * zoom
         self.zoom_buffer = pygame.transform.scale(self.img, (int(self.size[0] * zoom), int(self.size[1] * zoom)))
-
 
 class GameObject(GameObject_no_img):
     def __init__(self, pos, size, img):
@@ -61,8 +66,8 @@ class GameObject(GameObject_no_img):
         self.img = pygame.transform.scale(img, size)
         self.zoom_buffer = img
 
-    def update(self, camera_rect):
-        GameObject_no_img.update(self, camera_rect)
+    def update_camera(self, camera_rect):
+        GameObject_no_img.update_camera(self, camera_rect)
         w, h = pygame.display.get_surface().get_size()
         zoom = 1 / (camera_rect.w / w)
         self.rect.width = self.size[0] * zoom

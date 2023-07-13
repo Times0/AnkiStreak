@@ -1,3 +1,5 @@
+import math
+
 import pygame
 
 import colors
@@ -5,7 +7,7 @@ from objects import GameObject_no_img, GameObject, GameObject_no_pos, Clickable,
 from config import *
 from colors import *
 import imgs
-from utils import is_point_inside_polygon, draw_menu_rect
+from utils import is_point_inside_polygon, draw_menu_rect, nlerp
 
 
 class Item(GameObject_no_pos):
@@ -103,10 +105,10 @@ class Menu(GameObject_no_img):
     def add_item(self, item):
         self.items.append(item)
 
-    def update(self, camera_rect):
-        GameObject_no_img.update(self, camera_rect)
+    def update_camera(self, camera_rect):
+        GameObject_no_img.update_camera(self, camera_rect)
         for i, item in enumerate(self.items):
-            item.update(camera_rect)
+            item.update_camera(camera_rect)
         self.update_items_rect()
 
     def handle_events(self, events):
@@ -146,7 +148,7 @@ fire_seeds = FarmMenuItem("fire Seeds", imgs.fire_seeds, FarmMenuItem.seed)
 bucket = FarmMenuItem("bucket", imgs.bucket, FarmMenuItem.water)
 faux = FarmMenuItem("faux", imgs.faux, FarmMenuItem.recolter)
 
-menu_items = [ice_seeds, water_seeds, fire_seeds, faux]
+menu_items = [ice_seeds, water_seeds, fire_seeds, faux, bucket]
 
 
 class Farm(GameObject, Clickable):
@@ -158,6 +160,8 @@ class Farm(GameObject, Clickable):
         self.farm_zone: list[PointWithZoom] = farm_zone
         self.name = name
         self.farm_inventory: Inventory = farm_inventory
+
+        self.on_the_move_plants: list[OnTheMoveItem] = []
 
     def add_plant_location(self, plant):
         self.plants_location[plant.id] = plant
@@ -172,11 +176,11 @@ class Farm(GameObject, Clickable):
         plant_id = self.get_plant_spot_id_at(pos)
         self.add_plant_at_id(plant_id, plant)
 
-    def add_plant_at_id(self, id, plant):
-        self.plants_location[id].add_plant(plant)
+    def add_plant_at_id(self, plant_id, plant):
+        self.plants_location[plant_id].add_plant(plant)
 
-    def remove_plant_at_id(self, id):
-        self.plants_location[id].remove_plant()
+    def remove_plant_at_id(self, plant_id):
+        self.plants_location[plant_id].remove_plant()
 
     def handle_events(self, events):
         selected_tool = self.menu.selected_item
@@ -204,13 +208,17 @@ class Farm(GameObject, Clickable):
                     elif selected_tool.type == FarmMenuItem.water:
                         self.on_watering(pos)
 
-    def update(self, camera_rect):
-        GameObject.update(self, camera_rect)
-        self.menu.update(camera_rect)
+    def update_camera(self, camera_rect):
+        self.camera_rect = camera_rect
+        GameObject.update_camera(self, camera_rect)
+        self.menu.update_camera(camera_rect)
         for plant_loc in self.plants_location.values():
-            plant_loc.update(camera_rect)
+            plant_loc.update_camera(camera_rect)
         for point in self.farm_zone:
-            point.update(camera_rect)
+            point.update_camera(camera_rect)
+
+        for plant in self.on_the_move_plants:
+            plant.update_camera(camera_rect)
 
     def draw(self, win, debug=False):
         selected_tool = self.menu.selected_item
@@ -228,15 +236,18 @@ class Farm(GameObject, Clickable):
         if debug:
             pygame.draw.polygon(win, RED, points, 2)
 
+        for plant in self.on_the_move_plants:
+            plant.draw(win)
+
     def is_click_on_farmable_zone(self, pos):
         points = [p.coords for p in self.farm_zone]
         return is_point_inside_polygon(points, pos)
 
-    def get_plant_at_pos(self, pos):
+    def get_plantspot_at_pos(self, pos):
         plant_id = self.get_plant_spot_id_at(pos)
         if plant_id is None:
             return None
-        return self.plants_location[plant_id].plant
+        return self.plants_location[plant_id]
 
     def water_all(self):
         for plant_loc in self.plants_location.values():
@@ -270,13 +281,26 @@ class Farm(GameObject, Clickable):
             plant.water()
 
     def on_recolt(self, pos):
-        plant = self.get_plant_at_pos(pos)
+        plantspot = self.get_plantspot_at_pos(pos)
+        if plantspot is None:
+            return
+        plant = plantspot.plant
         if not plant:
             return
         if plant is not None and plant.is_ready_to_harvest():
+            vec_pos = pygame.math.Vector2(plantspot.pos)
+            vec_dest = pygame.math.Vector2(self.camera_rect.move(-50, +50).topright)
+            item_on_the_move = plant.get_item()
+            self.on_the_move_plants.append(OnTheMoveItem(item_on_the_move, vec_pos, vec_dest))
             item = plant.get_item()
             self.farm_inventory.add_item(item)
             plant.recolt()
+
+    def update(self, dt):
+        for plant in self.on_the_move_plants:
+            plant.update(dt)
+            if plant.is_arrived:
+                self.on_the_move_plants.remove(plant)
 
     # ____SAVE____#
     def dump(self):
@@ -296,6 +320,49 @@ class Farm(GameObject, Clickable):
                 self.add_plant_at_id(plant_id, plant)
 
 
+def speed_func(x):
+    """
+    Magic function to compute the speed of the plant made by the great GPT4
+    """
+    return (3 * x ** 2 - 2 * x ** 3) ** 4
+
+
+class OnTheMoveItem(GameObject):
+    def __init__(self, item: Item, pos, dest, speed_function=speed_func):
+        super().__init__(pos, item.size, item.img)
+        self.item = item
+
+        self.speed_function = speed_function
+        self.dest = dest
+
+        self.steps = []
+
+        self.is_arrived = False
+        self.index = 0
+
+    def compute_steps(self, time=4):
+        MAXFPS = 240
+        pos = pygame.math.Vector2(self.pos)
+        positions = []
+        steps = int(time * MAXFPS)
+        for i in range(steps + 1):
+            t = i / steps
+            positions.append(pos.lerp(self.dest, self.speed_function(t)))
+
+        return positions
+
+    def update(self, dt):
+        if not self.steps:
+            self.steps = self.compute_steps()
+        MAXFPS = 240
+        if self.steps:
+
+            self.pos = self.steps[self.index]
+            self.index += int(dt * MAXFPS / 1000)
+            if self.index >= len(self.steps):
+                self.is_arrived = True
+
+
 class PlantSpot(GameObject_no_img):
     counter = 0
 
@@ -311,10 +378,10 @@ class PlantSpot(GameObject_no_img):
     def remove_plant(self):
         self.plant = None
 
-    def update(self, camera_rect):
-        GameObject_no_img.update(self, camera_rect)
+    def update_camera(self, camera_rect):
+        GameObject_no_img.update_camera(self, camera_rect)
         if self.plant is not None:
-            self.plant.update(camera_rect)
+            self.plant.update_camera(camera_rect)
 
     def draw(self, win):
         if self.plant is not None:
@@ -352,7 +419,7 @@ class Plant:
             self.development_index += 1
             self.requires_update = True
 
-    def update(self, camera_rect):
+    def update_camera(self, camera_rect):
         w, h = pygame.display.get_surface().get_size()
         zoom = 1 / (camera_rect.w / w)
         if not self.requires_update and zoom == self.last_zoom:
@@ -372,10 +439,10 @@ class Plant:
     def get_item(self):
         if self.type == "fire":
             return Item("fire", imgs.fire_seeds)
-        elif self.type == "fire":
-            return Item("fire", imgs.water_seeds)
-        elif self.type == "fire":
-            return Item("fire", imgs.ice_seeds)
+        elif self.type == "ice":
+            return Item("ice", imgs.ice_seeds)
+        elif self.type == "water":
+            return Item("water", imgs.water_seeds)
         else:
             raise Exception(f"Plant type {self.type} not found")
 

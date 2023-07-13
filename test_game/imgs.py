@@ -20,10 +20,6 @@ def load_multiple(path):
     return l
 
 
-empty_plant = load("assets/plant.png")
-plant1 = load("assets/plant.png")
-plant2 = load("assets/plant2.png")
-
 fire_seeds = load("assets/farm/fire_seeds.png")
 water_seeds = load("assets/farm/water_seeds.png")
 ice_seeds = load("assets/farm/ice_seeds.png")

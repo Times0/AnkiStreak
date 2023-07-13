@@ -64,25 +64,26 @@ class CardIndicators:
         self.counter = 0
 
         self.font = pygame.font.Font(os.path.join(font_path_dir, "farm_font2.ttf"), 30)
-        self.text_render = None
-        self.text_render_2 = None
-        self.text_render_3 = None
+        self.renders = []
 
         self.render()
 
+    def set(self, counter):
+        self.counter = counter
+        self.render()
+
     def render(self):
-        self.text_render = self.font.render("Keep learning, ", True, colors.BLACK)
-        self.text_render_2 = self.font.render(f"{self.counter}/10 ", True, colors.RED)
-        self.text_render_3 = self.font.render("cards learned today", True, colors.BLACK)
+        text_render_2 = self.font.render(f"{self.counter}/10 ", True, colors.RED)
+        text_render_3 = self.font.render("cards learned today", True, colors.BLACK)
+        self.renders = [text_render_2, text_render_3]
 
     def draw(self, win):
-        renders = [self.text_render, self.text_render_2, self.text_render_3]
-        total_width = sum([render.get_width() for render in renders])
-        surf = pygame.Surface((total_width, self.text_render.get_height()), pygame.SRCALPHA)
+        total_width = sum([render.get_width() for render in self.renders])
+        surf = pygame.Surface((total_width, self.renders[0].get_height()), pygame.SRCALPHA)
         surf.fill((255, 255, 255, 100))
         win.blit(surf, (10, 10))
 
-        render_multiples_texts(win, renders)
+        render_multiples_texts(win, self.renders)
 
 
 def render_multiples_texts(win, renders):
