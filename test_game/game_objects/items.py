@@ -10,7 +10,8 @@ class Item(GameObject_no_pos):
     def draw(self, win):
         win.blit(self.zoom_buffer, self.rect)
 
-
+    def __repr__(self):
+        return f"Item({self.name})"
 
 
 items_data = {

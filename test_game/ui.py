@@ -1,4 +1,5 @@
 import pygame
+from PygameUIKit import button
 
 from test_game.boring import colors, utils
 from test_game.boring import imgs
@@ -41,7 +42,20 @@ class GameWindow:
 
         self.title_offset = 85  # Offset of the title from the top left corner of the window
 
+        self.cross_img = imgs.cross
+        self.cross_img = pygame.transform.scale(self.cross_img, (50, 50))
+
+        self.rect = pygame.Rect(0, 0, 0, 0)
+        self.cross_rect = pygame.Rect(0, 0, 0, 0)
+
+        self.hovered = False
+
     def draw_win(self, win, x, y, width, height, color=colors.BROWN, border_radius=15, center_title=False):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.cross_rect = pygame.Rect(x + width - self.cross_img.get_width(),
+                                      y + 10 - self.title_offset + self.cross_img.get_height() / 3,
+                                      self.cross_img.get_width(),
+                                      self.cross_img.get_height())
         pygame.draw.rect(win, color, (x, y, width, height),
                          border_radius=border_radius)
         # draw the title
@@ -53,8 +67,36 @@ class GameWindow:
         else:
             win.blit(text, (x + 10, y + 10 - self.title_offset))
 
+        # draw cross
+        img = self.cross_img  # black cross
+        if self.hovered:
+            pygame.draw.rect(win, colors.RED_CROSS, self.cross_rect.inflate(10, 10), border_radius=5)
+            # change cross to WHITE
+            img = pygame.transform.scale(img, (50, 50))
+            win.blit(img, self.cross_rect)
+        else:
+            win.blit(img, self.cross_rect)
+
     def toggle_visibility(self):
         self._is_visible = not self._is_visible
+
+    def handle_events(self, events):
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    if self.cross_rect.collidepoint(event.pos):
+                        self.toggle_visibility()
+            elif event.type == pygame.MOUSEMOTION:
+                if self.cross_rect.collidepoint(event.pos):
+                    self.on_hover()
+                else:
+                    self.on_unhover()
+
+    def on_hover(self):
+        self.hovered = True
+
+    def on_unhover(self):
+        self.hovered = False
 
     def isVisible(self):
         return self._is_visible
@@ -69,7 +111,7 @@ class InventoryUI(GameWindow):
         self.inventory_items: Inventory = inventory
 
     def draw(self, win, x, y, width, height):
-        self.draw_win(win, x, y, width, height, color=colors.GRAY, border_radius=self.border_radius,center_title=True)
+        self.draw_win(win, x, y, width, height, color=colors.GRAY, border_radius=self.border_radius, center_title=True)
 
         # Draw the inventory items
         item_x = x + self.border_radius  # X position of the first item
@@ -102,6 +144,9 @@ class InventoryUI(GameWindow):
             # Update the item Y position for the next item
             item_y += 60  # Adjust the spacing between items
 
+    def handle_events(self, events):
+        super().handle_events(events)
+
 
 class ShopUI(GameWindow):
     def __init__(self, shop):
@@ -110,17 +155,67 @@ class ShopUI(GameWindow):
 
         # Position of the shopUI
         self.border_radius = 15  # Border radius of the shopUI
-        self.item_spacing = 10  # Spacing between shopUI items
+        self.item_spacing = 50  # Spacing between shopUI items
 
         # Calculate the width and height of each cell based on the size of the grid
         self.cell_width = 100
         self.cell_height = 100
 
+        self.font = pygame.font.SysFont("Arial", 15, bold=True)
+
+        self.buy_buttons: list[button.ButtonText] = []
+        self.init_buy_buttons()
+
+    def init_buy_buttons(self):
+        for item_name, item in self.shop.items.items():
+            self.buy_buttons.append(button.ButtonText(colors.GREEN,
+                                                      lambda item=item: self.shop.buy_item(item),
+                                                      "Buy",
+                                                      border_radius=5, ))
+
     def draw(self, window, x, y, width, height):
         self.draw_win(window, x, y, width, height)
 
+        # Draw the shop items
+        item_x = x + self.border_radius  # X position of the first item
+        item_y = y + self.border_radius  # Y position of the first item
+
+        for i, (item_name, item) in enumerate(self.shop.items.items()):
+            item_rect = pygame.Rect(item_x, item_y, self.cell_width, self.cell_height)
+            self.draw_item(window, item, item_x, item_y)
+            self.buy_buttons[i].draw(window, *self.buy_buttons[i].surface.get_rect(
+                midtop=item_rect.midbottom).topleft)
+            item_x += self.cell_width + self.item_spacing  # Adjust the spacing between items
+
+    def draw_item(self, window, item, x, y):
+        img = pygame.transform.scale(item.img, (self.cell_width - 10, self.cell_height - 10))
+        img_rect = img.get_rect(topleft=(x, y))
+
+        # Draw the item rectangle
+        pygame.draw.rect(window, (76, 76, 76), (x, y, self.cell_width, self.cell_height),
+                         border_radius=5)
+
+        # Draw a subtle gradient on the item rectangle
+        gradient_rect = pygame.Rect(x, y, self.cell_width, self.cell_height)
+        gradient = pygame.Surface((gradient_rect.width, gradient_rect.height))
+        pygame.draw.rect(gradient, (100, 100, 100), gradient.get_rect(top=1, bottom=gradient_rect.height - 2))
+        pygame.draw.rect(gradient, (66, 66, 66), gradient.get_rect(top=0, bottom=1))
+        pygame.draw.rect(window, (0, 0, 0), gradient_rect)
+
+        window.blit(gradient, gradient_rect)
+        window.blit(img, img_rect)
+
+        label = utils.render(item.name, self.font, gfcolor=colors.BLACK, ocolor=colors.WHITE, opx=1)
+        window.blit(label, label.get_rect(center=img_rect.center))
+
+        # Price
+        label = utils.render(str(item.price), self.font, gfcolor=colors.BLACK, ocolor=colors.WHITE, opx=0)
+        window.blit(label, label.get_rect(bottomright=img_rect.bottomright))
+
     def handle_events(self, events):
-        pass
+        super().handle_events(events)
+        for btn in self.buy_buttons:
+            btn.handle_events(events)
 
 
 class CardIndicators(UIObject):
@@ -203,3 +298,32 @@ class CardIndicators(UIObject):
             # draw the tooltip border
             pygame.draw.polygon(surface, colors.BLACK, arrow_points, width=1)
             pygame.draw.rect(surface, colors.BLACK, tooltip_rect.inflate(15, 15), width=1)
+
+
+class CoinsIndicator(UIObject):
+    def __init__(self):
+        super().__init__()
+        self.is_visible = True
+        self.nb_coins = 0
+        self.image = imgs.coin
+        self.image = pygame.transform.scale(self.image,
+                                            (50, self.image.get_height() * 50 // self.image.get_width()))
+        self.font = pygame.font.Font("data/assets/fonts/title.otf", 45)
+
+        self.rect = pygame.Rect(0, 0, 0, 0)
+
+    def update_money(self, nb):
+        self.nb_coins = nb
+
+    def draw(self, win, x, y, width, height):
+        win.blit(self.image, (x, y))
+
+        coin_text = utils.render(str(self.nb_coins), self.font, gfcolor=colors.WHITE, ocolor=colors.BLACK)
+
+        coin_text_rect = coin_text.get_rect()  # get the rectangle that encloses the text
+        text_y = y + self.image.get_height() // 2 - coin_text_rect.height // 2  # center the text vertically with respect to the coin image
+
+        win.blit(coin_text, (x + self.image.get_width() + 10, text_y))
+
+        self.rect = pygame.Rect(x, y, self.image.get_width() + 10 + coin_text_rect.width, self.image.get_height())
+        pygame.draw.rect(win, colors.BLACK, self.rect, width=1)

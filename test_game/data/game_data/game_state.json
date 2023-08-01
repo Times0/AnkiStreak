@@ -584,8 +584,11 @@
         ]
     },
     "inventory": {
-        "fire seeds": 11
+        "fire seeds": 50,
+        "water seeds": 10,
+        "ice seeds": 17
     },
-    "cards_learned_today": 2,
-    "time": 738733
+    "cards_learned_today": 8,
+    "time": 738734,
+    "wallet": 890
 }

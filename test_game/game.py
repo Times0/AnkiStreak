@@ -4,7 +4,7 @@ from datetime import datetime
 import pygame.sprite
 import pyscroll
 import pytmx
-from PygameUIKit import button, Group
+from PygameUIKit import Group
 
 from boring import config
 from boring.config import *
@@ -12,6 +12,7 @@ from boring.utils import *
 from objects import *
 from test_game.game_objects.farms import Farm
 from test_game.game_objects.farms import PlantSpot
+from test_game.game_objects.shop import Wallet
 from ui import *
 
 cwd = os.path.dirname(__file__)
@@ -23,8 +24,11 @@ class Game:
         self.win = win
         self.running = True
 
+        # _____________________Back___________________________________#
         self.inventory = Inventory()
-        self.shop = Shop()
+        self.wallet = Wallet(money=1000)
+        self.shop = Shop(wallet=self.wallet, inventory=self.inventory)
+
         # ______________________TMX and pyscroll_____________________________________#
         self.ptmx = Pytmx(win)
         for farm in self.ptmx.farms:
@@ -34,13 +38,15 @@ class Game:
         self.inventoryUI = InventoryUI(self.inventory)
         self.shopUI = ShopUI(self.shop)
         self.learning_indicator = CardIndicators()
-
+        self.coin_indicator = CoinsIndicator()
+        self.wallet.link_ui(self.coin_indicator)
         self.easy_ui = Group()
         self.btn_menu = button.ButtonPngIcon(imgs.btn_inventory, colors.GRAY, self.inventoryUI.toggle_visibility)
         self.btn_shop = button.ButtonPngIcon(imgs.btn_shop, colors.GRAY, self.shopUI.toggle_visibility)
         self.easy_ui.add(self.btn_menu)
         self.easy_ui.add(self.btn_shop)
-
+        self.ui_elements = [self.learning_indicator, self.coin_indicator, self.easy_ui]
+        self.game_windows = [self.inventoryUI, self.shopUI]
         self.load_save()
 
     def run(self):
@@ -58,11 +64,15 @@ class Game:
 
     def events(self):
         events = pygame.event.get()
-        self.easy_ui.handle_events(events)
-        self.learning_indicator.handle_events(events)
-        if not self.inventoryUI.isVisible():
+
+        if not any([e.isVisible() for e in self.game_windows]):
             self.ptmx.handle_events(events)
-            self.shopUI.handle_events(events)
+            for e in self.ui_elements:
+                e.handle_events(events)
+
+        for gw in self.game_windows:
+            if gw.isVisible():
+                gw.handle_events(events)
 
         # important events
         for event in events:
@@ -111,6 +121,7 @@ class Game:
         self.btn_shop.draw(win, W - self.btn_shop.rect.width - 10 - self.btn_menu.rect.width - 10, 10)
 
         self.learning_indicator.draw(win, 30, 15, 200, 30)
+        self.coin_indicator.draw(win, 5, self.learning_indicator.rect.h + 200, 200, 30)
 
         if self.inventoryUI.isVisible():
             w, h = 400, 700
@@ -157,6 +168,12 @@ class Game:
             except Exception as e:
                 raise RuntimeError(f"Error while dumping time data: {str(e)}")
 
+            # save wallet
+            try:
+                data["wallet"] = self.wallet.dump()
+            except Exception as e:
+                raise RuntimeError(f"Error while dumping wallet data: {str(e)}")
+
             # Save data to JSON file
             try:
                 with open(path, "w") as f:
@@ -194,6 +211,10 @@ class Game:
                 self.learning_indicator.set_nb_cards_learned(0)
             else:
                 self.learning_indicator.set_nb_cards_learned(data["cards_learned_today"])
+
+        # load wallet
+        if "wallet" in data.keys():
+            self.wallet.load(data["wallet"])
 
 
 class Pytmx:

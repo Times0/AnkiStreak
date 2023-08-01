@@ -55,3 +55,8 @@ plants = {
 btn_inventory = load("assets/ui/inventory.png", vertical_size=75)
 btn_shop = load("assets/ui/shop.png", vertical_size=75)
 card = load("assets/ui/anki_card.png")
+coin = load("assets/ui/coin.png")
+cross = load("assets/ui/cross.png")
+
+# make cross black
+cross.fill((0, 0, 0, 255), special_flags=pygame.BLEND_RGBA_MULT)

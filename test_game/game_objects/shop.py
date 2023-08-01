@@ -1,3 +1,4 @@
+from test_game.game_objects.inventory import Inventory
 from test_game.game_objects.items import items_data, Item
 
 
@@ -14,11 +15,44 @@ available_items = {
 }
 
 
-class Shop:
-    """
-    A shopUI is a collection of items that can be bought, they are stored in a dictionary
-    With name
-    """
+class Wallet:
+    def __init__(self, ui=None, money=0):
+        self.money = money
+        self.ui = ui
+        if self.ui:
+            self.ui.update_money(self.money)
 
-    def __init__(self):
+    def link_ui(self, ui):
+        self.ui = ui
+        self.ui.update_money(self.money)
+
+    def spend_money(self, amount):
+        self.money -= amount
+        self.ui.update_money(self.money)
+
+    def gain_money(self, amount):
+        self.money += amount
+        self.ui.update_money(self.money)
+
+    def dump(self):
+        return self.money
+
+    def load(self, money):
+        self.money = money
+        self.ui.update_money(self.money)
+
+
+class Shop:
+    def __init__(self, wallet: Wallet, inventory: Inventory):
         self.items = available_items
+        self.wallet = wallet
+        self.inventory = inventory
+
+    def buy_item(self, item):
+        if self.wallet.money >= item.price:
+            self.wallet.spend_money(item.price)
+            self.inventory.add_item(item)
+            print(f"bought {item} for {item.price}, you have {self.wallet.money} left")
+
+        else:
+            print("not enough money")
