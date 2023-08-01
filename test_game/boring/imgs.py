@@ -10,8 +10,15 @@ if __name__ == "__main__":
 cwd = os.path.dirname(__file__)
 
 
-def load(path):
-    return pygame.image.load(os.path.join(cwd, "..", "data", path)).convert_alpha()
+def load(path, size=None, vertical_size=None, horizontal_size=None):
+    img = pygame.image.load(os.path.join(cwd, "..", "data", path)).convert_alpha()
+    if size:
+        img = pygame.transform.scale(img, size)
+    elif vertical_size:
+        img = pygame.transform.scale(img, (img.get_width() * vertical_size // img.get_height(), vertical_size))
+    elif horizontal_size:
+        img = pygame.transform.scale(img, (horizontal_size, img.get_height() * horizontal_size // img.get_width()))
+    return img
 
 
 def load_multiple(path):
@@ -33,9 +40,9 @@ water_plant = load_multiple("assets/plants/water")
 ice_plant = load_multiple("assets/plants/ice")
 
 items = {
-    "fire": fire_seeds,
-    "water": water_seeds,
-    "ice": ice_seeds
+    "fire seeds": fire_seeds,
+    "water seeds": water_seeds,
+    "ice seeds": ice_seeds
 }
 
 plants = {
@@ -45,4 +52,6 @@ plants = {
 }
 
 # _____________________UI___________________________________#
-btn_menu = load("assets/ui/btn_menu.png")
+btn_inventory = load("assets/ui/inventory.png", vertical_size=75)
+btn_shop = load("assets/ui/shop.png", vertical_size=75)
+card = load("assets/ui/anki_card.png")

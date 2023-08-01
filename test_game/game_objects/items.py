@@ -1,4 +1,5 @@
-from objects import GameObject_no_pos
+from test_game.boring import imgs
+from test_game.objects import GameObject_no_pos
 
 
 class Item(GameObject_no_pos):
@@ -8,3 +9,12 @@ class Item(GameObject_no_pos):
 
     def draw(self, win):
         win.blit(self.zoom_buffer, self.rect)
+
+
+
+
+items_data = {
+    "fire seeds": Item("fire seeds", imgs.items["fire seeds"]),
+    "water seeds": Item("water seeds", imgs.items["water seeds"]),
+    "ice seeds": Item("ice seeds", imgs.items["ice seeds"])
+}

@@ -1,14 +1,17 @@
-import os.path
-
 import pygame
 
-from test_game.boring import colors
-from test_game.boring.config import *
+from test_game.boring import colors, utils
+from test_game.boring import imgs
+from test_game.game_objects.inventory import Inventory
+from test_game.game_objects.shop import Shop
 
 
 class UIObject:
     def __init__(self):
         self._is_visible = False
+        self.rect = pygame.Rect(0, 0, 0, 0)
+
+        self._is_hovered = False
 
     def toggle_visibility(self):
         self._is_visible = not self._is_visible
@@ -16,25 +19,57 @@ class UIObject:
     def isVisible(self):
         return self._is_visible
 
-class InventoryUI(UIObject):
+    def handle_events(self, events):
+        for event in events:
+            if event.type == pygame.MOUSEMOTION:
+                if self.rect.collidepoint(event.pos):
+                    self.on_hover()
+                else:
+                    self.on_unhover()
+
+    def on_hover(self):
+        self._is_hovered = True
+
+    def on_unhover(self):
+        self._is_hovered = False
+
+
+class GameWindow:
+    def __init__(self, title):
+        self.title = title
+        self._is_visible = False
+
+        self.title_offset = 85  # Offset of the title from the top left corner of the window
+
+    def draw_win(self, win, x, y, width, height, color=colors.BROWN, border_radius=15, center_title=False):
+        pygame.draw.rect(win, color, (x, y, width, height),
+                         border_radius=border_radius)
+        # draw the title
+        font = pygame.font.Font("data/assets/fonts/title_outline.TTF", 75)
+        text = utils.render(self.title, font, gfcolor=colors.BLACK, ocolor=colors.WHITE, opx=2)
+
+        if center_title:
+            win.blit(text, (x + width / 2 - text.get_width() / 2, y + 10 - self.title_offset))
+        else:
+            win.blit(text, (x + 10, y + 10 - self.title_offset))
+
+    def toggle_visibility(self):
+        self._is_visible = not self._is_visible
+
+    def isVisible(self):
+        return self._is_visible
+
+
+class InventoryUI(GameWindow):
     def __init__(self, inventory):
-        super().__init__()
-        self.width = 300  # Width of the inventory/menu
-        self.height = 400  # Height of the inventory/menu
-        self.border_radius = 15  # Border radius of the inventory/menu
+        super().__init__("Inventory")
+        self.border_radius = 15  # Border radius of the inventory/inventoryUI
         self.item_spacing = 10  # Spacing between inventory items
 
         self.inventory_items: Inventory = inventory
 
-    def draw(self, win):
-        # Calculate the position of the inventory/menu at the center of the screen
-        screen_width = pygame.display.Info().current_w
-        screen_height = pygame.display.Info().current_h
-        x = (screen_width - self.width) // 2
-        y = (screen_height - self.height) // 2
-
-        # Draw the inventory/menu background
-        pygame.draw.rect(win, (51, 51, 51), (x, y, self.width, self.height), border_radius=self.border_radius)
+    def draw(self, win, x, y, width, height):
+        self.draw_win(win, x, y, width, height, color=colors.GRAY, border_radius=self.border_radius,center_title=True)
 
         # Draw the inventory items
         item_x = x + self.border_radius  # X position of the first item
@@ -42,11 +77,11 @@ class InventoryUI(UIObject):
 
         for item_name, nb in self.inventory_items.items.items():
             # Draw each item as a rounded rectangle
-            pygame.draw.rect(win, (76, 76, 76), (item_x, item_y, self.width - 2 * self.border_radius, 50),
+            pygame.draw.rect(win, (76, 76, 76), (item_x, item_y, width - 2 * self.border_radius, 50),
                              border_radius=5)
 
             # Draw a subtle gradient on the item rectangle
-            gradient_rect = pygame.Rect(item_x, item_y, self.width - 2 * self.border_radius, 50)
+            gradient_rect = pygame.Rect(item_x, item_y, width - 2 * self.border_radius, 50)
             gradient = pygame.Surface((gradient_rect.width, gradient_rect.height))
             pygame.draw.rect(gradient, (100, 100, 100), gradient.get_rect(top=1, bottom=gradient_rect.height - 2))
             pygame.draw.rect(gradient, (66, 66, 66), gradient.get_rect(top=0, bottom=1))
@@ -68,42 +103,103 @@ class InventoryUI(UIObject):
             item_y += 60  # Adjust the spacing between items
 
 
-class ShopUI(UIObject):
+class ShopUI(GameWindow):
     def __init__(self, shop):
-        super().__init__()
-        self.shop = shop
+        super().__init__("Shop")
+        self.shop: Shop = shop
+
+        # Position of the shopUI
+        self.border_radius = 15  # Border radius of the shopUI
+        self.item_spacing = 10  # Spacing between shopUI items
+
+        # Calculate the width and height of each cell based on the size of the grid
+        self.cell_width = 100
+        self.cell_height = 100
+
+    def draw(self, window, x, y, width, height):
+        self.draw_win(window, x, y, width, height)
+
+    def handle_events(self, events):
+        pass
+
 
 class CardIndicators(UIObject):
-    def __init__(self):
+    def __init__(self, color=(127, 255, 0), bg_color=(169, 169, 169), border_color=(0, 0, 0), font_color=(0, 0, 0)):
         super().__init__()
         self.is_visible = True
-        self.counter = 0
+        self.nb_cards_learned = 0
+        self.nb_cards_total = 10
+        self.color = pygame.Color(*color)
+        self.bg_color = pygame.Color(*bg_color)
+        self.border_color = pygame.Color(*border_color)
+        self.font_color = pygame.Color(*font_color)
 
-        self.font = pygame.font.Font(os.path.join(font_path_dir, "farm_font2.ttf"), 30)
-        self.renders = []
+        # Load the image
+        self.image = imgs.card
+        self.image = pygame.transform.scale(self.image, (50, self.image.get_height() * 50 // self.image.get_width()))
 
-        self.render()
+    def set_nb_cards_learned(self, nb):
+        self.nb_cards_learned = nb
 
-    def set(self, counter):
-        self.counter = counter
-        self.render()
+    def set_nb_cards_total(self, nb):
+        self.nb_cards_total = nb
 
-    def render(self):
-        text_render_2 = self.font.render(f"{self.counter}/10 ", True, colors.RED)
-        text_render_3 = self.font.render("cards learned today", True, colors.BLACK)
-        self.renders = [text_render_2, text_render_3]
+    def draw(self, surface, x, y, width, height):
+        border_radius = 5
+        self.rect = pygame.Rect(x, y, width, height)
+        border_thickness = 2
+        if not self.is_visible:
+            return
 
-    def draw(self, win):
-        total_width = sum([render.get_width() for render in self.renders])
-        surf = pygame.Surface((total_width, self.renders[0].get_height()), pygame.SRCALPHA)
-        surf.fill((255, 255, 255, 100))
-        win.blit(surf, (10, 10))
+        # create the border
+        border_rect = pygame.Rect(x, y, width, height)
+        pygame.draw.rect(surface, self.border_color, border_rect, border_radius=border_radius)
 
-        render_multiples_texts(win, self.renders)
+        # create the background rectangle
+        bg_rect = pygame.Rect(x + border_thickness, y + border_thickness, width - 2 * border_thickness,
+                              height - 2 * border_thickness)
+        pygame.draw.rect(surface, self.bg_color, bg_rect, border_radius=border_radius)
 
+        if self.nb_cards_total > 0:
+            # calculate the length of the progress bar
+            progress_ratio = min(self.nb_cards_learned / self.nb_cards_total, 1)  # limit the ratio to 1
+            progress_length = int((width - 2 * border_thickness) * progress_ratio)
 
-def render_multiples_texts(win, renders):
-    x = 10
-    for render in renders:
-        win.blit(render, (x, 10))
-        x += render.get_width()
+            # create the progress rectangle
+            progress_rect = pygame.Rect(x + border_thickness,
+                                        y + border_thickness,
+                                        progress_length,
+                                        height - 2 * border_thickness)
+            pygame.draw.rect(surface, self.color, progress_rect, border_radius=border_radius)
+
+        # display the number of learned cards to total cards
+        font = pygame.font.Font(None, 24)  # select a font that fits your game's style
+        text = f"{self.nb_cards_learned}/{self.nb_cards_total}"
+        text_surface = font.render(text, True, self.font_color)
+        text_rect = text_surface.get_rect(center=(x + width / 2, y + height / 2))
+        surface.blit(text_surface, text_rect)
+
+        # Draw the card image
+        surface.blit(self.image, (x - 25, y - 10))
+
+        if self._is_hovered:
+            # display the tooltip
+            tooltip_text = "Cards learned today"
+            tooltip_font = pygame.font.Font(None, 25)  # select a font that fits your game's style
+            tooltip_surface = tooltip_font.render(tooltip_text, True, colors.WHITE)
+            tooltip_rect = tooltip_surface.get_rect(
+                center=(x + width / 2, y + height + 40))  # adjust positioning as needed
+            pygame.draw.rect(surface, colors.BROWN, tooltip_rect.inflate(15, 15))  # add a small padding
+            surface.blit(tooltip_surface, tooltip_rect)
+
+            # draw the tooltip arrow
+            # draw the tooltip arrow
+            arrow_points = [(x + width / 2, y + height + 5),
+                            (x + width / 2 - 10, y + height + 5 + 10),
+                            (x + width / 2 + 10, y + height + 5 + 10)]
+
+            pygame.draw.polygon(surface, colors.BROWN, arrow_points)
+
+            # draw the tooltip border
+            pygame.draw.polygon(surface, colors.BLACK, arrow_points, width=1)
+            pygame.draw.rect(surface, colors.BLACK, tooltip_rect.inflate(15, 15), width=1)

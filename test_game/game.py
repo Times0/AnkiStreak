@@ -6,12 +6,12 @@ import pyscroll
 import pytmx
 from PygameUIKit import button, Group
 
-from boring import imgs
+from boring import config
+from boring.config import *
 from boring.utils import *
 from objects import *
 from test_game.game_objects.farms import Farm
-from test_game.game_objects.farms import Inventory, PlantSpot
-from test_game.game_objects.shop import Shop
+from test_game.game_objects.farms import PlantSpot
 from ui import *
 
 cwd = os.path.dirname(__file__)
@@ -31,13 +31,15 @@ class Game:
             farm.link_inventory(self.inventory)
 
         # _____________________UI___________________________________#
-        self.menu = InventoryUI(self.inventory)
-        self.shop = ShopUI(self.shop)
+        self.inventoryUI = InventoryUI(self.inventory)
+        self.shopUI = ShopUI(self.shop)
         self.learning_indicator = CardIndicators()
 
         self.easy_ui = Group()
-        self.btn_menu = button.ButtonPngIcon(imgs.btn_menu, colors.GRAY, self.menu.toggle_visibility)
+        self.btn_menu = button.ButtonPngIcon(imgs.btn_inventory, colors.GRAY, self.inventoryUI.toggle_visibility)
+        self.btn_shop = button.ButtonPngIcon(imgs.btn_shop, colors.GRAY, self.shopUI.toggle_visibility)
         self.easy_ui.add(self.btn_menu)
+        self.easy_ui.add(self.btn_shop)
 
         self.load_save()
 
@@ -46,7 +48,7 @@ class Game:
         while self.running:
             dt = clock.tick(FPS)
             self.time_since_last_late_update += dt
-            # print(f"FPS: {clock.get_fps()}")
+            # print(f"\rFPS: {clock.get_fps()}", end="")
             self.events()
             self.update(dt)
             if self.time_since_last_late_update >= 1000 / LATE_UPDATE_FPS:
@@ -57,8 +59,10 @@ class Game:
     def events(self):
         events = pygame.event.get()
         self.easy_ui.handle_events(events)
-        if not self.menu.isVisible():
+        self.learning_indicator.handle_events(events)
+        if not self.inventoryUI.isVisible():
             self.ptmx.handle_events(events)
+            self.shopUI.handle_events(events)
 
         # important events
         for event in events:
@@ -71,28 +75,29 @@ class Game:
 
     def late_update(self):
         """Ran every seconds"""
-        prev = self.learning_indicator.counter
+        self.update_learned_cards()
+
+    def update_learned_cards(self):
+        prev = self.learning_indicator.nb_cards_learned
         with open(cards_learned_path, "r") as f:
             # Check if first line is today's ordinal
             lines = f.readlines()
-
             first_line = lines[0]
             today = datetime.today().toordinal()
             if int(first_line) != today:
-                self.learning_indicator.set(0)
+                print("Weird, first line is not today's ordinal")
+                self.learning_indicator.set_nb_cards_learned(0)
                 return
             second_line = lines[1]
             nb = int(second_line)
             if nb > prev:
-                self.learning_indicator.counter = nb
-                self.learning_indicator.render()
+                self.learning_indicator.set_nb_cards_learned(nb)
                 for i in range(nb - prev):
                     for farm in self.ptmx.farms:
                         farm.water_all()
             elif nb < prev:
                 print("Must be new day")
-                self.learning_indicator.counter = nb
-                self.learning_indicator.render()
+                self.learning_indicator.set_nb_cards_learned(0)
 
     def draw(self, win):
         self.win.fill(BLACK)
@@ -103,10 +108,21 @@ class Game:
     def draw_ui(self, win):
         W = win.get_width()
         self.btn_menu.draw(win, W - self.btn_menu.rect.width - 10, 10)
-        self.learning_indicator.draw(win)
+        self.btn_shop.draw(win, W - self.btn_shop.rect.width - 10 - self.btn_menu.rect.width - 10, 10)
 
-        if self.menu.isVisible():
-            self.menu.draw(win)
+        self.learning_indicator.draw(win, 30, 15, 200, 30)
+
+        if self.inventoryUI.isVisible():
+            w, h = 400, 700
+            x = (win.get_width() - w) // 2
+            y = (win.get_height() - h) // 2
+            self.inventoryUI.draw(win, x, y, w, h)
+        if self.shopUI.isVisible():
+            w, h = 1000, 300
+            x = (win.get_width() - w) // 2
+            y = (win.get_height() - h) // 2
+
+            self.shopUI.draw(win, x, y, w, h)
 
     def dump_save(self, path):
         # Check if save_path is a valid path
@@ -131,7 +147,7 @@ class Game:
 
             # save learning indicator state
             try:
-                data["cards_learned_today"] = self.learning_indicator.counter
+                data["cards_learned_today"] = self.learning_indicator.nb_cards_learned
             except Exception as e:
                 raise RuntimeError(f"Error while dumping learning indicator data: {str(e)}")
 
@@ -156,7 +172,7 @@ class Game:
 
     def load_save(self):
         try:
-            with open(save_path, "r") as f:
+            with open(config.save_path, "r") as f:
                 data = json.load(f)
         except FileNotFoundError:
             # Handle the case when the file is not found
@@ -175,9 +191,9 @@ class Game:
         # load learning indicator state
         if "cards_learned_today" in data.keys():
             if data["time"] != datetime.now().toordinal():
-                self.learning_indicator.set(0)
+                self.learning_indicator.set_nb_cards_learned(0)
             else:
-                self.learning_indicator.set(data["cards_learned_today"])
+                self.learning_indicator.set_nb_cards_learned(data["cards_learned_today"])
 
 
 class Pytmx:

@@ -76,7 +76,7 @@ class Menu(objects.GameObject_no_img):
                         return
 
     def draw(self, win):
-        # draw menu background slightly transparent black with white border
+        # draw inventoryUI background slightly transparent black with white border
         utils.draw_menu_rect(win, self.rect, colors.MENU_BACKGROUND)
         for i, item in enumerate(self.items):
             if self.hovered_item_index == i:
@@ -378,11 +378,11 @@ class Plant:
 
     def get_item(self):
         if self.type == "fire":
-            return Item("fire", imgs.fire_seeds)
+            return Item("fire seeds", imgs.fire_seeds)
         elif self.type == "ice":
-            return Item("ice", imgs.ice_seeds)
+            return Item("ice seeds", imgs.ice_seeds)
         elif self.type == "water":
-            return Item("water", imgs.water_seeds)
+            return Item("water seeds", imgs.water_seeds)
         else:
             raise Exception(f"Plant type {self.type} not found")
 
