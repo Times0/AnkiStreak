@@ -2,14 +2,23 @@ import os.path
 
 import pygame
 
-import colors
-from farms import Inventory
-from config import *
+from test_game.boring import colors
+from test_game.boring.config import *
 
 
-class InventoryUI:
+class UIObject:
+    def __init__(self):
+        self._is_visible = False
+
+    def toggle_visibility(self):
+        self._is_visible = not self._is_visible
+
+    def isVisible(self):
+        return self._is_visible
+
+class InventoryUI(UIObject):
     def __init__(self, inventory):
-        self.is_open = False
+        super().__init__()
         self.width = 300  # Width of the inventory/menu
         self.height = 400  # Height of the inventory/menu
         self.border_radius = 15  # Border radius of the inventory/menu
@@ -59,8 +68,15 @@ class InventoryUI:
             item_y += 60  # Adjust the spacing between items
 
 
-class CardIndicators:
+class ShopUI(UIObject):
+    def __init__(self, shop):
+        super().__init__()
+        self.shop = shop
+
+class CardIndicators(UIObject):
     def __init__(self):
+        super().__init__()
+        self.is_visible = True
         self.counter = 0
 
         self.font = pygame.font.Font(os.path.join(font_path_dir, "farm_font2.ttf"), 30)

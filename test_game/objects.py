@@ -1,9 +1,5 @@
 import pygame
-from utils import clamp
-import os
-from colors import *
-from config import *
-import imgs
+from test_game.boring.colors import *
 
 
 class PointWithZoom:
