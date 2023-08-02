@@ -1,5 +1,5 @@
 from test_game.boring import imgs
-from test_game.objects import GameObject_no_pos
+from test_game.backend.objects import GameObject_no_pos
 
 
 class Item(GameObject_no_pos):

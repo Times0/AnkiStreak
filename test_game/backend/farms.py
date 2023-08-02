@@ -1,10 +1,10 @@
 import pygame
 
-from test_game import objects
+from test_game.backend import objects
+from test_game.backend.inventory import Inventory
+from test_game.backend.items import Item
 from test_game.boring import config
 from test_game.boring import imgs, utils, colors
-from test_game.game_objects.inventory import Inventory
-from test_game.game_objects.items import Item
 
 
 class FarmMenuItem(Item):
@@ -259,13 +259,17 @@ class Farm(objects.GameObject, objects.Clickable):
         if not plant:
             return
         if plant is not None and plant.is_ready_to_harvest():
-            vec_pos = pygame.math.Vector2(plantspot.pos)
-            vec_dest = pygame.math.Vector2(self.camera_rect.move(-50, +50).topright)
-            item_on_the_move = plant.get_item()
-            self.on_the_move_plants.append(OnTheMoveItem(item_on_the_move, vec_pos, vec_dest))
+            self.create_plant_on_the_move(plantspot)
             item = plant.get_item()
             self.farm_inventory.add_item(item)
             plant.recolt()
+
+    def create_plant_on_the_move(self, plantspot):
+        plant = plantspot.plant
+        vec_pos = pygame.math.Vector2(plantspot.pos)
+        vec_dest = pygame.math.Vector2(self.camera_rect.move(-60, 10).topright)  # Inventory position
+        item_on_the_move = plant.get_item()
+        self.on_the_move_plants.append(OnTheMoveItem(item_on_the_move, vec_pos, vec_dest))
 
     def update(self, dt):
         for plant in self.on_the_move_plants:
@@ -275,7 +279,7 @@ class Farm(objects.GameObject, objects.Clickable):
 
     # ____SAVE____#
     def dump(self):
-        """ Dump all the data of the farm to a json file to keep the farm state """
+        """ Dump all the assets of the farm to a json file to keep the farm state """
         data = {"plants": [plant.dump() for plant in self.plants_location.values()], }
 
         return data
@@ -353,7 +357,7 @@ class PlantSpot(objects.GameObject_no_img):
 
     def dump(self):
         """
-        Dump the plant spot data to a json file
+        Dump the plant spot assets to a json file
         """
         return {"id": self.id, "plant": self.plant.dump() if self.plant is not None else None, }
 

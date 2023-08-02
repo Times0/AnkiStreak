@@ -11,7 +11,7 @@ cwd = os.path.dirname(__file__)
 
 
 def load(path, size=None, vertical_size=None, horizontal_size=None):
-    img = pygame.image.load(os.path.join(cwd, "..", "data", path)).convert_alpha()
+    img = pygame.image.load(os.path.join(cwd, "..", "assets", path)).convert_alpha()
     if size:
         img = pygame.transform.scale(img, size)
     elif vertical_size:
@@ -23,25 +23,25 @@ def load(path, size=None, vertical_size=None, horizontal_size=None):
 
 def load_multiple(path):
     l = []
-    for p in glob.glob(os.path.join(cwd, "..", "data", path, "*.png")):
+    for p in glob.glob(os.path.join(cwd, "..", "assets", path, "*.png")):
         l.append(pygame.image.load(p).convert_alpha())
     return l
 
 
-fire_seeds = load("assets/farm/fire_seeds.png")
-water_seeds = load("assets/farm/water_seeds.png")
-ice_seeds = load("assets/farm/ice_seeds.png")
+fire_seeds = load("sprites/farm/fire_seeds.png")
+water_seeds = load("sprites/farm/water_seeds.png")
+ice_seeds = load("sprites/farm/ice_seeds.png")
 
-bucket = load("assets/farm/bucket.png")
-faux = load("assets/farm/faux.png")
+bucket = load("sprites/farm/bucket.png")
+faux = load("sprites/farm/faux.png")
 
-fire_plant = load_multiple("assets/farm/plants/fire")
-water_plant = load_multiple("assets/farm/plants/water")
-ice_plant = load_multiple("assets/farm/plants/ice")
+fire_plant = load_multiple("sprites/farm/plants/fire")
+water_plant = load_multiple("sprites/farm/plants/water")
+ice_plant = load_multiple("sprites/farm/plants/ice")
 
-fire_fruit = load(r"assets/farm\plants\fruits/fire.png")
-water_fruit = load("assets/farm/plants/fruits/water.png")
-ice_fruit = load("assets/farm/plants/fruits/ice.png")
+fire_fruit = load(r"sprites/farm\plants\fruits/fire.png")
+water_fruit = load("sprites/farm/plants/fruits/water.png")
+ice_fruit = load("sprites/farm/plants/fruits/ice.png")
 
 items = {
     "fire seeds": fire_seeds,
@@ -60,11 +60,11 @@ plants = {
 }
 
 # _____________________UI___________________________________#
-btn_inventory = load("assets/ui/inventory.png", vertical_size=75)
-btn_shop = load("assets/ui/shop.png", vertical_size=75)
-card = load("assets/ui/anki_card.png")
-coin = load("assets/ui/coin.png")
-cross = load("assets/ui/cross.png")
+btn_inventory = load("sprites/ui/inventory.png", vertical_size=75)
+btn_shop = load("sprites/ui/shop.png", vertical_size=75)
+card = load("sprites/ui/anki_card.png")
+coin = load("sprites/ui/coin.png")
+cross = load("sprites/ui/cross.png")
 
 # make cross black
 cross.fill((0, 0, 0, 255), special_flags=pygame.BLEND_RGBA_MULT)

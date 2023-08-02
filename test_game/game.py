@@ -10,11 +10,11 @@ from PygameUIKit import Group
 from boring import config
 from boring.config import *
 from boring.utils import *
-from objects import *
-from test_game.game_objects.farms import Farm
-from test_game.game_objects.farms import PlantSpot
-from test_game.game_objects.shop import Wallet
-from ui import *
+from test_game.backend.farms import Farm
+from test_game.backend.farms import PlantSpot
+from test_game.backend.objects import *
+from test_game.backend.shop import Wallet
+from test_game.frontend.ui import *
 
 cwd = os.path.dirname(__file__)
 logger = logging.getLogger(__name__)
@@ -105,7 +105,7 @@ class Game:
         self.anki_data_json = json.load(open(anki_data_path, "r"))
         data = self.anki_data_json
         if not "time_ordinal" in data:
-            return  # no data yet
+            return  # no assets yet
         if data["time_ordinal"] != datetime.today().toordinal():
             logger.warning(f"Weird, the ordinal date is not today's date ({data['time_ordinal']} "
                            f"!= {datetime.today().toordinal()})")
@@ -128,8 +128,7 @@ class Game:
                 for farm in self.ptmx.farms:
                     farm.water_all(nb_watering)
 
-                self.create_popup(f"Congratulations! You learned {learned_since_last_connection} cards today!"
-                                  f" You watered your plants {nb_watering} times!")
+                self.create_popup(f"You learned {learned_since_last_connection} cards ! +{nb_watering} watering !")
 
     def create_popup(self, text):
         popup = Popup(title="GG", text=text)
@@ -147,7 +146,7 @@ class Game:
         self.btn_shop.draw(win, W - self.btn_shop.rect.width - 10 - self.btn_menu.rect.width - 10, 10)
 
         self.learning_indicator.draw(win, 30, 15, 200, 30)
-        self.coin_indicator.draw(win, 5, self.learning_indicator.rect.h + 200, 200, 30)
+        self.coin_indicator.draw(win, 5, self.learning_indicator.rect.h + 100, 200, 30)
 
         if self.inventoryUI.isVisible():
             w, h = 400, 700
@@ -181,44 +180,44 @@ class Game:
                 for farm in self.ptmx.farms:
                     data[farm.name] = farm.dump()
             except Exception as e:
-                raise RuntimeError(f"Error while dumping farm data: {str(e)}")
+                raise RuntimeError(f"Error while dumping farm assets: {str(e)}")
 
             # save inventory state
             try:
                 data["inventory"] = self.inventory.dump()
             except Exception as e:
-                raise RuntimeError(f"Error while dumping inventory data: {str(e)}")
+                raise RuntimeError(f"Error while dumping inventory assets: {str(e)}")
 
             # save learning indicator state
             try:
                 data["cards_learned_today"] = self.learning_indicator.nb_cards_learned
             except Exception as e:
-                raise RuntimeError(f"Error while dumping learning indicator data: {str(e)}")
+                raise RuntimeError(f"Error while dumping learning indicator assets: {str(e)}")
 
             # save time
             try:
                 data["time"] = datetime.now().toordinal()
             except Exception as e:
-                raise RuntimeError(f"Error while dumping time data: {str(e)}")
+                raise RuntimeError(f"Error while dumping time assets: {str(e)}")
 
             # save wallet
             try:
                 data["wallet"] = self.wallet.dump()
             except Exception as e:
-                raise RuntimeError(f"Error while dumping wallet data: {str(e)}")
+                raise RuntimeError(f"Error while dumping wallet assets: {str(e)}")
 
-            # Save data to JSON file
+            # Save assets to JSON file
             try:
                 with open(path, "w") as f:
                     json.dump(data, f, indent=4)
             except Exception as e:
-                raise RuntimeError(f"Error while writing data to file: {str(e)}")
+                raise RuntimeError(f"Error while writing assets to file: {str(e)}")
 
             print(f"Data dumped to {path} !")
 
 
         except Exception as e:
-            print(f"An error occurred while dumping data: {str(e)}")
+            print(f"An error occurred while dumping assets: {str(e)}")
 
     def load_save(self):
         try:
@@ -226,8 +225,8 @@ class Game:
                 data = json.load(f)
         except FileNotFoundError:
             # Handle the case when the file is not found
-            print("File not found. Initializing with default data.")
-            data = {}  # or any other default data structure you want to use
+            print("File not found. Initializing with default assets.")
+            data = {}  # or any other default assets structure you want to use
 
         # load farm state
         for farm in self.ptmx.farms:
@@ -253,7 +252,7 @@ class Game:
 class Pytmx:
     def __init__(self, win):
         self.win = win
-        self.data_tmx = pytmx.load_pygame(os.path.join(cwd, "data", "map", "map_with_objects.tmx"))
+        self.data_tmx = pytmx.load_pygame(os.path.join(cwd, "assets", "map", "map_with_objects.tmx"))
         pyscroll_data = pyscroll.data.TiledMapData(self.data_tmx)
         self.map_layer = pyscroll.BufferedRenderer(pyscroll_data, self.win.get_size(), clamp_camera=True)
         self.farms = []

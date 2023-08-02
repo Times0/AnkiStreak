@@ -1,5 +1,5 @@
-from test_game.game_objects.inventory import Inventory
-from test_game.game_objects.items import items_data, Item
+from test_game.backend.inventory import Inventory
+from test_game.backend.items import items_data, Item
 
 
 class ShopItem(Item):
@@ -48,7 +48,7 @@ class Shop:
         self.wallet = wallet
         self.inventory = inventory
 
-    def buy_item(self, item):
+    def buy(self, item: ShopItem):
         if self.wallet.money >= item.price:
             self.wallet.spend_money(item.price)
             self.inventory.add_item(item)

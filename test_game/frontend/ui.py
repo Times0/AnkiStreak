@@ -3,14 +3,14 @@ import os
 import pygame
 from PygameUIKit import button
 
+from test_game.backend.inventory import Inventory
+from test_game.backend.shop import Shop
 from test_game.boring import colors, utils
 from test_game.boring import imgs
-from test_game.game_objects.inventory import Inventory
-from test_game.game_objects.shop import Shop
 
 cwd = os.path.dirname(__file__)
-font_title_path = os.path.join(cwd, "data", "fonts", "farm_font.ttf")
-font_coins_path = os.path.join(cwd, "data", "fonts", "title.otf")
+font_title_path = os.path.join(cwd, "../assets", "fonts", "farm_font.ttf")
+font_coins_path = os.path.join(cwd, "../assets", "fonts", "title.otf")
 
 
 class UIObject:
@@ -174,10 +174,12 @@ class ShopUI(GameWindow):
 
     def init_buy_buttons(self):
         for item_name, item in self.shop.items.items():
+            f = lambda i=item: self.shop.buy(i)  # Very important to use = in lambda for variable scope (no idea what im writing)
             self.buy_buttons.append(button.ButtonText(colors.GREEN,
-                                                      lambda: self.shop.buy_item(item),
+                                                      f,
                                                       "Buy",
-                                                      border_radius=5, font=self.font))
+                                                      border_radius=5,
+                                                      font=self.font))
 
     def draw(self, window, x, y, width, height):
         self.draw_win(window, x, y, width, height)
@@ -230,12 +232,13 @@ class Popup(GameWindow):
         self._is_visible = True  # The popup is visible when created
         self.text = text
 
+        self.font = pygame.font.SysFont("Arial", 30)
+
     def draw(self, window, x, y, width, height):
         self.draw_win(window, x, y, width, height)
 
         # Draw the text
-        font = pygame.font.SysFont("Arial", 25, bold=True)
-        text = utils.render(self.text, font, gfcolor=colors.BLACK, ocolor=colors.GRAY, opx=1)
+        text = utils.render(self.text, self.font, gfcolor=colors.WHITE, ocolor=colors.BLACK, opx=1)
         window.blit(text, text.get_rect(center=(x + width // 2, y + height // 2)))
 
     def handle_events(self, events):
