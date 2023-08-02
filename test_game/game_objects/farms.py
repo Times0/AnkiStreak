@@ -1,8 +1,8 @@
 import pygame
 
 from test_game import objects
-from test_game.boring import imgs, utils, colors
 from test_game.boring import config
+from test_game.boring import imgs, utils, colors
 from test_game.game_objects.inventory import Inventory
 from test_game.game_objects.items import Item
 
@@ -209,10 +209,11 @@ class Farm(objects.GameObject, objects.Clickable):
             return None
         return self.plants_location[plant_id]
 
-    def water_all(self):
+    def water_all(self, n):
         for plant_loc in self.plants_location.values():
             if plant_loc.plant is not None:
-                plant_loc.plant.water()
+                for _ in range(n):
+                    plant_loc.plant.water()
 
     def consume_seed(self, seed_type):
         if self.farm_inventory is None:

@@ -1,8 +1,14 @@
 import os
 import sys
+
 import pygame
+
 sys.path.append(os.path.dirname(__file__))
 from test_game.boring.config import *
+import logging
+
+logging.basicConfig(level=logging.INFO, filename="game.log", filemode="w",
+                    format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 def main():

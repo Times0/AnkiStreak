@@ -224,6 +224,24 @@ class ShopUI(GameWindow):
             btn.handle_events(events)
 
 
+class Popup(GameWindow):
+    def __init__(self, title, text):
+        super().__init__(title)
+        self._is_visible = True  # The popup is visible when created
+        self.text = text
+
+    def draw(self, window, x, y, width, height):
+        self.draw_win(window, x, y, width, height)
+
+        # Draw the text
+        font = pygame.font.SysFont("Arial", 25, bold=True)
+        text = utils.render(self.text, font, gfcolor=colors.BLACK, ocolor=colors.GRAY, opx=1)
+        window.blit(text, text.get_rect(center=(x + width // 2, y + height // 2)))
+
+    def handle_events(self, events):
+        super().handle_events(events)
+
+
 class CardIndicators(UIObject):
     def __init__(self, color=(127, 255, 0), bg_color=(169, 169, 169), border_color=(0, 0, 0), font_color=(0, 0, 0)):
         super().__init__()

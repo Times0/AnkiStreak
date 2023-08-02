@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import datetime
 
 import pygame.sprite
@@ -16,6 +17,7 @@ from test_game.game_objects.shop import Wallet
 from ui import *
 
 cwd = os.path.dirname(__file__)
+logger = logging.getLogger(__name__)
 
 
 class Game:
@@ -48,14 +50,17 @@ class Game:
         self.ui_elements = [self.learning_indicator, self.coin_indicator, self.easy_ui]
         self.game_windows = [self.inventoryUI, self.shopUI]
 
+        self.special_ui = []
+
         self.anki_data_json = None
-        self.load_anki_data()
         self.load_save()
+        self.load_anki_data()
 
     def load_anki_data(self):
-        with open(anki_data_path, "r") as f:
-            self.anki_data_json = json.load(f)
+        self.anki_data_json = json.load(open(anki_data_path, "r"))
         self.learning_indicator.set_nb_cards_total(self.anki_data_json["nb_cards_to_review_today"])
+
+        self.update_learned_cards()
 
     def run(self):
         clock = pygame.time.Clock()
@@ -73,12 +78,13 @@ class Game:
     def events(self):
         events = pygame.event.get()
 
+        # If no game window is open, we handle basic game events
         if not any([e.isVisible() for e in self.game_windows]):
             self.ptmx.handle_events(events)
             for e in self.ui_elements:
                 e.handle_events(events)
 
-        for gw in self.game_windows:
+        for gw in self.game_windows + self.special_ui:
             if gw.isVisible():
                 gw.handle_events(events)
 
@@ -93,26 +99,41 @@ class Game:
 
     def late_update(self):
         """Ran every seconds"""
-        self.update_learned_cards()
+        pass
 
     def update_learned_cards(self):
-        prev = self.learning_indicator.nb_cards_learned
-
-        with open(anki_data_path, "r") as f:
-            self.anki_data_json = json.load(f)
+        self.anki_data_json = json.load(open(anki_data_path, "r"))
         data = self.anki_data_json
-
         if not "time_ordinal" in data:
             return  # no data yet
         if data["time_ordinal"] != datetime.today().toordinal():
-            print("Weird, time_ordinal is not today's ordinal, today's ordinal is", datetime.today().toordinal())
+            logger.warning(f"Weird, the ordinal date is not today's date ({data['time_ordinal']} "
+                           f"!= {datetime.today().toordinal()})")
             self.learning_indicator.set_nb_cards_learned(0)
             return
         else:
+            prev = self.learning_indicator.nb_cards_learned
             self.learning_indicator.set_nb_cards_learned(data["nb_cards_learned_today"])
-            for i in range(data["nb_cards_learned_today"] - prev):
+
+            # If we learned cards
+            if data["nb_cards_learned_today"] > prev:
+                # We water all the plants based on the percentage of cards learned
+                max_watering = config.MAX_WATERING
+                learned_today = data["nb_cards_learned_today"]
+                learned_since_last_connection = learned_today - prev
+                percentage = (learned_since_last_connection / self.learning_indicator.nb_cards_total)
+                nb_watering = int(percentage * max_watering) + 1
+                print(f"learned {learned_today} cards today, {learned_since_last_connection} since last connection, "
+                      f"percentage: {percentage}, nb_watering: {nb_watering}")
                 for farm in self.ptmx.farms:
-                    farm.water_all()
+                    farm.water_all(nb_watering)
+
+                self.create_popup(f"Congratulations! You learned {learned_since_last_connection} cards today!"
+                                  f" You watered your plants {nb_watering} times!")
+
+    def create_popup(self, text):
+        popup = Popup(title="GG", text=text)
+        self.special_ui.append(popup)
 
     def draw(self, win):
         self.win.fill(BLACK)
@@ -139,6 +160,13 @@ class Game:
             y = (win.get_height() - h) // 2
 
             self.shopUI.draw(win, x, y, w, h)
+
+        for popup in self.special_ui:
+            if popup.isVisible():
+                w, h = 500, 200
+                x = (win.get_width() - w) // 2
+                y = (win.get_height() - h) // 2
+                popup.draw(win, x, y, w, h)
 
     def dump_save(self, path):
         # Check if save_path is a valid path

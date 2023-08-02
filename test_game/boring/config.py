@@ -15,12 +15,13 @@ MIN_ZOOM = 1
 START_ZOOM = 1.5
 ALLOW_SCROLLING = True
 
+MAX_WATERING = 7
+
 cwd = os.path.dirname(__file__)
 
 save_path = os.path.join(cwd, "../data", "game_data", "game_state.json")
 anki_data_path = os.path.join(cwd, "../..", "anki_data.json")
 cards_learned_path = os.path.join(cwd, "../..", "cards_learned_today.txt")
 font_path_dir = os.path.join(cwd, "../data", "fonts")
-
 
 DEBUG = True
