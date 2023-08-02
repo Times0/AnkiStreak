@@ -3,8 +3,8 @@ from test_game.objects import GameObject_no_pos
 
 
 class Item(GameObject_no_pos):
-    def __init__(self, name, img, size=(50, 50)):
-        super().__init__(size, img)
+    def __init__(self, name, img):
+        super().__init__((50, 50), img)
         self.name = name
 
     def draw(self, win):

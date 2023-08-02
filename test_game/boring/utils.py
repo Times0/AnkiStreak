@@ -103,3 +103,26 @@ def render(text, font, gfcolor=pygame.Color('dodgerblue'), ocolor=(255, 255, 255
 
     surf.blit(textsurface, (opx, opx))
     return surf
+
+import pygame
+
+def grayscale(img:pygame.Surface) -> pygame.Surface:
+    # Create a new surface with the same size as the original image, maintaining alpha channel
+    bw_image = pygame.Surface(img.get_size(), pygame.SRCALPHA)
+
+    # Iterate over each pixel in the image
+    for x in range(img.get_width()):
+        for y in range(img.get_height()):
+            # Get the RGBA values of the pixel
+            r, g, b, a = img.get_at((x, y))
+
+            # Calculate the grayscale value
+            # This is a simple average, but more sophisticated methods could be used
+            gray = int((r + g + b) / 3)
+
+            # Set the pixel in the new image to the grayscale value, keeping the original alpha
+            bw_image.set_at((x, y), (gray, gray, gray, a))
+
+    # Return the new black and white image
+    return bw_image
+

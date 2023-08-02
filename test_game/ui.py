@@ -132,7 +132,7 @@ class InventoryUI(GameWindow):
 
             # Draw the item image and number on the same line
             font = pygame.font.Font(None, 24)
-            img = self.inventory_items.get_item_image(item_name)
+            img = self.inventory_items.get_image(item_name)
             # resize the image to fit the item rectangle
             img = pygame.transform.scale(img, (40, 40))
 

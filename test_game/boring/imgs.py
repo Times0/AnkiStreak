@@ -35,14 +35,22 @@ ice_seeds = load("assets/farm/ice_seeds.png")
 bucket = load("assets/farm/bucket.png")
 faux = load("assets/farm/faux.png")
 
-fire_plant = load_multiple("assets/plants/fire")
-water_plant = load_multiple("assets/plants/water")
-ice_plant = load_multiple("assets/plants/ice")
+fire_plant = load_multiple("assets/farm/plants/fire")
+water_plant = load_multiple("assets/farm/plants/water")
+ice_plant = load_multiple("assets/farm/plants/ice")
+
+fire_fruit = load(r"assets/farm\plants\fruits/fire.png")
+water_fruit = load("assets/farm/plants/fruits/water.png")
+ice_fruit = load("assets/farm/plants/fruits/ice.png")
 
 items = {
     "fire seeds": fire_seeds,
     "water seeds": water_seeds,
-    "ice seeds": ice_seeds
+    "ice seeds": ice_seeds,
+
+    "fire fruit": fire_fruit,
+    "water fruit": water_fruit,
+    "ice fruit": ice_fruit,
 }
 
 plants = {

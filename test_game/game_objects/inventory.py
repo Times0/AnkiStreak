@@ -1,5 +1,3 @@
-import pygame
-
 from test_game.boring import imgs
 from test_game.game_objects.items import Item
 
@@ -7,7 +5,7 @@ from test_game.game_objects.items import Item
 class Inventory:
     def __init__(self):
         self.items = {}  # name: quantity
-        self.items_data = {}  # name: Item
+        self.items_data: dict[str, Item] = {}  # name: Item
 
     def add_item(self, item: Item):
         if item.name in self.items:
@@ -32,17 +30,29 @@ class Inventory:
         for item_name in items:
             self.items_data[item_name] = Item(item_name, imgs.items[item_name])
 
+    def get_image(self, item_name):
+        return self.items_data[item_name].img
+
     def __getitem__(self, item_name):
         return self.items[item_name]
 
     def __setitem__(self, item_name, value):
         self.items[item_name] = value
 
-    def __contains__(self, item_name):
-        return item_name in self.items
+    def __contains__(self, item: Item):
+        return item.name in self.items
 
     def __iter__(self):
         return iter(self.items)
 
-    def get_item_image(self, item_name) -> pygame.Surface:
-        return self.items_data[item_name].img
+    def __repr__(self):
+        return f"Inventory({self.items})"
+
+    def consume_item(self, name, nb):
+        if name in self.items:
+            self.items[name] -= nb
+            if self.items[name] == 0:
+                del self.items[name]
+        else:
+            raise Exception(f"Item not found in inventory \n "
+                            f"{name} not in {self.items}")

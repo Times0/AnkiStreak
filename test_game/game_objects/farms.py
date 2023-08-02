@@ -34,7 +34,12 @@ class Menu(objects.GameObject_no_img):
         self.items_rects: list[pygame.Rect] = []
         self.selected_item = None
 
+        self.inventory = None
+
         self.update_items_rect()
+
+    def link_inventory(self, inventory):
+        self.inventory = inventory
 
     def update_items_rect(self):
         self.items_rects = []
@@ -81,14 +86,16 @@ class Menu(objects.GameObject_no_img):
         for i, item in enumerate(self.items):
             if self.hovered_item_index == i:
                 pygame.draw.rect(win, colors.MENU_SELECTED, self.items_rects[i].inflate(10, 10), border_radius=10)
+            img = item.zoom_buffer
+            if item.type == FarmMenuItem.seed and item not in self.inventory:
+                # make img black and white
+                img = utils.grayscale(img)
+            win.blit(img, self.items_rects[i])
 
-            win.blit(item.zoom_buffer, self.items_rects[i])
 
-
-ice_seeds = FarmMenuItem("ice_seeds", imgs.ice_seeds, type=FarmMenuItem.seed)
-water_seeds = FarmMenuItem("water Seeds", imgs.water_seeds, type=FarmMenuItem.seed)
-fire_seeds = FarmMenuItem("fire Seeds", imgs.fire_seeds, type=FarmMenuItem.seed)
-
+ice_seeds = FarmMenuItem("ice seeds", imgs.ice_seeds, type=FarmMenuItem.seed)
+water_seeds = FarmMenuItem("water seeds", imgs.water_seeds, type=FarmMenuItem.seed)
+fire_seeds = FarmMenuItem("fire seeds", imgs.fire_seeds, type=FarmMenuItem.seed)
 bucket = FarmMenuItem("bucket", imgs.bucket, FarmMenuItem.water)
 faux = FarmMenuItem("faux", imgs.faux, FarmMenuItem.recolter)
 
@@ -96,7 +103,7 @@ menu_items = [ice_seeds, water_seeds, fire_seeds, faux, bucket]
 
 
 class Farm(objects.GameObject, objects.Clickable):
-    def __init__(self, pos, size, img, farm_zone, name="Farm", inventory = None):
+    def __init__(self, pos, size, img, farm_zone, name="Farm", inventory=None):
         objects.GameObject.__init__(self, pos, size, img)
         objects.Clickable.__init__(self, pos, size)
         self.menu = Menu(self, (66 * len(menu_items), 75), menu_items)
@@ -109,6 +116,7 @@ class Farm(objects.GameObject, objects.Clickable):
 
     def link_inventory(self, inventory: Inventory):
         self.farm_inventory = inventory
+        self.menu.link_inventory(inventory)
 
     def add_plant_location(self, plant):
         self.plants_location[plant.id] = plant
@@ -201,23 +209,31 @@ class Farm(objects.GameObject, objects.Clickable):
             if plant_loc.plant is not None:
                 plant_loc.plant.water()
 
+    def consume_seed(self, seed_type):
+        if self.farm_inventory is None:
+            raise Exception("No inventory linked to farm")
+        itemname = seed_type + " seeds"
+        if not itemname in self.farm_inventory.items:
+            self.menu.selected_item = None
+        else:
+            self.farm_inventory.consume_item(itemname, 1)
+
     # ____ON EVENTS____#
 
     def on_seed_planting(self, pos):
         spot_id = self.get_plant_spot_id_at(pos)
-        if spot_id is None:
+        if spot_id is None or self.plants_location[spot_id].plant is not None:
             return
-        if self.plants_location[spot_id].plant is not None:
-            return
-        if "fire" in self.menu.selected_item.name:
-            plant = Plant("fire", self.plants_location[spot_id])
-        elif "water" in self.menu.selected_item.name:
-            plant = Plant("water", self.plants_location[spot_id])
-        elif "ice" in self.menu.selected_item.name:
-            plant = Plant("ice", self.plants_location[spot_id])
+
+        plant_types = ["fire", "water", "ice"]
+        for plant_type in plant_types:
+            if plant_type in self.menu.selected_item.name:
+                plant = Plant(plant_type, self.plants_location[spot_id])
+                self.add_plant_at_id(spot_id, plant)
+                self.consume_seed(plant_type)
+                break
         else:
             raise Exception(f"Plant {self.menu.selected_item.name} not found")
-        self.add_plant_at_id(spot_id, plant)
 
     def on_watering(self, pos):
         plant_id = self.get_plant_spot_id_at(pos)
@@ -376,15 +392,11 @@ class Plant:
     def recolt(self):
         self.spot.plant = None
 
-    def get_item(self):
-        if self.type == "fire":
-            return Item("fire seeds", imgs.fire_seeds)
-        elif self.type == "ice":
-            return Item("ice seeds", imgs.ice_seeds)
-        elif self.type == "water":
-            return Item("water seeds", imgs.water_seeds)
-        else:
+    def get_item(self) -> Item:
+        if self.type not in ["fire", "ice", "water"]:
             raise Exception(f"Plant type {self.type} not found")
+        k = self.type + " fruit"
+        return Item(k, imgs.items[k])
 
 
 def scale_img(img, zoom):
