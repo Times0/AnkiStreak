@@ -2,7 +2,7 @@ import pygame
 
 from test_game import objects
 from test_game.boring import imgs, utils, colors
-from test_game.boring.config import TILE_SIZE
+from test_game.boring import config
 from test_game.game_objects.inventory import Inventory
 from test_game.game_objects.items import Item
 
@@ -101,11 +101,14 @@ fire_seeds = FarmMenuItem("fire seeds", imgs.fire_seeds, type=FarmMenuItem.seed)
 bucket = FarmMenuItem("bucket", imgs.bucket, FarmMenuItem.water)
 faux = FarmMenuItem("faux", imgs.faux, FarmMenuItem.recolter)
 
-menu_items = [ice_seeds, water_seeds, fire_seeds, faux, bucket]
-
 
 class Farm(objects.GameObject, objects.Clickable):
     def __init__(self, pos, size, img, farm_zone, name="Farm", inventory=None):
+        if config.DEBUG:
+            menu_items = [ice_seeds, water_seeds, fire_seeds, faux, bucket]
+        else:
+            menu_items = [ice_seeds, water_seeds, fire_seeds, faux]
+
         objects.GameObject.__init__(self, pos, size, img)
         objects.Clickable.__init__(self, pos, size)
         self.menu = Menu(self, (66 * len(menu_items), 75), menu_items)
@@ -327,7 +330,7 @@ class PlantSpot(objects.GameObject_no_img):
     counter = 0
 
     def __init__(self, pos):
-        super().__init__(pos, (TILE_SIZE, TILE_SIZE))
+        super().__init__(pos, (config.TILE_SIZE, config.TILE_SIZE))
         self.plant = None
         self.id = PlantSpot.counter
         PlantSpot.counter += 1
@@ -362,7 +365,7 @@ class Plant:
         self.imgs = imgs.plants[plant_type]
         self.spot = spot
 
-        max_widht = TILE_SIZE * 1.5
+        max_widht = config.TILE_SIZE * 1.5
         for i in range(len(self.imgs)):
             if self.imgs[i].get_width() > max_widht:
                 self.imgs[i] = scale_img(self.imgs[i], max_widht / self.imgs[i].get_width())

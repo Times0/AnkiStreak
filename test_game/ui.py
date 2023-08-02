@@ -12,6 +12,7 @@ cwd = os.path.dirname(__file__)
 font_title_path = os.path.join(cwd, "data", "fonts", "farm_font.ttf")
 font_coins_path = os.path.join(cwd, "data", "fonts", "title.otf")
 
+
 class UIObject:
     def __init__(self):
         self._is_visible = False
@@ -174,9 +175,9 @@ class ShopUI(GameWindow):
     def init_buy_buttons(self):
         for item_name, item in self.shop.items.items():
             self.buy_buttons.append(button.ButtonText(colors.GREEN,
-                                                      lambda item=item: self.shop.buy_item(item),
+                                                      lambda: self.shop.buy_item(item),
                                                       "Buy",
-                                                      border_radius=5, ))
+                                                      border_radius=5, font=self.font))
 
     def draw(self, window, x, y, width, height):
         self.draw_win(window, x, y, width, height)

@@ -586,11 +586,10 @@
     "inventory": {
         "ice fruit": 30,
         "fire fruit": 40,
-        "water fruit": 46,
-        "ice seeds": 15,
-        "water seeds": 6
+        "water fruit": 52,
+        "ice seeds": 18
     },
     "cards_learned_today": 6,
     "time": 738734,
-    "wallet": 480
+    "wallet": 450
 }
