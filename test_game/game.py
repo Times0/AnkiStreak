@@ -101,6 +101,9 @@ class Game:
         with open(anki_data_path, "r") as f:
             self.anki_data_json = json.load(f)
         data = self.anki_data_json
+
+        if not "time_ordinal" in data:
+            return  # no data yet
         if data["time_ordinal"] != datetime.today().toordinal():
             print("Weird, time_ordinal is not today's ordinal, today's ordinal is", datetime.today().toordinal())
             self.learning_indicator.set_nb_cards_learned(0)
