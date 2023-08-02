@@ -47,7 +47,15 @@ class Game:
         self.easy_ui.add(self.btn_shop)
         self.ui_elements = [self.learning_indicator, self.coin_indicator, self.easy_ui]
         self.game_windows = [self.inventoryUI, self.shopUI]
+
+        self.anki_data_json = None
+        self.load_anki_data()
         self.load_save()
+
+    def load_anki_data(self):
+        with open(anki_data_path, "r") as f:
+            self.anki_data_json = json.load(f)
+        self.learning_indicator.set_nb_cards_total(self.anki_data_json["nb_cards_to_review_today"])
 
     def run(self):
         clock = pygame.time.Clock()
@@ -89,25 +97,19 @@ class Game:
 
     def update_learned_cards(self):
         prev = self.learning_indicator.nb_cards_learned
-        with open(cards_learned_path, "r") as f:
-            # Check if first line is today's ordinal
-            lines = f.readlines()
-            first_line = lines[0]
-            today = datetime.today().toordinal()
-            if int(first_line) != today:
-                print("Weird, first line is not today's ordinal")
-                self.learning_indicator.set_nb_cards_learned(0)
-                return
-            second_line = lines[1]
-            nb = int(second_line)
-            if nb > prev:
-                self.learning_indicator.set_nb_cards_learned(nb)
-                for i in range(nb - prev):
-                    for farm in self.ptmx.farms:
-                        farm.water_all()
-            elif nb < prev:
-                print("Must be new day")
-                self.learning_indicator.set_nb_cards_learned(0)
+
+        with open(anki_data_path, "r") as f:
+            self.anki_data_json = json.load(f)
+        data = self.anki_data_json
+        if data["time_ordinal"] != datetime.today().toordinal():
+            print("Weird, time_ordinal is not today's ordinal, today's ordinal is", datetime.today().toordinal())
+            self.learning_indicator.set_nb_cards_learned(0)
+            return
+        else:
+            self.learning_indicator.set_nb_cards_learned(data["nb_cards_learned_today"])
+            for i in range(data["nb_cards_learned_today"] - prev):
+                for farm in self.ptmx.farms:
+                    farm.water_all()
 
     def draw(self, win):
         self.win.fill(BLACK)

@@ -1,3 +1,5 @@
+import os
+
 import pygame
 from PygameUIKit import button
 
@@ -6,6 +8,9 @@ from test_game.boring import imgs
 from test_game.game_objects.inventory import Inventory
 from test_game.game_objects.shop import Shop
 
+cwd = os.path.dirname(__file__)
+font_title_path = os.path.join(cwd, "data", "fonts", "farm_font.ttf")
+font_coins_path = os.path.join(cwd, "data", "fonts", "title.otf")
 
 class UIObject:
     def __init__(self):
@@ -59,7 +64,7 @@ class GameWindow:
         pygame.draw.rect(win, color, (x, y, width, height),
                          border_radius=border_radius)
         # draw the title
-        font = pygame.font.Font("data/assets/fonts/title_outline.TTF", 75)
+        font = pygame.font.Font(font_title_path, 75)
         text = utils.render(self.title, font, gfcolor=colors.BLACK, ocolor=colors.WHITE, opx=2)
 
         if center_title:
@@ -308,7 +313,7 @@ class CoinsIndicator(UIObject):
         self.image = imgs.coin
         self.image = pygame.transform.scale(self.image,
                                             (50, self.image.get_height() * 50 // self.image.get_width()))
-        self.font = pygame.font.Font("data/assets/fonts/title.otf", 45)
+        self.font = pygame.font.Font(font_coins_path, 45)
 
         self.rect = pygame.Rect(0, 0, 0, 0)
 
@@ -326,4 +331,3 @@ class CoinsIndicator(UIObject):
         win.blit(coin_text, (x + self.image.get_width() + 10, text_y))
 
         self.rect = pygame.Rect(x, y, self.image.get_width() + 10 + coin_text_rect.width, self.image.get_height())
-        pygame.draw.rect(win, colors.BLACK, self.rect, width=1)

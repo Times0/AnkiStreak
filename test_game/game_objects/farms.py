@@ -77,6 +77,8 @@ class Menu(objects.GameObject_no_img):
                 # Check if an item is clicked
                 for i, item in enumerate(self.items):
                     if self.items_rects[i].collidepoint(event.pos):
+                        if item.type == FarmMenuItem.seed and item not in self.inventory:
+                            return
                         self.selected_item = item
                         return
 
@@ -215,8 +217,9 @@ class Farm(objects.GameObject, objects.Clickable):
         itemname = seed_type + " seeds"
         if not itemname in self.farm_inventory.items:
             self.menu.selected_item = None
-        else:
-            self.farm_inventory.consume_item(itemname, 1)
+            return False
+        self.farm_inventory.consume_item(itemname, 1)
+        return True
 
     # ____ON EVENTS____#
 
@@ -228,9 +231,10 @@ class Farm(objects.GameObject, objects.Clickable):
         plant_types = ["fire", "water", "ice"]
         for plant_type in plant_types:
             if plant_type in self.menu.selected_item.name:
+                if not self.consume_seed(plant_type):
+                    return
                 plant = Plant(plant_type, self.plants_location[spot_id])
                 self.add_plant_at_id(spot_id, plant)
-                self.consume_seed(plant_type)
                 break
         else:
             raise Exception(f"Plant {self.menu.selected_item.name} not found")
