@@ -174,10 +174,11 @@ class ShopUI(GameWindow):
 
     def init_buy_buttons(self):
         for item_name, item in self.shop.items.items():
-            f = lambda i=item: self.shop.buy(i)  # Very important to use = in lambda for variable scope (no idea what im writing)
-            self.buy_buttons.append(button.ButtonText(colors.GREEN,
+            f = lambda i=item: self.shop.buy(
+                i)  # Very important to use = in lambda for variable scope (no idea what im writing)
+            self.buy_buttons.append(button.ButtonText("Buy",
                                                       f,
-                                                      "Buy",
+                                                      colors.GREEN,
                                                       border_radius=5,
                                                       font=self.font))
 
