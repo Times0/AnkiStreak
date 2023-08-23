@@ -15,6 +15,7 @@ from test_game.backend.farms import PlantSpot
 from test_game.backend.objects import *
 from test_game.backend.shop import Wallet
 from test_game.frontend.ui import *
+from test_game.frontend.ui_manager import UIManager
 
 cwd = os.path.dirname(__file__)
 logger = logging.getLogger(__name__)
@@ -36,20 +37,22 @@ class Game:
         for farm in self.ptmx.farms:
             farm.link_inventory(self.inventory)
 
+        # _____________________UI Manager___________________________________#
+        self.ui_manager = UIManager()
+        self.inventoryUI = InventoryUI(self.inventory, manager=self.ui_manager)
+        self.ui_manager.add_elements([self.inventoryUI])
+
         # _____________________UI___________________________________#
-        self.inventoryUI = InventoryUI(self.inventory)
-        self.shopUI = ShopUI(self.shop)
+        self.easy_ui = Group()
+        self.btn_menu = button.ButtonPngIcon(imgs.btn_inventory, colors.GRAY,
+                                             lambda: self.ui_manager.open("inventory"))
+        # self.btn_shop = button.ButtonPngIcon(imgs.btn_shop, colors.GRAY, self.shopUI.toggle_visibility)
+        self.easy_ui.add(self.btn_menu)
+        # self.shopUI = ShopUI(self.shop)
         self.learning_indicator = CardIndicators()
         self.coin_indicator = CoinsIndicator()
         self.wallet.link_ui(self.coin_indicator)
-        self.easy_ui = Group()
-        self.btn_menu = button.ButtonPngIcon(imgs.btn_inventory, colors.GRAY, self.inventoryUI.toggle_visibility)
-        self.btn_shop = button.ButtonPngIcon(imgs.btn_shop, colors.GRAY, self.shopUI.toggle_visibility)
-        self.easy_ui.add(self.btn_menu)
-        self.easy_ui.add(self.btn_shop)
         self.ui_elements = [self.learning_indicator, self.coin_indicator, self.easy_ui]
-        self.game_windows = [self.inventoryUI, self.shopUI]
-
         self.special_ui = []
 
         self.anki_data_json = None
@@ -79,17 +82,18 @@ class Game:
         events = pygame.event.get()
 
         # If no game window is open, we handle basic game events
-        if not any([e.isVisible() for e in self.game_windows]):
+        if not self.ui_manager.active_element:
             self.ptmx.handle_events(events)
             for e in self.ui_elements:
                 e.handle_events(events)
 
-        for gw in self.game_windows + self.special_ui:
+        for gw in self.special_ui:
             if gw.isVisible():
                 gw.handle_events(events)
 
         # important events
         for event in events:
+            self.ui_manager.handle_event(event)
             if event.type == pygame.QUIT:
                 self.running = False
                 self.dump_save(save_path)
@@ -143,23 +147,10 @@ class Game:
     def draw_ui(self, win):
         W = win.get_width()
         self.btn_menu.draw(win, W - self.btn_menu.rect.width - 10, 10)
-        self.btn_shop.draw(win, W - self.btn_shop.rect.width - 10 - self.btn_menu.rect.width - 10, 10)
-
+        # self.btn_shop.draw(win, W - self.btn_shop.rect.width - 10 - self.btn_menu.rect.width - 10, 10)
+        self.ui_manager.draw(win)
         self.learning_indicator.draw(win, 30, 15, 200, 30)
         self.coin_indicator.draw(win, 5, self.learning_indicator.rect.h + 100, 200, 30)
-
-        if self.inventoryUI.isVisible():
-            w, h = 400, 700
-            x = (win.get_width() - w) // 2
-            y = (win.get_height() - h) // 2
-            self.inventoryUI.draw(win, x, y, w, h)
-        if self.shopUI.isVisible():
-            w, h = 1000, 300
-            x = (win.get_width() - w) // 2
-            y = (win.get_height() - h) // 2
-
-            self.shopUI.draw(win, x, y, w, h)
-
         for popup in self.special_ui:
             if popup.isVisible():
                 w, h = 500, 200

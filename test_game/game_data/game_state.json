@@ -5,7 +5,6 @@
                 "id": 0,
                 "plant": null
             },
-            
             {
                 "id": 1,
                 "plant": null
@@ -590,6 +589,6 @@
         "water fruit": 8
     },
     "cards_learned_today": 0,
-    "time": 738741,
+    "time": 738756,
     "wallet": 420
 }

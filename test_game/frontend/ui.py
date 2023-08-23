@@ -7,6 +7,7 @@ from test_game.backend.inventory import Inventory
 from test_game.backend.shop import Shop
 from test_game.boring import colors, utils
 from test_game.boring import imgs
+from test_game.frontend.ui_manager import UIElement
 
 cwd = os.path.dirname(__file__)
 font_title_path = os.path.join(cwd, "../assets", "fonts", "farm_font.ttf")
@@ -41,84 +42,84 @@ class UIObject:
         self._is_hovered = False
 
 
-class GameWindow:
-    def __init__(self, title):
-        self.title = title
-        self._is_visible = False
+# class GameWindow:
+#     def __init__(self, title):
+#         self.title = title
+#         self._is_visible = False
+#
+#         self.title_offset = 85  # Offset of the title from the top left corner of the window
+#
+#         self.cross_img = imgs.cross
+#         self.cross_img = pygame.transform.scale(self.cross_img, (50, 50))
+#
+#         self.rect = pygame.Rect(0, 0, 0, 0)
+#         self.cross_rect = pygame.Rect(0, 0, 0, 0)
+#
+#         self.hovered = False
+#
+#     def draw_win(self, win, x, y, width, height, color=colors.BROWN, border_radius=15, center_title=False):
+#         self.rect = pygame.Rect(x, y, width, height)
+#         self.cross_rect = pygame.Rect(x + width - self.cross_img.get_width(),
+#                                       y + 10 - self.title_offset + self.cross_img.get_height() / 3,
+#                                       self.cross_img.get_width(),
+#                                       self.cross_img.get_height())
+#         pygame.draw.rect(win, color, (x, y, width, height),
+#                          border_radius=border_radius)
+#         # draw the title
+#         font = pygame.font.Font(font_title_path, 75)
+#         text = utils.render(self.title, font, gfcolor=colors.BLACK, ocolor=colors.WHITE, opx=2)
+#
+#         if center_title:
+#             win.blit(text, (x + width / 2 - text.get_width() / 2, y + 10 - self.title_offset))
+#         else:
+#             win.blit(text, (x + 10, y + 10 - self.title_offset))
+#
+#         # draw cross
+#         img = self.cross_img  # black cross
+#         if self.hovered:
+#             pygame.draw.rect(win, colors.RED_CROSS, self.cross_rect.inflate(10, 10), border_radius=5)
+#             # change cross to WHITE
+#             img = pygame.transform.scale(img, (50, 50))
+#             win.blit(img, self.cross_rect)
+#         else:
+#             win.blit(img, self.cross_rect)
+#
+#     def toggle_visibility(self):
+#         self._is_visible = not self._is_visible
+#
+#     def handle_events(self, events):
+#         for event in events:
+#             if event.type == pygame.MOUSEBUTTONDOWN:
+#                 if event.button == 1:
+#                     if self.cross_rect.collidepoint(event.pos):
+#                         self.toggle_visibility()
+#             elif event.type == pygame.MOUSEMOTION:
+#                 if self.cross_rect.collidepoint(event.pos):
+#                     self.on_hover()
+#                 else:
+#                     self.on_unhover()
+#
+#     def on_hover(self):
+#         self.hovered = True
+#
+#     def on_unhover(self):
+#         self.hovered = False
+#
+#     def isVisible(self):
+#         return self._is_visible
 
-        self.title_offset = 85  # Offset of the title from the top left corner of the window
 
-        self.cross_img = imgs.cross
-        self.cross_img = pygame.transform.scale(self.cross_img, (50, 50))
-
-        self.rect = pygame.Rect(0, 0, 0, 0)
-        self.cross_rect = pygame.Rect(0, 0, 0, 0)
-
-        self.hovered = False
-
-    def draw_win(self, win, x, y, width, height, color=colors.BROWN, border_radius=15, center_title=False):
-        self.rect = pygame.Rect(x, y, width, height)
-        self.cross_rect = pygame.Rect(x + width - self.cross_img.get_width(),
-                                      y + 10 - self.title_offset + self.cross_img.get_height() / 3,
-                                      self.cross_img.get_width(),
-                                      self.cross_img.get_height())
-        pygame.draw.rect(win, color, (x, y, width, height),
-                         border_radius=border_radius)
-        # draw the title
-        font = pygame.font.Font(font_title_path, 75)
-        text = utils.render(self.title, font, gfcolor=colors.BLACK, ocolor=colors.WHITE, opx=2)
-
-        if center_title:
-            win.blit(text, (x + width / 2 - text.get_width() / 2, y + 10 - self.title_offset))
-        else:
-            win.blit(text, (x + 10, y + 10 - self.title_offset))
-
-        # draw cross
-        img = self.cross_img  # black cross
-        if self.hovered:
-            pygame.draw.rect(win, colors.RED_CROSS, self.cross_rect.inflate(10, 10), border_radius=5)
-            # change cross to WHITE
-            img = pygame.transform.scale(img, (50, 50))
-            win.blit(img, self.cross_rect)
-        else:
-            win.blit(img, self.cross_rect)
-
-    def toggle_visibility(self):
-        self._is_visible = not self._is_visible
-
-    def handle_events(self, events):
-        for event in events:
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    if self.cross_rect.collidepoint(event.pos):
-                        self.toggle_visibility()
-            elif event.type == pygame.MOUSEMOTION:
-                if self.cross_rect.collidepoint(event.pos):
-                    self.on_hover()
-                else:
-                    self.on_unhover()
-
-    def on_hover(self):
-        self.hovered = True
-
-    def on_unhover(self):
-        self.hovered = False
-
-    def isVisible(self):
-        return self._is_visible
-
-
-class InventoryUI(GameWindow):
-    def __init__(self, inventory):
-        super().__init__("Inventory")
+class InventoryUI(UIElement):
+    def __init__(self, inventory,manager):
+        super().__init__("inventory", rect=pygame.Rect(200, 200, 500, 500),manager=manager)
         self.border_radius = 15  # Border radius of the inventory/inventoryUI
         self.item_spacing = 10  # Spacing between inventory items
 
         self.inventory_items: Inventory = inventory
 
-    def draw(self, win, x, y, width, height):
-        self.draw_win(win, x, y, width, height, color=colors.GRAY, border_radius=self.border_radius, center_title=True)
-
+    def _draw(self, win):
+        x, y = self.rect.topleft
+        width, height = self.rect.size
         # Draw the inventory items
         item_x = x + self.border_radius  # X position of the first item
         item_y = y + self.border_radius  # Y position of the first item
@@ -154,9 +155,9 @@ class InventoryUI(GameWindow):
         super().handle_events(events)
 
 
-class ShopUI(GameWindow):
+class ShopUI(UIElement):
     def __init__(self, shop):
-        super().__init__("Shop")
+        super().__init__("Shop", rect=pygame.Rect(200, 200, 500, 500))
         self.shop: Shop = shop
 
         # Position of the shopUI
@@ -227,7 +228,7 @@ class ShopUI(GameWindow):
             btn.handle_events(events)
 
 
-class Popup(GameWindow):
+class Popup(UIElement):
     def __init__(self, title, text):
         super().__init__(title)
         self._is_visible = True  # The popup is visible when created
