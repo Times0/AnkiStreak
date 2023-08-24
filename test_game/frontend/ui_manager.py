@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional
 
 import pygame
 from PygameUIKit.button import ButtonPngIcon
@@ -20,9 +20,13 @@ class UIElement:
         self.active: bool = False
         self.visible: bool = False
 
-        self.btn_close = ButtonPngIcon(cross_btn, Color("gray"), self.close)
+        self.btn_close = ButtonPngIcon(cross_btn, Color("red"), self.close, opacity=0.9)
 
-    def handle_events(self, event):
+    def _handle_event(self, event):
+        raise NotImplementedError
+
+    def handle_event(self, event):
+        self._handle_event(event)
         self.btn_close.handle_event(event)
 
     def _draw(self, win):
@@ -59,4 +63,4 @@ class UIManager:
 
     def handle_event(self, event):
         if self.active_element:
-            self.active_element.handle_events(event)
+            self.active_element.handle_event(event)

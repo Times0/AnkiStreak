@@ -40,15 +40,16 @@ class Game:
         # _____________________UI Manager___________________________________#
         self.ui_manager = UIManager()
         self.inventoryUI = InventoryUI(self.inventory, manager=self.ui_manager)
-        self.ui_manager.add_elements([self.inventoryUI])
+        self.shopUI = ShopUI(self.shop, manager=self.ui_manager)
+
+        self.ui_manager.add_elements([self.inventoryUI, self.shopUI])
 
         # _____________________UI___________________________________#
         self.easy_ui = Group()
-        self.btn_menu = button.ButtonPngIcon(imgs.btn_inventory, colors.GRAY,
-                                             lambda: self.ui_manager.open("inventory"))
-        # self.btn_shop = button.ButtonPngIcon(imgs.btn_shop, colors.GRAY, self.shopUI.toggle_visibility)
+        self.btn_menu = button.ButtonPngIcon(imgs.btn_inventory, colors.GRAY, lambda: self.ui_manager.open("inventory"))
+        self.btn_shop = button.ButtonPngIcon(imgs.btn_shop, colors.GRAY, lambda: self.ui_manager.open("shop"))
         self.easy_ui.add(self.btn_menu)
-        # self.shopUI = ShopUI(self.shop)
+        self.easy_ui.add(self.btn_shop)
         self.learning_indicator = CardIndicators()
         self.coin_indicator = CoinsIndicator()
         self.wallet.link_ui(self.coin_indicator)
@@ -147,10 +148,10 @@ class Game:
     def draw_ui(self, win):
         W = win.get_width()
         self.btn_menu.draw(win, W - self.btn_menu.rect.width - 10, 10)
-        # self.btn_shop.draw(win, W - self.btn_shop.rect.width - 10 - self.btn_menu.rect.width - 10, 10)
-        self.ui_manager.draw(win)
+        self.btn_shop.draw(win, W - self.btn_shop.rect.width - 10 - self.btn_menu.rect.width - 10, 10)
         self.learning_indicator.draw(win, 30, 15, 200, 30)
         self.coin_indicator.draw(win, 5, self.learning_indicator.rect.h + 100, 200, 30)
+        self.ui_manager.draw(win)
         for popup in self.special_ui:
             if popup.isVisible():
                 w, h = 500, 200

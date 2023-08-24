@@ -110,8 +110,8 @@ class UIObject:
 
 
 class InventoryUI(UIElement):
-    def __init__(self, inventory,manager):
-        super().__init__("inventory", rect=pygame.Rect(200, 200, 500, 500),manager=manager)
+    def __init__(self, inventory, manager):
+        super().__init__("inventory", rect=pygame.Rect(200, 200, 500, 500), manager=manager)
         self.border_radius = 15  # Border radius of the inventory/inventoryUI
         self.item_spacing = 10  # Spacing between inventory items
 
@@ -151,13 +151,13 @@ class InventoryUI(UIElement):
             # Update the item Y position for the next item
             item_y += 60  # Adjust the spacing between items
 
-    def handle_events(self, events):
-        super().handle_events(events)
+    def _handle_event(self, events):
+        pass
 
 
 class ShopUI(UIElement):
-    def __init__(self, shop):
-        super().__init__("Shop", rect=pygame.Rect(200, 200, 500, 500))
+    def __init__(self, shop, manager):
+        super().__init__("shop", rect=pygame.Rect(200, 200, 500, 500), manager=manager)
         self.shop: Shop = shop
 
         # Position of the shopUI
@@ -175,17 +175,15 @@ class ShopUI(UIElement):
 
     def init_buy_buttons(self):
         for item_name, item in self.shop.items.items():
-            f = lambda i=item: self.shop.buy(
-                i)  # Very important to use = in lambda for variable scope (no idea what im writing)
+            f = lambda i=item: self.shop.buy(i)  # Very important to use = in lambda for variable scope (idk why)
             self.buy_buttons.append(button.ButtonText("Buy",
                                                       f,
                                                       colors.GREEN,
                                                       border_radius=5,
                                                       font=self.font))
 
-    def draw(self, window, x, y, width, height):
-        self.draw_win(window, x, y, width, height)
-
+    def _draw(self, window):
+        x, y = self.rect.topleft
         # Draw the shop items
         item_x = x + self.border_radius  # X position of the first item
         item_y = y + self.border_radius  # Y position of the first item
@@ -222,10 +220,9 @@ class ShopUI(UIElement):
         label = utils.render(str(item.price), self.font, gfcolor=colors.BLACK, ocolor=colors.WHITE, opx=0)
         window.blit(label, label.get_rect(bottomright=img_rect.bottomright))
 
-    def handle_events(self, events):
-        super().handle_events(events)
+    def _handle_event(self, event):
         for btn in self.buy_buttons:
-            btn.handle_events(events)
+            btn.handle_event(event)
 
 
 class Popup(UIElement):
