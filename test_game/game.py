@@ -6,15 +6,19 @@ import pygame.sprite
 import pyscroll
 import pytmx
 from PygameUIKit import Group
+from PygameUIKit.button import ButtonPngIcon
+from pygame import Color
 
 from boring import config
+from boring import imgs
 from boring.config import *
 from boring.utils import *
-from test_game.backend.farms import Farm
-from test_game.backend.farms import PlantSpot
-from test_game.backend.objects import *
-from test_game.backend.shop import Wallet
-from test_game.frontend.ui import *
+from test_game.backend.farms import Farm, PlantSpot
+from test_game.backend.inventory import Inventory
+from test_game.backend.objects import GameObject, SortedGroup, PointWithZoom
+from test_game.backend.shop import Wallet, Shop
+from test_game.frontend.indicators import CardIndicators, CoinsIndicator
+from test_game.frontend.screens import InventoryUI, ShopUI, Popup
 from test_game.frontend.ui_manager import UIManager
 
 cwd = os.path.dirname(__file__)
@@ -42,18 +46,25 @@ class Game:
         self.inventoryUI = InventoryUI(self.inventory, manager=self.ui_manager)
         self.shopUI = ShopUI(self.shop, manager=self.ui_manager)
 
-        self.ui_manager.add_elements([self.inventoryUI, self.shopUI])
+        self.learning_indicator = CardIndicators(manager=self.ui_manager)
+        self.coin_indicator = CoinsIndicator(manager=self.ui_manager)
+        self.wallet.link_ui(self.coin_indicator)
+
+        self.ui_manager.add_elements([
+            self.inventoryUI,
+            self.shopUI,
+            self.learning_indicator,
+            self.coin_indicator
+        ])
 
         # _____________________UI___________________________________#
         self.easy_ui = Group()
-        self.btn_menu = button.ButtonPngIcon(imgs.btn_inventory, colors.GRAY, lambda: self.ui_manager.open("inventory"))
-        self.btn_shop = button.ButtonPngIcon(imgs.btn_shop, colors.GRAY, lambda: self.ui_manager.open("shop"))
+        self.btn_menu = ButtonPngIcon(imgs.btn_inventory, Color("gray"), lambda: self.ui_manager.open("inventory"))
+        self.btn_shop = ButtonPngIcon(imgs.btn_shop, Color("gray"), lambda: self.ui_manager.open("shop"))
         self.easy_ui.add(self.btn_menu)
         self.easy_ui.add(self.btn_shop)
-        self.learning_indicator = CardIndicators()
-        self.coin_indicator = CoinsIndicator()
-        self.wallet.link_ui(self.coin_indicator)
-        self.ui_elements = [self.learning_indicator, self.coin_indicator, self.easy_ui]
+
+        self.ui_elements = [self.easy_ui]
         self.special_ui = []
 
         self.anki_data_json = None
@@ -140,7 +151,7 @@ class Game:
         self.special_ui.append(popup)
 
     def draw(self, win):
-        self.win.fill(BLACK)
+        self.win.fill(Color("black"))
         self.ptmx.draw(win)
         self.draw_ui(win)
         pygame.display.update()
@@ -149,8 +160,6 @@ class Game:
         W = win.get_width()
         self.btn_menu.draw(win, W - self.btn_menu.rect.width - 10, 10)
         self.btn_shop.draw(win, W - self.btn_shop.rect.width - 10 - self.btn_menu.rect.width - 10, 10)
-        self.learning_indicator.draw(win, 30, 15, 200, 30)
-        self.coin_indicator.draw(win, 5, self.learning_indicator.rect.h + 100, 200, 30)
         self.ui_manager.draw(win)
         for popup in self.special_ui:
             if popup.isVisible():
