@@ -1,10 +1,12 @@
+from typing import Optional
+
 import pygame
 from PygameUIKit import button
 from pygame import Color
 
 from test_game.backend.inventory import Inventory
 from test_game.backend.shop import Shop
-from test_game.boring import colors, utils
+from test_game.boring import colors, utils, imgs
 from test_game.frontend.ui_manager import UIElement
 from test_game.frontend.utils import draw_transparent_rect
 from test_game.backend.tuxemons import Tuxemon, TuxemonType, TuxemonInventory
@@ -135,11 +137,35 @@ type_colors: dict[TuxemonType:Color] = {
 import random
 
 
-class TuxemonCard:
+class Hoverable:
+    def __init__(self, rect: pygame.Rect, inflate=10):
+        self.hovered = False
+        self.rect_default = rect
+        self.rect_inflated = rect.inflate(inflate, inflate)
+        self.rect = rect
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEMOTION:
+
+            if self.rect.collidepoint(event.pos):
+                self.on_hover()
+            else:
+                self.on_unhover()
+
+    def on_hover(self):
+        self.hovered = True
+        self.rect = self.rect_inflated
+
+    def on_unhover(self):
+        self.hovered = False
+        self.rect = self.rect_default
+
+
+class TuxemonCard(Hoverable):
     ANIMATION_FPS = 5
 
     def __init__(self, t: Tuxemon, rect: pygame.Rect, offset=10):
-        self.rect = rect
+        super().__init__(rect, inflate=5)
         self.offset = offset
         self.tuxemon = t
         self.imgs = [t.imgs["menu01"], t.imgs["menu02"]]
@@ -159,24 +185,34 @@ class TuxemonCard:
 
     def draw(self, surface: pygame.Surface, pos):
         self.rect.center = pos
-        draw_transparent_rect(surface, self.rect, self.color, 150, border_radius=10)
+        rect = self.rect_inflated if self.hovered else self.rect_default
+        draw_transparent_rect(surface, rect, self.color, 150, border_radius=10)
         img = self.imgs[self.frame_index]
-        img = pygame.transform.scale(img, (self.rect.width - self.offset * 2, self.rect.height - self.offset * 2))
-        surface.blit(img, self.rect.inflate(-self.offset * 2, -self.offset * 2))
+        img = pygame.transform.scale(img, (rect.width - self.offset * 2, rect.height - self.offset * 2))
+        surface.blit(img, rect.inflate(-self.offset * 2, -self.offset * 2))
 
     def handle_event(self, event):
-        pass
+        super().handle_event(event)
 
 
 class TuxemonUI(UIElement):
     def __init__(self, tuxemon_inventory: TuxemonInventory, manager):
-        super().__init__("tuxemon", rect=pygame.Rect(0, 0, 300, 600), manager=manager)
+        super().__init__("tuxemon", rect=pygame.Rect(0, 0, 300, 400), manager=manager)
+        self.second_part_rect = self.rect.copy()
+        self.second_part_rect.x += self.rect.width
+        self.second_part_rect.width = 400
+
         self.border_radius = 15
         self.item_spacing = 10
 
         self.tuxemons_inventory = tuxemon_inventory
         self.cards: list[TuxemonCard] = []
+
+        self.expanded = False
+        self.focused_card: Optional[TuxemonCard] = None
         self.init_cards()
+
+        self.btn_feed = button.ButtonText("Feed", lambda: print("feed"), colors.GREEN, border_radius=5)
 
     def init_cards(self):
         for i, tuxemon in enumerate(self.tuxemons_inventory.tuxemons):
@@ -188,9 +224,73 @@ class TuxemonUI(UIElement):
         for i, card in enumerate(self.cards):
             card.draw(win, (start[0] + 50, start[1] + i * 100 + 50))
 
+        if self.expanded:
+            pygame.draw.rect(win, Color("black"), self.second_part_rect, 5)
+            self.draw_tuxemon_view(win)
+
+    def draw_tuxemon_view(self, win):
+        """
+        Only displayes the focused tuxemon when expanded
+        """
+        tuxemon = self.focused_card.tuxemon
+        img = tuxemon.imgs["front"]
+        tuxemon_rect = self.second_part_rect.copy()
+        tuxemon_rect.height = 300
+        tuxemon_rect.topleft = self.second_part_rect.topleft
+
+        pygame.draw.rect(win, Color("red"), tuxemon_rect, 5)
+        img = imgs.scale(img, (tuxemon_rect.size[0] - 40, tuxemon_rect.size[1] - 40))
+        win.blit(img, img.get_rect(center=tuxemon_rect.center))
+
+        # Draw button to feed the tuxemon
+        bottomright_rect = self.second_part_rect.copy()
+        bottomright_rect.y = tuxemon_rect.bottom
+        bottomright_rect.height = self.second_part_rect.height - tuxemon_rect.height
+
+        surf = self.btn_feed.surface
+        pos = surf.get_rect(center=bottomright_rect.center).topleft
+        self.btn_feed.draw(win, *pos)
+
     def _handle_event(self, event):
         for card in self.cards:
             card.handle_event(event)
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            for card in self.cards:
+                if card.rect.collidepoint(event.pos):
+                    print(card.tuxemon.name)
+                    self.expand(card)
+
+    def expand(self, card: TuxemonCard):
+        if card == self.focused_card:
+            return
+        if self.expanded:
+            self.deexpand()
+        self.expanded = True
+        self.focused_card = card
+        self.re_compute()
+
+    def deexpand(self):
+        if not self.expanded:
+            return
+        self.expanded = False
+        self.focused_card = None
+        self.re_compute()
+
+    def re_compute(self):
+        if self.expanded:
+            self.rect.width += self.second_part_rect.width
+        else:
+            self.rect.width -= self.second_part_rect.width
+
+        # center
+        self.rect.center = self.manager.rect.center
+        self.second_part_rect.midright = self.rect.midright
+
+        self.require_update = True
+        self.instantiate_button_cross()
+
+    def _close(self):
+        self.deexpand()
 
     def _update(self, dt):
         for card in self.cards:
@@ -198,17 +298,13 @@ class TuxemonUI(UIElement):
 
 
 class Popup(UIElement):
-    def __init__(self, title, text):
-        super().__init__(title, rect=pygame.Rect(0, 0, 300, 200))
+    def __init__(self, text):
+        super().__init__("popup", rect=pygame.Rect(0, 0, 300, 200), manager=None)
         self.text = text
-        self.font = pygame.font.SysFont("Arial", 30)
 
-    def draw(self, window):
-        x, y = self.rect.topleft
-        width, height = self.rect.size
-        # Draw the text
-        text = utils.render(self.text, self.font, gfcolor=colors.WHITE, ocolor=colors.BLACK, opx=1)
-        window.blit(text, text.get_rect(center=(x + width // 2, y + height // 2)))
-
-    def handle_events(self, events):
-        super().handle_events(events)
+    def _draw(self, win):
+        pygame.draw.rect(win, Color("white"), self.rect)
+        pygame.draw.rect(win, Color("black"), self.rect, 5)
+        font = pygame.font.SysFont("Arial", 20, bold=True)
+        label = font.render(self.text, True, Color("black"))
+        win.blit(label, label.get_rect(center=self.rect.center))

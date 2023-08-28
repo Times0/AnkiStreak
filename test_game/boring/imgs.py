@@ -84,3 +84,12 @@ def load_tuxemon_imgs(name: str) -> dict[str, pygame.Surface]:
         file_name = f"{name}-{k}.png"
         res[k] = load(os.path.join(tuxemon_folder, file_name))
     return res
+
+
+def scale(img, size):
+    """Scale image so it fits in a rectangle of size `size`"""
+    w, h = size
+    w_ratio = w / img.get_width()
+    h_ratio = h / img.get_height()
+    ratio = min(w_ratio, h_ratio)
+    return pygame.transform.scale(img, (int(img.get_width() * ratio), int(img.get_height() * ratio)))

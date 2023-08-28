@@ -6,14 +6,36 @@ from pygame import Color
 from pygame import Rect
 
 from test_game.boring import imgs
+from test_game.frontend.utils import blit_acrylic_surface
 
 cross_btn = pygame.transform.scale(imgs.cross, (50, 50))
 
 debug = True
 
 
-class UIElement:
+class AcrylicBackground:
+    def __init__(self):
+        self.surface = None
+        self.require_update = True
+        self.acrylic_surface = None
+
+    def render(self, screen_in, rect, blur_radius=15, color=Color(220, 200, 200, 128)):
+        self.acrylic_surface = pygame.Surface(rect.size, pygame.SRCALPHA)
+        surface = pygame.Surface(rect.size, pygame.SRCALPHA)
+        surface.fill(color)
+        blit_acrylic_surface(screen_in, self.acrylic_surface, surface, blur_radius=blur_radius)
+        self.require_update = False
+
+    def draw_acrylic_background(self, win, rect, blur_radius=15):
+        if self.require_update:
+            self.render(win, rect, blur_radius=blur_radius)
+            self.require_update = False
+        win.blit(self.acrylic_surface, rect.topleft)
+
+
+class UIElement(AcrylicBackground):
     def __init__(self, name, manager, rect: Rect = Rect(0, 0, 0, 0), is_permament=False):
+        super().__init__()
         self.name: str = name
         self.manager: UIManager = manager
         self.rect: Rect = rect
@@ -24,7 +46,11 @@ class UIElement:
 
         self.is_permament = is_permament
         if not is_permament:
-            self.btn_close = ButtonPngIcon(cross_btn, Color((181, 71, 71)), opacity=1, onclick_f=self.close)
+            self.btn_close: Optional[ButtonPngIcon] = None
+            self.instantiate_button_cross()
+
+    def instantiate_button_cross(self):
+        self.btn_close = ButtonPngIcon(cross_btn, Color((181, 200, 71)), opacity=1, onclick_f=self.close, inflate=0)
 
     def _handle_event(self, event):
         print(f"{self.name}")
@@ -52,20 +78,19 @@ class UIElement:
         if self.is_permament:
             self._draw(win)
             return
-        if debug:
-            pygame.draw.rect(win, Color("red"), self.rect, 2)
-
-        self.draw_window(win, shadow=True)
+        self.draw_window(win)
         self._draw(win)
         self.btn_close.draw(win, *self.btn_close.image.get_rect(bottomright=self.rect.topright).topleft)
 
-    def draw_window(self, win, shadow=False):
-        if shadow:
-            pygame.draw.rect(win, Color("black"), self.rect.inflate(10, 10))
-        pygame.draw.rect(win, Color("white"), self.rect)
-        pygame.draw.rect(win, Color("black"), self.rect, 2)
+    def draw_window(self, win):
+        self.draw_acrylic_background(win, self.rect, blur_radius=15)
+        pygame.draw.rect(win, Color("black"), self.rect, 5, border_radius=10)
+
+    def _close(self):
+        pass
 
     def close(self):
+        self._close()
         self.manager.active_element = None
 
 

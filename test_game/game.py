@@ -90,7 +90,7 @@ class Game:
         while self.running:
             dt = clock.tick(FPS) / 1000
             self.time_since_last_late_update += dt
-            # print(f"\rFPS: {clock.get_fps()}", end="")
+            print(f"\rFPS: {clock.get_fps()}", end="")
             self.events()
             self.update(dt)
             if self.time_since_last_late_update >= 1000 / LATE_UPDATE_FPS:
