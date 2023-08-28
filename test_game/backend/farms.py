@@ -1,5 +1,6 @@
 import pygame
-
+import os
+import sys
 from test_game.backend import objects
 from test_game.backend.inventory import Inventory
 from test_game.backend.items import Item
@@ -12,12 +13,12 @@ class FarmMenuItem(Item):
     recolter = 1
     water = 2
 
-    def __init__(self, name, img, type):
+    def __init__(self, name, img, item_type):
         super().__init__(name, img)
-        self.type = type
+        self.type = item_type
 
 
-class Menu(objects.GameObject_no_img):
+class Menu(objects.GameObjectNoImg):
     def __init__(self, linked_bat, size, items):
         x_menu = linked_bat.rect.x + (linked_bat.rect.width - size[0]) // 2
         y_menu = linked_bat.rect.y - size[1] - 10
@@ -55,7 +56,7 @@ class Menu(objects.GameObject_no_img):
         self.items.append(item)
 
     def update_camera(self, camera_rect):
-        objects.GameObject_no_img.update_camera(self, camera_rect)
+        objects.GameObjectNoImg.update_camera(self, camera_rect)
         for i, item in enumerate(self.items):
             item.update_camera(camera_rect)
         self.update_items_rect()
@@ -95,9 +96,9 @@ class Menu(objects.GameObject_no_img):
             win.blit(img, self.items_rects[i])
 
 
-ice_seeds = FarmMenuItem("ice seeds", imgs.ice_seeds, type=FarmMenuItem.seed)
-water_seeds = FarmMenuItem("water seeds", imgs.water_seeds, type=FarmMenuItem.seed)
-fire_seeds = FarmMenuItem("fire seeds", imgs.fire_seeds, type=FarmMenuItem.seed)
+ice_seeds = FarmMenuItem("ice seeds", imgs.ice_seeds, item_type=FarmMenuItem.seed)
+water_seeds = FarmMenuItem("water seeds", imgs.water_seeds, item_type=FarmMenuItem.seed)
+fire_seeds = FarmMenuItem("fire seeds", imgs.fire_seeds, item_type=FarmMenuItem.seed)
 bucket = FarmMenuItem("bucket", imgs.bucket, FarmMenuItem.water)
 faux = FarmMenuItem("faux", imgs.faux, FarmMenuItem.recolter)
 
@@ -331,7 +332,7 @@ class OnTheMoveItem(objects.GameObject):
                 self.is_arrived = True
 
 
-class PlantSpot(objects.GameObject_no_img):
+class PlantSpot(objects.GameObjectNoImg):
     counter = 0
 
     def __init__(self, pos):
@@ -347,7 +348,7 @@ class PlantSpot(objects.GameObject_no_img):
         self.plant = None
 
     def update_camera(self, camera_rect):
-        objects.GameObject_no_img.update_camera(self, camera_rect)
+        objects.GameObjectNoImg.update_camera(self, camera_rect)
         if self.plant is not None:
             self.plant.update_camera(camera_rect)
 
@@ -373,7 +374,7 @@ class Plant:
         max_widht = config.TILE_SIZE * 1.5
         for i in range(len(self.imgs)):
             if self.imgs[i].get_width() > max_widht:
-                self.imgs[i] = scale_img(self.imgs[i], max_widht / self.imgs[i].get_width())
+                self.imgs[i] = imgs.scale_by(self.imgs[i], max_widht / self.imgs[i].get_width())
         self.zoom_buffer = self.imgs[self.development_index]
 
         self.last_zoom = 1
@@ -393,7 +394,7 @@ class Plant:
         if not self.requires_update and zoom == self.last_zoom:
             return
 
-        self.zoom_buffer = scale_img(self.imgs[self.development_index], zoom)
+        self.zoom_buffer = imgs.scale_by(self.imgs[self.development_index], zoom)
         self.last_zoom = zoom
         self.requires_update = False
 
@@ -409,7 +410,3 @@ class Plant:
             raise Exception(f"Plant type {self.type} not found")
         k = self.type + " fruit"
         return Item(k, imgs.items[k])
-
-
-def scale_img(img, zoom):
-    return pygame.transform.scale(img, (int(img.get_width() * zoom), int(img.get_height() * zoom)))

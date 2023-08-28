@@ -1,5 +1,5 @@
-from test_game.boring import imgs
-from test_game.backend.items import Item
+from boring import imgs
+from backend.items import Item
 
 
 class Inventory:

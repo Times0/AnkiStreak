@@ -13,13 +13,14 @@ from boring import config
 from boring import imgs
 from boring.config import *
 from boring.utils import *
-from test_game.backend.farms import Farm, PlantSpot
-from test_game.backend.inventory import Inventory
-from test_game.backend.objects import GameObject, SortedGroup, PointWithZoom
-from test_game.backend.shop import Wallet, Shop
-from test_game.frontend.indicators import CardIndicators, CoinsIndicator
-from test_game.frontend.screens import InventoryUI, ShopUI, Popup
-from test_game.frontend.ui_manager import UIManager
+from backend.farms import Farm, PlantSpot
+from backend.inventory import Inventory
+from backend.objects import GameObject, SortedGroup, PointWithZoom
+from backend.shop import Wallet, Shop
+from backend.tuxemons import TuxemonInventory
+from frontend.indicators import CardIndicators, CoinsIndicator
+from frontend.screens import InventoryUI, ShopUI, TuxemonUI, Popup, Tuxemon
+from frontend.ui_manager import UIManager
 
 cwd = os.path.dirname(__file__)
 logger = logging.getLogger(__name__)
@@ -35,6 +36,9 @@ class Game:
         self.inventory = Inventory()
         self.wallet = Wallet(money=1000)
         self.shop = Shop(wallet=self.wallet, inventory=self.inventory)
+        self.tuxemon_inventory = TuxemonInventory()
+        self.tuxemon_inventory.add_default_tuxemons()
+        # self.tuxemon_inventory.add_tuxemon(Tuxemon("snowrilla"))
 
         # ______________________TMX and pyscroll_____________________________________#
         self.ptmx = Pytmx(win)
@@ -45,6 +49,7 @@ class Game:
         self.ui_manager = UIManager()
         self.inventoryUI = InventoryUI(self.inventory, manager=self.ui_manager)
         self.shopUI = ShopUI(self.shop, manager=self.ui_manager)
+        self.tuxemonUI = TuxemonUI(self.tuxemon_inventory, manager=self.ui_manager)
 
         self.learning_indicator = CardIndicators(manager=self.ui_manager)
         self.coin_indicator = CoinsIndicator(manager=self.ui_manager)
@@ -53,6 +58,7 @@ class Game:
         self.ui_manager.add_elements([
             self.inventoryUI,
             self.shopUI,
+            self.tuxemonUI,
             self.learning_indicator,
             self.coin_indicator
         ])
@@ -61,8 +67,10 @@ class Game:
         self.easy_ui = Group()
         self.btn_menu = ButtonPngIcon(imgs.btn_inventory, Color("gray"), lambda: self.ui_manager.open("inventory"))
         self.btn_shop = ButtonPngIcon(imgs.btn_shop, Color("gray"), lambda: self.ui_manager.open("shop"))
+        self.btn_tuxemon = ButtonPngIcon(imgs.btn_tuxemon, Color("gray"), lambda: self.ui_manager.open("tuxemon"))
         self.easy_ui.add(self.btn_menu)
         self.easy_ui.add(self.btn_shop)
+        self.easy_ui.add(self.btn_tuxemon)
 
         self.ui_elements = [self.easy_ui]
         self.special_ui = []
@@ -80,7 +88,7 @@ class Game:
     def run(self):
         clock = pygame.time.Clock()
         while self.running:
-            dt = clock.tick(FPS)
+            dt = clock.tick(FPS) / 1000
             self.time_since_last_late_update += dt
             # print(f"\rFPS: {clock.get_fps()}", end="")
             self.events()
@@ -112,6 +120,7 @@ class Game:
 
     def update(self, dt):
         self.ptmx.update(dt)
+        self.ui_manager.update(dt)
 
     def late_update(self):
         """Ran every seconds"""
@@ -160,6 +169,9 @@ class Game:
         W = win.get_width()
         self.btn_menu.draw(win, W - self.btn_menu.rect.width - 10, 10)
         self.btn_shop.draw(win, W - self.btn_shop.rect.width - 10 - self.btn_menu.rect.width - 10, 10)
+        self.btn_tuxemon.draw(win,
+                              W - self.btn_tuxemon.rect.width - 10 - self.btn_menu.rect.width - 10 - self.btn_shop.rect.width - 10,
+                              10)
         self.ui_manager.draw(win)
         for popup in self.special_ui:
             if popup.isVisible():

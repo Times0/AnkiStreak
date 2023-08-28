@@ -1,5 +1,5 @@
-from test_game.backend.inventory import Inventory
-from test_game.backend.items import items_data, Item
+from backend.inventory import Inventory
+from backend.items import items_data, Item
 
 
 class ShopItem(Item):

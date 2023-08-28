@@ -1,10 +1,13 @@
 import pygame
 from PygameUIKit import button
+from pygame import Color
 
 from test_game.backend.inventory import Inventory
 from test_game.backend.shop import Shop
 from test_game.boring import colors, utils
 from test_game.frontend.ui_manager import UIElement
+from test_game.frontend.utils import draw_transparent_rect
+from test_game.backend.tuxemons import Tuxemon, TuxemonType, TuxemonInventory
 
 
 class InventoryUI(UIElement):
@@ -121,6 +124,77 @@ class ShopUI(UIElement):
     def _handle_event(self, event):
         for btn in self.buy_buttons:
             btn.handle_event(event)
+
+
+type_colors: dict[TuxemonType:Color] = {
+    TuxemonType.fire: Color("darkred"),
+    TuxemonType.water: Color("darkblue"),
+    TuxemonType.ice: Color("darkcyan")
+}
+
+import random
+
+
+class TuxemonCard:
+    ANIMATION_FPS = 5
+
+    def __init__(self, t: Tuxemon, rect: pygame.Rect, offset=10):
+        self.rect = rect
+        self.offset = offset
+        self.tuxemon = t
+        self.imgs = [t.imgs["menu01"], t.imgs["menu02"]]
+        # Make the animation start at a random frame to make the cards look more alive
+        self.time_since_last_img = random.random() * (1 / self.ANIMATION_FPS)
+        self.frame_index = 0
+
+        self.color = type_colors[t.type]
+
+    def update(self, dt):
+        # handle animation
+        self.time_since_last_img += dt
+        fps = 5
+        if self.time_since_last_img > 1 / fps:
+            self.time_since_last_img = 0
+            self.frame_index = (self.frame_index + 1) % len(self.imgs)
+
+    def draw(self, surface: pygame.Surface, pos):
+        self.rect.center = pos
+        draw_transparent_rect(surface, self.rect, self.color, 150, border_radius=10)
+        img = self.imgs[self.frame_index]
+        img = pygame.transform.scale(img, (self.rect.width - self.offset * 2, self.rect.height - self.offset * 2))
+        surface.blit(img, self.rect.inflate(-self.offset * 2, -self.offset * 2))
+
+    def handle_event(self, event):
+        pass
+
+
+class TuxemonUI(UIElement):
+    def __init__(self, tuxemon_inventory: TuxemonInventory, manager):
+        super().__init__("tuxemon", rect=pygame.Rect(0, 0, 300, 600), manager=manager)
+        self.border_radius = 15
+        self.item_spacing = 10
+
+        self.tuxemons_inventory = tuxemon_inventory
+        self.cards: list[TuxemonCard] = []
+        self.init_cards()
+
+    def init_cards(self):
+        for i, tuxemon in enumerate(self.tuxemons_inventory.tuxemons):
+            card = TuxemonCard(tuxemon, pygame.Rect(0, 0, 80, 80))
+            self.cards.append(card)
+
+    def _draw(self, win):
+        start = self.rect.topleft
+        for i, card in enumerate(self.cards):
+            card.draw(win, (start[0] + 50, start[1] + i * 100 + 50))
+
+    def _handle_event(self, event):
+        for card in self.cards:
+            card.handle_event(event)
+
+    def _update(self, dt):
+        for card in self.cards:
+            card.update(dt)
 
 
 class Popup(UIElement):

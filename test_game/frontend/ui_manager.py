@@ -24,7 +24,7 @@ class UIElement:
 
         self.is_permament = is_permament
         if not is_permament:
-            self.btn_close = ButtonPngIcon(cross_btn, Color("red"), self.close, opacity=0.9)
+            self.btn_close = ButtonPngIcon(cross_btn, Color((181, 71, 71)), opacity=1, onclick_f=self.close)
 
     def _handle_event(self, event):
         print(f"{self.name}")
@@ -36,17 +36,34 @@ class UIElement:
             return
         self.btn_close.handle_event(event)
 
+    def _update(self, dt):
+        pass
+
+    def update(self, dt):
+        if self.is_permament:
+            self._update(dt)
+            return
+        self._update(dt)
+
     def _draw(self, win):
         raise NotImplementedError
 
     def draw(self, win):
-        self._draw(win)
         if self.is_permament:
+            self._draw(win)
             return
         if debug:
             pygame.draw.rect(win, Color("red"), self.rect, 2)
 
+        self.draw_window(win, shadow=True)
+        self._draw(win)
         self.btn_close.draw(win, *self.btn_close.image.get_rect(bottomright=self.rect.topright).topleft)
+
+    def draw_window(self, win, shadow=False):
+        if shadow:
+            pygame.draw.rect(win, Color("black"), self.rect.inflate(10, 10))
+        pygame.draw.rect(win, Color("white"), self.rect)
+        pygame.draw.rect(win, Color("black"), self.rect, 2)
 
     def close(self):
         self.manager.active_element = None
@@ -87,3 +104,10 @@ class UIManager:
         else:
             for element in self.perma_elements.values():
                 element.handle_event(event)
+
+    def update(self, dt):
+        if self.active_element:
+            self.active_element.update(dt)
+
+        for element in self.perma_elements.values():
+            element.update(dt)

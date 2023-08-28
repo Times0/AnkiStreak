@@ -3,8 +3,10 @@ import sys
 
 import pygame
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
 sys.path.append(os.path.dirname(__file__))
-from test_game.boring.config import *
+from boring.config import WIDTH, HEIGHT
 import logging
 
 logging.basicConfig(level=logging.INFO, filename="game.log", filemode="w",

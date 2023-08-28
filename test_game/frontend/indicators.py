@@ -3,8 +3,7 @@ import os
 import pygame
 from pygame import Rect
 
-from test_game.boring import colors, utils
-from test_game.boring import imgs
+from test_game.boring import colors, utils, imgs
 from test_game.frontend.ui_manager import UIElement
 
 cwd = os.path.dirname(__file__)

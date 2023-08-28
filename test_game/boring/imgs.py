@@ -13,11 +13,12 @@ cwd = os.path.dirname(__file__)
 def load(path, size=None, vertical_size=None, horizontal_size=None):
     img = pygame.image.load(os.path.join(cwd, "..", "assets", path)).convert_alpha()
     if size:
-        img = pygame.transform.scale(img, size)
+        img = pygame.transform.smoothscale(img, size)
     elif vertical_size:
-        img = pygame.transform.scale(img, (img.get_width() * vertical_size // img.get_height(), vertical_size))
+        img = pygame.transform.smoothscale(img, (img.get_width() * vertical_size // img.get_height(), vertical_size))
     elif horizontal_size:
-        img = pygame.transform.scale(img, (horizontal_size, img.get_height() * horizontal_size // img.get_width()))
+        img = pygame.transform.smoothscale(img,
+                                           (horizontal_size, img.get_height() * horizontal_size // img.get_width()))
     return img
 
 
@@ -26,6 +27,10 @@ def load_multiple(path):
     for p in glob.glob(os.path.join(cwd, "..", "assets", path, "*.png")):
         l.append(pygame.image.load(p).convert_alpha())
     return l
+
+
+def scale_by(img, scale):
+    return pygame.transform.smoothscale(img, (img.get_width() * scale, img.get_height() * scale))
 
 
 fire_seeds = load("sprites/farm/fire_seeds.png")
@@ -61,6 +66,7 @@ plants = {
 
 # _____________________UI___________________________________#
 btn_inventory = load("sprites/ui/inventory.png", vertical_size=75)
+btn_tuxemon = load("sprites/ui/tuxemon.png", vertical_size=75)
 btn_shop = load("sprites/ui/shop.png", vertical_size=75)
 card = load("sprites/ui/anki_card.png")
 coin = load("sprites/ui/coin.png")
@@ -68,3 +74,13 @@ cross = load("sprites/ui/cross.png")
 
 # make cross black
 cross.fill((0, 0, 0, 255), special_flags=pygame.BLEND_RGBA_MULT)
+
+
+def load_tuxemon_imgs(name: str) -> dict[str, pygame.Surface]:
+    tuxemon_folder = os.path.join(cwd, "..", "assets", "sprites", "tuxemons")
+    res = {}
+    keys = ["front", "back", "menu01", "menu02"]
+    for k in keys:
+        file_name = f"{name}-{k}.png"
+        res[k] = load(os.path.join(tuxemon_folder, file_name))
+    return res

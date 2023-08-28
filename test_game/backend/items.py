@@ -1,8 +1,8 @@
+from test_game.backend.objects import GameObjectNoPos
 from test_game.boring import imgs
-from test_game.backend.objects import GameObject_no_pos
 
 
-class Item(GameObject_no_pos):
+class Item(GameObjectNoPos):
     def __init__(self, name, img):
         super().__init__((50, 50), img)
         self.name = name

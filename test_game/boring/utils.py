@@ -104,9 +104,11 @@ def render(text, font, gfcolor=pygame.Color('dodgerblue'), ocolor=(255, 255, 255
     surf.blit(textsurface, (opx, opx))
     return surf
 
+
 import pygame
 
-def grayscale(img:pygame.Surface) -> pygame.Surface:
+
+def grayscale(img: pygame.Surface) -> pygame.Surface:
     # Create a new surface with the same size as the original image, maintaining alpha channel
     bw_image = pygame.Surface(img.get_size(), pygame.SRCALPHA)
 
@@ -125,4 +127,3 @@ def grayscale(img:pygame.Surface) -> pygame.Surface:
 
     # Return the new black and white image
     return bw_image
-

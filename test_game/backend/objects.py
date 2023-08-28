@@ -1,5 +1,5 @@
 import pygame
-from test_game.boring.colors import *
+from pygame import Surface, Rect, Color
 
 
 class PointWithZoom:
@@ -14,10 +14,11 @@ class PointWithZoom:
                        self.coords_init[1] / (camera_rect.h / h) - camera_rect.y * zoom)
 
 
-class GameObject_no_img:
+class GameObjectNoImg:
     """
     Use pos, don't use rect when using the object
     """
+
     def __init__(self, pos, size):
         self.pos = pos
         self.size = size
@@ -35,7 +36,7 @@ class GameObject_no_img:
         pass
 
 
-class GameObject_no_pos:
+class GameObjectNoPos:
     def __init__(self, size, img):
         self.size = size
         self.img = img
@@ -49,7 +50,8 @@ class GameObject_no_pos:
         self.rect.height = self.size[1] * zoom
         self.zoom_buffer = pygame.transform.scale(self.img, (int(self.size[0] * zoom), int(self.size[1] * zoom)))
 
-class GameObject(GameObject_no_img):
+
+class GameObject(GameObjectNoImg):
     def __init__(self, pos, size, img):
         super().__init__(pos, size)
         size = int(size[0]), int(size[1])
@@ -58,7 +60,7 @@ class GameObject(GameObject_no_img):
         self.zoom_buffer = img
 
     def update_camera(self, camera_rect):
-        GameObject_no_img.update_camera(self, camera_rect)
+        GameObjectNoImg.update_camera(self, camera_rect)
         w, h = pygame.display.get_surface().get_size()
         zoom = 1 / (camera_rect.w / w)
         self.rect.width = self.size[0] * zoom
@@ -105,9 +107,9 @@ class Clickable:
 
     def draw(self, win):
         if self.hovered:
-            pygame.draw.rect(win, RED, self.rect, 2)
+            pygame.draw.rect(win, Color("red"), self.rect, 2)
         else:
-            pygame.draw.rect(win, GREEN, self.rect, 2)
+            pygame.draw.rect(win, Color("green"), self.rect, 2)
 
 
 class SortedGroup:
