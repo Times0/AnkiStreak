@@ -15,6 +15,11 @@ class TuxemonType:
 all_tuxemons = {"snowrilla": TuxemonType.ice,
                 "metesaur": TuxemonType.fire,
                 "velocitile": TuxemonType.water}
+type_colors: dict[TuxemonType:Color] = {
+    TuxemonType.fire: Color("darkred"),
+    TuxemonType.water: Color("darkblue"),
+    TuxemonType.ice: Color("darkcyan")
+}
 
 
 class Tuxemon:
@@ -23,12 +28,18 @@ class Tuxemon:
 
         self.name: str = name
         self.type: TuxemonType = all_tuxemons[name]
-        self.xp: int = 0
+        self.xp: int = 50
 
         self.imgs = imgs.load_tuxemon_imgs(name)
 
+    def max_xp(self):
+        return 100
+
     def __repr__(self):
         return f"Tuxemon({self.name} type: {self.type})"
+
+    def favorite_color(self):
+        return type_colors[self.type]
 
 
 class TuxemonInventory:
@@ -45,7 +56,6 @@ class TuxemonInventory:
         for name in all_tuxemons:
             self.add_tuxemon(Tuxemon(name))
         print(self.tuxemons)
-
 
 
 if __name__ == '__main__':

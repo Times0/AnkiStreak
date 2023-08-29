@@ -22,7 +22,7 @@ def draw_transparent_rect(screen: Surface, rect: Rect, color: Color, alpha: int,
     screen.blit(surf, rect)
 
 
-def blit_acrylic_surface(screen_in, screen_out, surface, blur_radius=5):
+def blit_acrylic_surface(screen_in, screen_out, pos, surface, blur_radius=5):
     """
     Blit une surface "acrylique" sur l'écran à la position spécifiée.
 
@@ -32,8 +32,12 @@ def blit_acrylic_surface(screen_in, screen_out, surface, blur_radius=5):
     blur_radius: le rayon du flou gaussien à appliquer
     """
     # Extraire la zone de l'arrière-plan où la surface sera dessinée
-    bg_rect = pygame.Rect((0, 0), surface.get_size())
+
+    bg_rect = pygame.Rect(pos, surface.get_size())
+    print(bg_rect)
     bg_subsurface = screen_in.subsurface(bg_rect).copy()
+
+    pygame.image.save(bg_subsurface, "bg_subsurface.png")
 
     # Convertir cette sous-surface en tableau numpy pour le traitement
     np_surface = pygame.surfarray.pixels3d(bg_subsurface).transpose((1, 0, 2))

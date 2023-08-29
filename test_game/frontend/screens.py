@@ -128,12 +128,6 @@ class ShopUI(UIElement):
             btn.handle_event(event)
 
 
-type_colors: dict[TuxemonType:Color] = {
-    TuxemonType.fire: Color("darkred"),
-    TuxemonType.water: Color("darkblue"),
-    TuxemonType.ice: Color("darkcyan")
-}
-
 import random
 
 
@@ -173,7 +167,7 @@ class TuxemonCard(Hoverable):
         self.time_since_last_img = random.random() * (1 / self.ANIMATION_FPS)
         self.frame_index = 0
 
-        self.color = type_colors[t.type]
+        self.color = t.favorite_color()
 
     def update(self, dt):
         # handle animation
@@ -190,9 +184,26 @@ class TuxemonCard(Hoverable):
         img = self.imgs[self.frame_index]
         img = pygame.transform.scale(img, (rect.width - self.offset * 2, rect.height - self.offset * 2))
         surface.blit(img, rect.inflate(-self.offset * 2, -self.offset * 2))
+        self.draw_xp(surface, rect)
+
+    def draw_xp(self, surface, rect):
+        """draw a little xp bar at the bottom of the rect"""
+        xp = self.tuxemon.xp
+        max_xp = self.tuxemon.max_xp()
+        xp_percent = xp / max_xp
+        xp_bar_rect = pygame.Rect(rect.x, rect.bottom - 5, rect.width * xp_percent, 5)
+        xp_bar_rect_full = pygame.Rect(rect.x, rect.bottom - 5, rect.width, 5)
+
+        pygame.draw.rect(surface, Color("white"), xp_bar_rect_full, 1)
+        pygame.draw.rect(surface, Color("black"), xp_bar_rect, 1)
+        pygame.draw.rect(surface, Color("green"), xp_bar_rect)
 
     def handle_event(self, event):
         super().handle_event(event)
+
+
+def draw_label(win, text, rect, param2, param3, param4):
+    pass
 
 
 class TuxemonUI(UIElement):
@@ -232,6 +243,8 @@ class TuxemonUI(UIElement):
         """
         Only displayes the focused tuxemon when expanded
         """
+
+        # Draw big tuxemon
         tuxemon = self.focused_card.tuxemon
         img = tuxemon.imgs["front"]
         tuxemon_rect = self.second_part_rect.copy()
@@ -241,6 +254,28 @@ class TuxemonUI(UIElement):
         pygame.draw.rect(win, Color("red"), tuxemon_rect, 5)
         img = imgs.scale(img, (tuxemon_rect.size[0] - 40, tuxemon_rect.size[1] - 40))
         win.blit(img, img.get_rect(center=tuxemon_rect.center))
+
+        # Draw vertical health bar with label xp : x/x
+        off = 30
+        x = tuxemon_rect.right - 40
+        y1 = tuxemon_rect.top + off
+        y2 = tuxemon_rect.bottom - off
+        width_health_bar = 10
+
+        pygame.draw.rect(win, Color(tuxemon.favorite_color()), (x, y1, width_health_bar, y2 - y1), 2, border_radius=5)
+        percentage = tuxemon.xp / tuxemon.max_xp()
+        pygame.draw.rect(win, tuxemon.favorite_color(), (x, y2 - (y2 - y1) * percentage,
+                                                         width_health_bar, (y2 - y1) * percentage), border_radius=5)
+
+        text = f"{tuxemon.xp}/{tuxemon.max_xp()}"
+        label = utils.render(text, pygame.font.SysFont("Arial", 15, bold=True), gfcolor=Color("white"),
+                             ocolor=Color("black"), opx=1)
+        win.blit(label, label.get_rect(center=(x, y2 + 10)))
+
+        text = "XP"
+        label = utils.render(text, pygame.font.SysFont("Arial", 15, bold=True), gfcolor=Color("white"),
+                             ocolor=Color("black"), opx=1)
+        win.blit(label, label.get_rect(center=(x, y1 - 10)))
 
         # Draw button to feed the tuxemon
         bottomright_rect = self.second_part_rect.copy()

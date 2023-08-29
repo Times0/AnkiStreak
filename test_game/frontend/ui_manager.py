@@ -18,19 +18,23 @@ class AcrylicBackground:
         self.surface = None
         self.require_update = True
         self.acrylic_surface = None
+        self.acrylic_surface_rect = None
 
-    def render(self, screen_in, rect, blur_radius=15, color=Color(220, 200, 200, 128)):
+    def render(self, screen_in, rect, blur_radius, color=Color(220, 200, 200, 128)):
         self.acrylic_surface = pygame.Surface(rect.size, pygame.SRCALPHA)
+        self.acrylic_surface_rect = self.acrylic_surface.get_rect(topleft=rect.topleft)
         surface = pygame.Surface(rect.size, pygame.SRCALPHA)
         surface.fill(color)
-        blit_acrylic_surface(screen_in, self.acrylic_surface, surface, blur_radius=blur_radius)
+        blit_acrylic_surface(screen_in, self.acrylic_surface, rect.topleft, surface, blur_radius=blur_radius)
         self.require_update = False
 
-    def draw_acrylic_background(self, win, rect, blur_radius=15):
+    def draw_acrylic_background(self, win, rect, blur_radius=5):
         if self.require_update:
+            self.surface = pygame.Surface(rect.size, pygame.SRCALPHA)
             self.render(win, rect, blur_radius=blur_radius)
             self.require_update = False
-        win.blit(self.acrylic_surface, rect.topleft)
+
+        win.blit(self.acrylic_surface, self.acrylic_surface_rect)
 
 
 class UIElement(AcrylicBackground):
@@ -91,6 +95,7 @@ class UIElement(AcrylicBackground):
 
     def close(self):
         self._close()
+        self.require_update = True
         self.manager.active_element = None
 
 
