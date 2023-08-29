@@ -11,7 +11,7 @@ class TuxemonType(Enum):
 
 all_tuxemons = {"snowrilla": TuxemonType.ice,
                 "metesaur": TuxemonType.fire,
-                "velocitile": TuxemonType.water}
+                "fribbit": TuxemonType.water}
 
 type_colors: dict[TuxemonType:Color] = {
     TuxemonType.fire: Color("darkred"),

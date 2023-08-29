@@ -587,8 +587,6 @@
         ]
     },
     "inventory": {
-        "water fruit": 3,
-        "fire fruit": 5,
         "ice fruit": 5
     },
     "cards_learned_today": 0,
