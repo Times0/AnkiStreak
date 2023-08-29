@@ -13,11 +13,11 @@ cwd = os.path.dirname(__file__)
 def load(path, size=None, vertical_size=None, horizontal_size=None):
     img = pygame.image.load(os.path.join(cwd, "..", "assets", path)).convert_alpha()
     if size:
-        img = pygame.transform.smoothscale(img, size)
+        img = pygame.transform.scale(img, size)
     elif vertical_size:
-        img = pygame.transform.smoothscale(img, (img.get_width() * vertical_size // img.get_height(), vertical_size))
+        img = pygame.transform.scale(img, (img.get_width() * vertical_size // img.get_height(), vertical_size))
     elif horizontal_size:
-        img = pygame.transform.smoothscale(img,
+        img = pygame.transform.scale(img,
                                            (horizontal_size, img.get_height() * horizontal_size // img.get_width()))
     return img
 
@@ -30,7 +30,7 @@ def load_multiple(path):
 
 
 def scale_by(img, scale):
-    return pygame.transform.smoothscale(img, (img.get_width() * scale, img.get_height() * scale))
+    return pygame.transform.scale(img, (img.get_width() * scale, img.get_height() * scale))
 
 
 fire_seeds = load("sprites/farm/fire_seeds.png")

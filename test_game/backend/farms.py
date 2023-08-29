@@ -1,6 +1,5 @@
 import pygame
-import os
-import sys
+
 from test_game.backend import objects
 from test_game.backend.inventory import Inventory
 from test_game.backend.items import Item
@@ -327,9 +326,12 @@ class OnTheMoveItem(objects.GameObject):
         if self.steps:
 
             self.pos = self.steps[self.index]
-            self.index += int(dt * MAXFPS / 1000)
+            self.index += int(dt * MAXFPS)
             if self.index >= len(self.steps):
                 self.is_arrived = True
+
+
+from typing import Optional
 
 
 class PlantSpot(objects.GameObjectNoImg):
@@ -337,7 +339,7 @@ class PlantSpot(objects.GameObjectNoImg):
 
     def __init__(self, pos):
         super().__init__(pos, (config.TILE_SIZE, config.TILE_SIZE))
-        self.plant = None
+        self.plant: Optional[Plant] = None
         self.id = PlantSpot.counter
         PlantSpot.counter += 1
 

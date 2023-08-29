@@ -1,5 +1,5 @@
-from boring import imgs
-from backend.items import Item
+from test_game.backend.items import Item
+from test_game.boring import imgs
 
 
 class Inventory:
@@ -31,7 +31,13 @@ class Inventory:
             self.items_data[item_name] = Item(item_name, imgs.items[item_name])
 
     def get_image(self, item_name):
-        return self.items_data[item_name].img
+        if item_name in self.items_data:
+            return self.items_data[item_name].img
+        else:
+            pass
+
+    def get(self, item_name, default=None):
+        return self.items.get(item_name, default)
 
     def __getitem__(self, item_name):
         return self.items[item_name]

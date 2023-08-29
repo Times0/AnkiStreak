@@ -1,5 +1,6 @@
 import json
 import logging
+import os.path
 from datetime import datetime
 
 import pygame.sprite
@@ -9,17 +10,20 @@ from PygameUIKit import Group
 from PygameUIKit.button import ButtonPngIcon
 from pygame import Color
 
-from boring import config
-from boring import imgs
-from boring.config import *
-from boring.utils import *
 from backend.farms import Farm, PlantSpot
 from backend.inventory import Inventory
 from backend.objects import GameObject, SortedGroup, PointWithZoom
 from backend.shop import Wallet, Shop
 from backend.tuxemons import TuxemonInventory
+from boring import config
+from boring import imgs
+from boring.config import *
+from boring.utils import *
 from frontend.indicators import CardIndicators, CoinsIndicator
-from frontend.screens import InventoryUI, ShopUI, TuxemonUI, Popup, Tuxemon
+from frontend.screens.UiInventory import InventoryUI
+from frontend.screens.UiPopup import Popup
+from frontend.screens.UiShop import ShopUI
+from frontend.screens.UiTuxemon import TuxemonUI
 from frontend.ui_manager import UIManager
 
 cwd = os.path.dirname(__file__)
@@ -36,9 +40,7 @@ class Game:
         self.inventory = Inventory()
         self.wallet = Wallet(money=1000)
         self.shop = Shop(wallet=self.wallet, inventory=self.inventory)
-        self.tuxemon_inventory = TuxemonInventory()
-        self.tuxemon_inventory.add_default_tuxemons()
-        # self.tuxemon_inventory.add_tuxemon(Tuxemon("snowrilla"))
+        self.tuxemon_inventory = TuxemonInventory(inventory=self.inventory)
 
         # ______________________TMX and pyscroll_____________________________________#
         self.ptmx = Pytmx(win)
@@ -90,7 +92,7 @@ class Game:
         while self.running:
             dt = clock.tick(FPS) / 1000
             self.time_since_last_late_update += dt
-            print(f"\rFPS: {clock.get_fps()}", end="")
+            # print(f"\rFPS: {clock.get_fps()}", end="")
             self.events()
             self.update(dt)
             if self.time_since_last_late_update >= 1000 / LATE_UPDATE_FPS:
@@ -116,7 +118,7 @@ class Game:
             self.ui_manager.handle_event(event)
             if event.type == pygame.QUIT:
                 self.running = False
-                self.dump_save(save_path)
+                self.dump_save()
 
     def update(self, dt):
         self.ptmx.update(dt)
@@ -156,7 +158,7 @@ class Game:
                 self.create_popup(f"You learned {learned_since_last_connection} cards ! +{nb_watering} watering !")
 
     def create_popup(self, text):
-        popup = Popup(title="GG", text=text)
+        popup = Popup(text=text)
         self.special_ui.append(popup)
 
     def draw(self, win):
@@ -180,11 +182,7 @@ class Game:
                 y = (win.get_height() - h) // 2
                 popup.draw(win, x, y, w, h)
 
-    def dump_save(self, path):
-        # Check if save_path is a valid path
-        if not os.path.isdir(os.path.dirname(path)):
-            raise ValueError(f"Invalid path: {os.path.dirname(path)} does not exist.")
-
+    def dump_save(self):
         try:
             data = {}
 
@@ -195,13 +193,11 @@ class Game:
             except Exception as e:
                 raise RuntimeError(f"Error while dumping farm assets: {str(e)}")
 
-            # save inventory state
             try:
                 data["inventory"] = self.inventory.dump()
             except Exception as e:
                 raise RuntimeError(f"Error while dumping inventory assets: {str(e)}")
 
-            # save learning indicator state
             try:
                 data["cards_learned_today"] = self.learning_indicator.nb_cards_learned
             except Exception as e:
@@ -221,20 +217,24 @@ class Game:
 
             # Save assets to JSON file
             try:
-                with open(path, "w") as f:
+                with open(os.path.join(save_folder, "game_state.json"), "w") as f:
                     json.dump(data, f, indent=4)
             except Exception as e:
                 raise RuntimeError(f"Error while writing assets to file: {str(e)}")
 
-            print(f"Data dumped to {path} !")
-
-
         except Exception as e:
             print(f"An error occurred while dumping assets: {str(e)}")
 
+        self.dump_tuxemon()
+
+    def dump_tuxemon(self):
+        data = self.tuxemon_inventory.dump()
+        with open(os.path.join(config.save_folder, "tuxemon.json"), "w") as f:
+            json.dump(data, f, indent=4)
+
     def load_save(self):
         try:
-            with open(config.save_path, "r") as f:
+            with open(os.path.join(config.save_folder, "game_state.json"), "r") as f:
                 data = json.load(f)
         except FileNotFoundError:
             # Handle the case when the file is not found
@@ -260,6 +260,20 @@ class Game:
         # load wallet
         if "wallet" in data.keys():
             self.wallet.load(data["wallet"])
+
+        # load tuxemon
+        self.load_tuxemon()
+
+    def load_tuxemon(self):
+        try:
+            with open(os.path.join(config.save_folder, "tuxemon.json"), "r") as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            # Handle the case when the file is not found
+            print("File not found. Initializing with default assets.")
+            data = {}
+        print(data)
+        self.tuxemon_inventory.load(data)
 
 
 class Pytmx:

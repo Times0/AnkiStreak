@@ -1,12 +1,9 @@
-import pygame
-from pygame import Surface, Rect, Color
+from enum import Enum
 
-from enum import Enum, auto
-from test_game.backend.objects import GameObjectNoPos
-from test_game.frontend.utils import draw_transparent_rect
+from pygame import Color
 
 
-class TuxemonType:
+class TuxemonType(Enum):
     fire = 1
     water = 2
     ice = 3
@@ -15,10 +12,17 @@ class TuxemonType:
 all_tuxemons = {"snowrilla": TuxemonType.ice,
                 "metesaur": TuxemonType.fire,
                 "velocitile": TuxemonType.water}
+
 type_colors: dict[TuxemonType:Color] = {
     TuxemonType.fire: Color("darkred"),
     TuxemonType.water: Color("darkblue"),
     TuxemonType.ice: Color("darkcyan")
+}
+
+favorite_fruits: dict[TuxemonType:str] = {
+    TuxemonType.fire: "fire fruit",
+    TuxemonType.water: "water fruit",
+    TuxemonType.ice: "ice fruit"
 }
 
 
@@ -28,7 +32,7 @@ class Tuxemon:
 
         self.name: str = name
         self.type: TuxemonType = all_tuxemons[name]
-        self.xp: int = 50
+        self.xp: int = 1
 
         self.imgs = imgs.load_tuxemon_imgs(name)
 
@@ -41,45 +45,56 @@ class Tuxemon:
     def favorite_color(self):
         return type_colors[self.type]
 
+    def add_xp(self, amount):
+        self.xp += amount
+        if self.xp > self.max_xp():
+            self.xp = self.max_xp()
+            print(f"{self.name} has reached max xp")
+
+    def favorite_fruit(self):
+        return favorite_fruits[self.type]
+
+
+from test_game.backend.inventory import Inventory
+
 
 class TuxemonInventory:
-    def __init__(self):
-        self.tuxemons: list[Tuxemon] = []
+    def __init__(self, inventory: Inventory):
+        self.tuxemons: dict[str, Tuxemon] = {}
+        self.inventory = inventory
 
     def add_tuxemon(self, t: Tuxemon):
-        self.tuxemons.append(t)
-
-    def remove_tuxemon(self, t: Tuxemon):
-        self.tuxemons.remove(t)
+        self.tuxemons[t.name] = t
 
     def add_default_tuxemons(self):
         for name in all_tuxemons:
             self.add_tuxemon(Tuxemon(name))
         print(self.tuxemons)
 
+    def feed_tuxemon(self, tuxemon_name):
+        tuxemon = self.tuxemons.get(tuxemon_name)
+        if tuxemon:
+            nb_remaining = self.inventory.get(tuxemon.favorite_fruit(), 0)
+            if nb_remaining > 0:
+                self.inventory.consume_item(tuxemon.favorite_fruit(), 1)
+                tuxemon.add_xp(10)
 
-if __name__ == '__main__':
-    from test_game.frontend.screens import TuxemonCard
+        else:
+            print(f"no tuxemon named {tuxemon_name}")
 
-    pygame.init()
-    pygame.display.set_mode((500, 500))
+    def dump(self):
+        res = {}
+        for tuxemon in self.tuxemons.values():
+            res[tuxemon.name] = tuxemon.xp
+        return res
 
-    tuxemon_inventory = TuxemonInventory()
-    tuxemon_inventory.add_default_tuxemons()
+    def load(self, tuxemons: dict):
+        print(self.tuxemons)
+        for tuxemon_name in tuxemons:
+            tuxemon = Tuxemon(tuxemon_name)
+            tuxemon.xp = tuxemons[tuxemon_name]
+            self.add_tuxemon(tuxemon)
+        print(self.tuxemons)
 
-    cards = []
-    for i, tuxemon in enumerate(tuxemon_inventory.tuxemons):
-        card = TuxemonCard(tuxemon, Rect(0, 0, 80, 80))
-        cards.append(card)
-
-    clock = pygame.time.Clock()
-    while 1:
-        dt = clock.tick(500) / 1000
-        print(f"\rfps: {clock.get_fps()}", end="")
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                exit()
-        for i, card in enumerate(cards):
-            card.update(dt)
-            card.draw(pygame.display.get_surface(), (i * 100 + 50, 50))
-        pygame.display.update()
+    def __iter__(self):
+        return iter(self.tuxemons.values())

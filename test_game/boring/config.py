@@ -19,7 +19,7 @@ MAX_WATERING = 7
 
 cwd = os.path.dirname(__file__)
 
-save_path = os.path.join(cwd, "..", "game_data", "game_state.json")
+save_folder = os.path.join(cwd, "..", "game_data")
 anki_data_path = os.path.join(cwd, "../..", "anki_data.json")
 cards_learned_path = os.path.join(cwd, "../..", "cards_learned_today.txt")
 font_path_dir = os.path.join(cwd, "../assets", "fonts")
