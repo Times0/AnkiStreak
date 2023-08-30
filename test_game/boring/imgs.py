@@ -30,7 +30,7 @@ def load_multiple(path):
 
 
 def scale_by(img, scale):
-    return pygame.transform.scale(img, (img.get_width() * scale, img.get_height() * scale))
+    return pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
 
 
 fire_seeds = load("sprites/farm/fire_seeds.png")

@@ -92,7 +92,7 @@ class Game:
         while self.running:
             dt = clock.tick(FPS) / 1000
             self.time_since_last_late_update += dt
-            # print(f"\rFPS: {clock.get_fps()}", end="")
+            print(f"\rFPS: {clock.get_fps()}", end="")
             self.events()
             self.update(dt)
             if self.time_since_last_late_update >= 1000 / LATE_UPDATE_FPS:
@@ -158,29 +158,22 @@ class Game:
                 self.create_popup(f"You learned {learned_since_last_connection} cards ! +{nb_watering} watering !")
 
     def create_popup(self, text):
-        popup = Popup(text=text)
-        self.special_ui.append(popup)
+        popup = Popup(text=text, manager=self.ui_manager)
+        self.ui_manager.add_popop(popup)
 
     def draw(self, win):
         self.win.fill(Color("black"))
         self.ptmx.draw(win)
         self.draw_ui(win)
-        pygame.display.update()
+        pygame.display.flip()
 
     def draw_ui(self, win):
         W = win.get_width()
         self.btn_menu.draw(win, W - self.btn_menu.rect.width - 10, 10)
         self.btn_shop.draw(win, W - self.btn_shop.rect.width - 10 - self.btn_menu.rect.width - 10, 10)
-        self.btn_tuxemon.draw(win,
-                              W - self.btn_tuxemon.rect.width - 10 - self.btn_menu.rect.width - 10 - self.btn_shop.rect.width - 10,
-                              10)
+        self.btn_tuxemon.draw(win, W - self.btn_tuxemon.rect.width - 10 -
+                              self.btn_menu.rect.width - 10 - self.btn_shop.rect.width - 10, 10)
         self.ui_manager.draw(win)
-        for popup in self.special_ui:
-            if popup.isVisible():
-                w, h = 500, 200
-                x = (win.get_width() - w) // 2
-                y = (win.get_height() - h) // 2
-                popup.draw(win, x, y, w, h)
 
     def dump_save(self):
         try:

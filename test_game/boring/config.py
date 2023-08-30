@@ -7,7 +7,7 @@ WIDTH, HEIGHT = TILE_SIZE * 45, TILE_SIZE * 30
 # dpi awareness
 ctypes.windll.user32.SetProcessDPIAware()
 
-FPS = 60
+FPS = 150
 LATE_UPDATE_FPS = 1
 
 MAX_ZOOM = 2

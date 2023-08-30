@@ -1,9 +1,7 @@
+import pygame
 import pygame as pg
 from pygame import Surface, Rect, Color
-
-import numpy as np
 from scipy.ndimage import gaussian_filter
-import pygame
 
 
 def draw_transparent_rect(screen: Surface, rect: Rect, color: Color, alpha: int, border_radius=0):
@@ -34,7 +32,6 @@ def blit_acrylic_surface(screen_in, screen_out, pos, surface, blur_radius=5):
     # Extraire la zone de l'arrière-plan où la surface sera dessinée
 
     bg_rect = pygame.Rect(pos, surface.get_size())
-    print(bg_rect)
     bg_subsurface = screen_in.subsurface(bg_rect).copy()
 
     pygame.image.save(bg_subsurface, "bg_subsurface.png")

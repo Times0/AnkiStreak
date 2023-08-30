@@ -78,13 +78,33 @@ class TuxemonUI(UIElement):
         self.init_cards()
 
         self.btn_feed = button.ButtonText("Feed", NotImplemented, Color("green"), border_radius=5,
+                                          font=pygame.font.SysFont("Arial", 15, bold=True),
                                           font_color=Color("black"))
+
+        self.tuxemons_images_to_display = {}
+        self.fruits_images = {}
+
+        # rects
+        # Tuxeomons part
+        self.tuxemon_part_rect = self.second_part_rect.copy()
+        self.tuxemon_part_rect.height = 300
+        self.tuxemon_part_rect.topleft = self.second_part_rect.topleft
+
+        # Bottom right part
+        bottomright_rect = self.second_part_rect.copy()
+        bottomright_rect.y = self.tuxemon_part_rect.bottom
+        bottomright_rect.height = self.second_part_rect.height - self.tuxemon_part_rect.height
+        self.bottomright_rect = bottomright_rect
 
     def init_cards(self):
         self.cards = []
         for i, tuxemon in enumerate(self.tuxemons_inventory):
             card = TuxemonCard(tuxemon, pygame.Rect(0, 0, 80, 80))
             self.cards.append(card)
+            img = tuxemon.imgs["front"]
+            img = imgs.scale(img, (self.rect.width - 40, self.rect.height - 40))
+            self.tuxemons_images_to_display[tuxemon] = img
+            self.fruits_images[tuxemon.favorite_fruit()] = imgs.scale(imgs.items[tuxemon.favorite_fruit()], (30, 30))
 
     def _draw(self, win):
         if len(self.cards) != len(self.tuxemons_inventory.tuxemons):
@@ -102,22 +122,22 @@ class TuxemonUI(UIElement):
         """
         Only displayes the focused tuxemon when expanded
         """
+        DEBUG = True
+
+        if DEBUG:
+            pygame.draw.rect(win, Color("red"), self.tuxemon_part_rect, 5)
+            pygame.draw.rect(win, Color("blue"), self.bottomright_rect, 5)
 
         # Draw big tuxemon
         tuxemon = self.focused_card.tuxemon
-        img = tuxemon.imgs["front"]
-        tuxemon_rect = self.second_part_rect.copy()
-        tuxemon_rect.height = 300
-        tuxemon_rect.topleft = self.second_part_rect.topleft
-
-        img = imgs.scale(img, (tuxemon_rect.size[0] - 40, tuxemon_rect.size[1] - 40))
-        win.blit(img, img.get_rect(center=tuxemon_rect.center))
+        img = self.tuxemons_images_to_display[tuxemon]
+        win.blit(img, img.get_rect(center=self.tuxemon_part_rect.center))
 
         # Draw vertical health bar with label xp : x/x
         off = 30
-        x = tuxemon_rect.right - 40
-        y1 = tuxemon_rect.top + off
-        y2 = tuxemon_rect.bottom - off
+        x = self.tuxemon_part_rect.right - 40
+        y1 = self.tuxemon_part_rect.top + off
+        y2 = self.tuxemon_part_rect.bottom - off
         width_health_bar = 10
 
         pygame.draw.rect(win, Color(tuxemon.favorite_color()), (x, y1, width_health_bar, y2 - y1), 2, border_radius=5)
@@ -136,16 +156,14 @@ class TuxemonUI(UIElement):
         win.blit(label, label.get_rect(center=(x, y1 - 10)))
 
         # Draw button to feed the tuxemon
-        bottomright_rect = self.second_part_rect.copy()
-        bottomright_rect.y = tuxemon_rect.bottom
-        bottomright_rect.height = self.second_part_rect.height - tuxemon_rect.height
+
         surf = self.btn_feed.surface
-        pos = surf.get_rect(center=bottomright_rect.center).topleft
+        pos = surf.get_rect(center=self.bottomright_rect.center).topleft
         self.btn_feed.draw(win, *pos)
 
         # Draw tuxemon favorite fruit and number of fruits
-        fruit_image = imgs.items[tuxemon.favorite_fruit()]
-        fruit_image = imgs.scale(fruit_image, (surf.get_height(), surf.get_height()))
+
+        fruit_image = self.fruits_images[tuxemon.favorite_fruit()]
         win.blit(fruit_image, (pos[0] + surf.get_width() + 10, pos[1]))
 
         # Draw the number of fruits in the inventory
@@ -153,9 +171,8 @@ class TuxemonUI(UIElement):
         text = f"x{nb}"
         label = utils.render(text, pygame.font.SysFont("Arial", 15, bold=True), gfcolor=Color("white"),
                              ocolor=Color("black"), opx=1)
-        win.blit(label, label.get_rect(center=(pos[0] + surf.get_width() + 10 + fruit_image.get_width() + 10, pos[1] + fruit_image.get_height() / 2)))
-
-
+        win.blit(label, label.get_rect(center=(
+            pos[0] + surf.get_width() + 10 + fruit_image.get_width() + 10, pos[1] + fruit_image.get_height() / 2)))
 
     def _handle_event(self, event):
         for card in self.cards:
@@ -194,7 +211,9 @@ class TuxemonUI(UIElement):
 
         # center
         self.rect.center = self.manager.rect.center
-        self.second_part_rect.midright = self.rect.midright
+        self.second_part_rect.topright = self.rect.topright
+        self.tuxemon_part_rect.topright = self.second_part_rect.topright
+        self.bottomright_rect.midtop = self.tuxemon_part_rect.midbottom
 
         self.require_update = True
         self.instantiate_button_cross()

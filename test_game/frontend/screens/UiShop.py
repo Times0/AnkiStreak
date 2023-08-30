@@ -7,8 +7,6 @@ from test_game.boring import utils
 from test_game.frontend.ui_manager import UIElement
 
 
-
-
 class ShopUI(UIElement):
     def __init__(self, shop, manager):
         super().__init__("shop", rect=pygame.Rect(0, 0, 700, 200), manager=manager)

@@ -61,7 +61,7 @@ class CardIndicators(UIElement, Tooltip):
     def __init__(self, manager,
                  color=(127, 255, 0), bg_color=(169, 169, 169), border_color=(0, 0, 0),
                  font_color=(0, 0, 0)):
-        rect = pygame.Rect(40, 80, 200, 30)
+        rect = pygame.Rect(40, 20, 200, 30)
         UIElement.__init__(self, "card_indicators", rect=rect, manager=manager, is_permament=True)
         Tooltip.__init__(self, "Cards learned today", rect)
 
@@ -109,7 +109,7 @@ class CardIndicators(UIElement, Tooltip):
             pygame.draw.rect(surface, self.color, progress_rect, border_radius=border_radius)
 
         # display the number of learned cards to total cards
-        font = pygame.font.Font(None, 24)  # select a font that fits your game's style
+        font = pygame.font.Font(None, 24)
         text = f"{self.nb_cards_learned}/{self.nb_cards_total}"
         text_surface = font.render(text, True, self.font_color)
         text_rect = text_surface.get_rect(center=(x + width / 2, y + height / 2))
@@ -126,7 +126,7 @@ class CardIndicators(UIElement, Tooltip):
 
 class CoinsIndicator(UIElement):
     def __init__(self, manager):
-        rect = Rect(20, 10, 0, 0)
+        rect = Rect(20, 100, 0, 0)
         UIElement.__init__(self, "coins_indicator", rect=rect, manager=manager, is_permament=True)
         self.nb_coins = 0
         self.image = imgs.coin

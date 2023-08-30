@@ -203,10 +203,7 @@
             },
             {
                 "id": 49,
-                "plant": {
-                    "type": "fire",
-                    "development_index": 3
-                }
+                "plant": null
             },
             {
                 "id": 50,
@@ -587,9 +584,10 @@
         ]
     },
     "inventory": {
-        "ice fruit": 5
+        "ice fruit": 5,
+        "fire fruit": 1
     },
     "cards_learned_today": 0,
-    "time": 738761,
+    "time": 738762,
     "wallet": 760
 }
