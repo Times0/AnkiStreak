@@ -15,6 +15,18 @@ class FarmMenuItem(Item):
     def __init__(self, name, img, item_type):
         super().__init__(name, img)
         self.type = item_type
+        self.img_gray_scale = utils.grayscale(img)
+
+        self.cache = {}
+
+    def update_camera(self, camera_rect):
+        super().update_camera(camera_rect)
+        zoom = self.zoom_buffer.get_width() / self.img.get_width()
+        if zoom not in self.cache:
+            self.img_gray_scale = utils.grayscale(self.zoom_buffer)
+            self.cache[zoom] = self.img_gray_scale
+        else:
+            self.img_gray_scale = self.cache[zoom]
 
 
 class Menu(objects.GameObjectNoImg):
@@ -90,7 +102,7 @@ class Menu(objects.GameObjectNoImg):
                 pygame.draw.rect(win, colors.MENU_SELECTED, self.items_rects[i].inflate(10, 10), border_radius=10)
             img = item.zoom_buffer
             if item.type == FarmMenuItem.seed and item not in self.inventory:
-                img = utils.grayscale(img)
+                img = item.img_gray_scale
             win.blit(img, self.items_rects[i])
 
 

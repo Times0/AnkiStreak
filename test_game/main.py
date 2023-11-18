@@ -19,7 +19,7 @@ def main():
     from game import Game
     game = Game(win)
     from game import PlantSpot
-    PlantSpot.counter = 0  # Avoids conflicts when starting a new game without closing the anki window
+    PlantSpot.counter = 0  # Avoids starting id counter at 43 when starting a new game without closing the anki window
     game.run()
     pygame.quit()
 

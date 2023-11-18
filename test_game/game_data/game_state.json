@@ -204,29 +204,23 @@
                 "id": 48,
                 "plant": {
                     "type": "fire",
-                    "development_index": 0
+                    "development_index": 1
                 }
             },
             {
                 "id": 49,
                 "plant": {
                     "type": "fire",
-                    "development_index": 1
+                    "development_index": 4
                 }
             },
             {
                 "id": 50,
-                "plant": {
-                    "type": "fire",
-                    "development_index": 1
-                }
+                "plant": null
             },
             {
                 "id": 51,
-                "plant": {
-                    "type": "fire",
-                    "development_index": 2
-                }
+                "plant": null
             },
             {
                 "id": 52,
@@ -242,17 +236,11 @@
             },
             {
                 "id": 55,
-                "plant": {
-                    "type": "fire",
-                    "development_index": 4
-                }
+                "plant": null
             },
             {
                 "id": 56,
-                "plant": {
-                    "type": "fire",
-                    "development_index": 3
-                }
+                "plant": null
             },
             {
                 "id": 57,
@@ -264,10 +252,7 @@
             },
             {
                 "id": 59,
-                "plant": {
-                    "type": "fire",
-                    "development_index": 2
-                }
+                "plant": null
             },
             {
                 "id": 60,
@@ -279,38 +264,23 @@
             },
             {
                 "id": 62,
-                "plant": {
-                    "type": "fire",
-                    "development_index": 2
-                }
+                "plant": null
             },
             {
                 "id": 63,
-                "plant": {
-                    "type": "water",
-                    "development_index": 3
-                }
+                "plant": null
             },
             {
                 "id": 64,
-                "plant": {
-                    "type": "water",
-                    "development_index": 1
-                }
+                "plant": null
             },
             {
                 "id": 65,
-                "plant": {
-                    "type": "water",
-                    "development_index": 1
-                }
+                "plant": null
             },
             {
                 "id": 66,
-                "plant": {
-                    "type": "water",
-                    "development_index": 4
-                }
+                "plant": null
             },
             {
                 "id": 67,
@@ -344,7 +314,7 @@
                 "id": 74,
                 "plant": {
                     "type": "water",
-                    "development_index": 3
+                    "development_index": 4
                 }
             },
             {
@@ -358,15 +328,12 @@
                 "id": 76,
                 "plant": {
                     "type": "water",
-                    "development_index": 2
+                    "development_index": 4
                 }
             },
             {
                 "id": 77,
-                "plant": {
-                    "type": "ice",
-                    "development_index": 3
-                }
+                "plant": null
             },
             {
                 "id": 78,
@@ -641,10 +608,12 @@
         ]
     },
     "inventory": {
-        "ice fruit": 6,
-        "fire fruit": 5
+        "ice fruit": 7,
+        "fire fruit": 11,
+        "water seeds": 9,
+        "water fruit": 4
     },
     "cards_learned_today": 0,
     "time": 738842,
-    "wallet": 450
+    "wallet": 360
 }
