@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="45" height="30" tilewidth="32" tileheight="32" infinite="0" nextlayerid="29" nextobjectid="208">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="45" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="29" nextobjectid="208">
  <tileset firstgid="1" name="simple_pokemon" tilewidth="32" tileheight="32" tilecount="1424" columns="8">
   <image source="tilemaps_png/tile_pokemon.png" width="256" height="5697"/>
  </tileset>
@@ -543,72 +543,72 @@
 </data>
  </layer>
  <objectgroup id="28" name="Rects">
-  <object id="206" name="Farm2" type="farm_zone" x="392" y="293">
-   <polygon points="0,0 300,1 304,524 -6,527 -2,319 159,318 159,219 -3,214"/>
+  <object id="206" name="Farm2" type="farm_zone" x="202.457" y="143.12">
+   <polygon points="0,0 150.426,0.501422 152.432,262.745 -3.00853,264.249 -1.00284,159.954 79.726,159.452 79.726,109.811 -1.50426,107.304"/>
   </object>
-  <object id="207" name="Farm1" type="farm_zone" x="6" y="388">
-   <polygon points="0,0 272,2 276,210 227,210 227,182 148,181 145,332 5,335"/>
+  <object id="207" name="Farm1" type="farm_zone" x="8.90809" y="190.755">
+   <polygon points="0,0 136.387,1.00284 138.392,105.299 113.823,105.299 113.823,91.2587 74.2104,90.7573 72.7061,166.472 2.50711,167.976"/>
   </object>
  </objectgroup>
  <objectgroup id="2" name="Objects">
-  <object id="28" name="Farm1" type="Farm" gid="1425" x="146" y="660" width="130" height="163"/>
-  <object id="34" name="Farm2" type="Farm" gid="1433" x="359.25" y="653.583" width="240" height="238.333"/>
-  <object id="36" type="Stairs" gid="1436" x="293.667" y="966.083" width="68" height="140"/>
-  <object id="60" type="Bridge" gid="1438" x="735.333" y="891.666" width="55.6667" height="54"/>
-  <object id="62" type="Bridge" gid="1438" x="785.583" y="891.333" width="43" height="54"/>
-  <object id="63" type="Bridge" gid="1438" x="818" y="891.333" width="48.6667" height="54"/>
-  <object id="64" type="Bridge" gid="1438" x="703" y="284.5" width="43" height="54"/>
-  <object id="66" type="Bridge" gid="1438" x="737.5" y="284.5" width="43" height="54"/>
-  <object id="67" type="Bridge" gid="1438" x="770.5" y="284.5" width="52.3333" height="54"/>
-  <object id="68" type="Building" gid="1439" x="1233.67" y="967.833" width="131.833" height="371.334"/>
-  <object id="82" type="Tree" gid="1440" x="1152" y="672" width="99" height="136"/>
-  <object id="89" type="Building" gid="1444" x="1001.5" y="375.5" width="179.833" height="372.667"/>
-  <object id="90" type="Building" gid="1442" x="1230.33" y="453.5" width="248" height="256"/>
-  <object id="93" type="Tree" gid="1445" x="668.009" y="962" width="106.38" height="161.493"/>
-  <object id="96" type="Tree" gid="1446" x="566.479" y="960.718" width="105.099" height="161.493"/>
-  <object id="97" type="Tree" gid="1446" x="355" y="960.718" width="105.099" height="161.493"/>
-  <object id="98" type="Tree" gid="1445" x="458.817" y="959.437" width="106.38" height="161.493"/>
-  <object id="100" type="Building" gid="1443" x="320.167" y="252.333" width="206.5" height="268"/>
-  <object id="105" type="Tree" gid="1445" x="309.956" y="254.056" width="90.1644" height="136.876"/>
-  <object id="106" type="Tree" gid="1446" x="445.005" y="253.809" width="93.4233" height="139.773"/>
-  <object id="119" type="Tree" gid="1440" x="1152" y="608" width="99" height="136"/>
-  <object id="121" type="Tree" gid="1453" x="0" y="96" width="62.6364" height="83.6667"/>
-  <object id="122" type="Tree" gid="1453" x="64" y="96" width="62.6364" height="83.6667"/>
-  <object id="123" type="Tree" gid="1453" x="0" y="224" width="62.6364" height="83.6667"/>
-  <object id="124" type="Tree" gid="1453" x="64" y="224" width="62.6364" height="83.6667"/>
-  <object id="125" type="Tree" gid="1453" x="0" y="160" width="62.6364" height="83.6667"/>
-  <object id="126" type="Tree" gid="1453" x="64" y="160" width="62.6364" height="83.6667"/>
-  <object id="127" type="Tree" gid="1453" x="0" y="32" width="62.6364" height="83.6667"/>
-  <object id="128" type="Tree" gid="1453" x="64" y="32" width="62.6364" height="83.6667"/>
-  <object id="129" type="Tree" gid="1453" x="128" y="352" width="62.6364" height="83.6667"/>
-  <object id="130" type="Tree" gid="1453" x="192" y="352" width="62.6364" height="83.6667"/>
-  <object id="131" type="Tree" gid="1453" x="0" y="352" width="62.6364" height="83.6667"/>
-  <object id="132" type="Tree" gid="1453" x="64" y="352" width="62.6364" height="83.6667"/>
-  <object id="133" type="Tree" gid="1453" x="0" y="288" width="62.6364" height="83.6667"/>
-  <object id="134" type="Tree" gid="1453" x="64" y="288" width="62.6364" height="83.6667"/>
-  <object id="137" type="Tree" gid="1453" x="256" y="352" width="62.6364" height="83.6667"/>
-  <object id="143" type="Tree" gid="1452" x="1193" y="243" width="93.0417" height="116.292"/>
-  <object id="148" type="Tree" gid="1451" x="1152" y="544" width="110.333" height="141"/>
-  <object id="149" type="Tree" gid="1451" x="1061.33" y="522.667" width="110.333" height="141"/>
-  <object id="156" type="Tree" gid="1451" x="1033.33" y="613.5" width="110.333" height="141"/>
-  <object id="158" type="Tree" gid="1454" x="960" y="608" width="96.5" height="121.5"/>
-  <object id="159" type="Tree" gid="1454" x="864" y="608" width="96.5" height="121.5"/>
-  <object id="161" type="Tree" gid="1446" x="231" y="172.657" width="89.0781" height="136.876"/>
-  <object id="162" type="Tree" gid="1446" x="514.922" y="193.1" width="89.0781" height="136.876"/>
-  <object id="163" type="Tree" gid="1446" x="484.184" y="85.135" width="89.0781" height="136.876"/>
-  <object id="164" type="Tree" gid="1446" x="242.53" y="93.2094" width="89.0781" height="136.876"/>
-  <object id="166" type="Tree" gid="1447" x="961" y="963" width="93" height="115"/>
-  <object id="168" type="Tree" gid="1449" x="865" y="709" width="90" height="110"/>
-  <object id="169" type="Tree" gid="1449" x="865" y="806" width="90" height="110"/>
-  <object id="172" type="Tree" gid="1448" x="961.5" y="713" width="91" height="116"/>
-  <object id="173" type="Tree" gid="1440" x="1050" y="708" width="99" height="136"/>
-  <object id="174" type="Tree" gid="1440" x="1056" y="800" width="99" height="136"/>
-  <object id="175" type="Tree" gid="1455" x="192" y="32" width="60" height="77.6667"/>
-  <object id="176" type="Tree" gid="1455" x="192" y="96" width="60" height="77.6667"/>
-  <object id="179" type="Tree" gid="1455" x="192" y="160" width="60" height="77.6667"/>
-  <object id="180" type="Tree" gid="1455" x="192" y="224" width="60" height="77.6667"/>
-  <object id="181" type="Tree" gid="1455" x="256" y="224" width="60" height="77.6667"/>
-  <object id="182" type="Tree" gid="1447" x="962" y="812" width="93" height="115"/>
-  <object id="185" gid="1456" x="1346" y="40.6667" width="62.6667" height="70.3333"/>
+  <object id="28" name="Farm1" type="Farm" gid="1425" x="79.1071" y="327.141" width="65.1848" height="81.7317"/>
+  <object id="34" name="Farm2" type="Farm" gid="1433" x="186.035" y="323.924" width="120.341" height="119.505"/>
+  <object id="36" type="Stairs" gid="1436" x="153.151" y="480.618" width="34.0967" height="70.199"/>
+  <object id="60" type="Bridge" gid="1438" x="374.611" y="443.304" width="27.9125" height="27.0768"/>
+  <object id="62" type="Bridge" gid="1438" x="399.808" y="443.137" width="21.5611" height="27.0768"/>
+  <object id="63" type="Bridge" gid="1438" x="416.062" y="443.137" width="24.4025" height="27.0768"/>
+  <object id="64" type="Bridge" gid="1438" x="358.399" y="138.858" width="21.5611" height="27.0768"/>
+  <object id="66" type="Bridge" gid="1438" x="375.698" y="138.858" width="21.5611" height="27.0768"/>
+  <object id="67" type="Bridge" gid="1438" x="392.245" y="138.858" width="26.241" height="27.0768"/>
+  <object id="68" type="Building" gid="1439" x="624.488" y="481.495" width="66.1039" height="186.195"/>
+  <object id="82" type="Tree" gid="1440" x="583.537" y="333.158" width="49.6407" height="68.1933"/>
+  <object id="89" type="Building" gid="1444" x="508.073" y="184.487" width="90.1722" height="186.863"/>
+  <object id="90" type="Building" gid="1442" x="622.814" y="223.598" width="124.353" height="128.364"/>
+  <object id="93" type="Tree" gid="1445" x="340.854" y="478.571" width="53.3412" height="80.9761"/>
+  <object id="96" type="Tree" gid="1446" x="289.944" y="477.928" width="52.6989" height="80.9761"/>
+  <object id="97" type="Tree" gid="1446" x="183.904" y="477.928" width="52.6989" height="80.9761"/>
+  <object id="98" type="Tree" gid="1445" x="235.96" y="477.286" width="53.3412" height="80.9761"/>
+  <object id="100" type="Building" gid="1443" x="166.438" y="122.728" width="103.544" height="134.381"/>
+  <object id="105" type="Tree" gid="1445" x="161.318" y="123.592" width="45.2104" height="68.6326"/>
+  <object id="106" type="Tree" gid="1446" x="229.035" y="123.468" width="46.8445" height="70.0852"/>
+  <object id="119" type="Tree" gid="1440" x="583.537" y="301.067" width="49.6407" height="68.1933"/>
+  <object id="121" type="Tree" gid="1453" x="5.89956" y="44.3395" width="31.4072" height="41.9523"/>
+  <object id="122" type="Tree" gid="1453" x="37.9905" y="44.3395" width="31.4072" height="41.9523"/>
+  <object id="123" type="Tree" gid="1453" x="5.89956" y="108.522" width="31.4072" height="41.9523"/>
+  <object id="124" type="Tree" gid="1453" x="37.9905" y="108.522" width="31.4072" height="41.9523"/>
+  <object id="125" type="Tree" gid="1453" x="5.89956" y="76.4305" width="31.4072" height="41.9523"/>
+  <object id="126" type="Tree" gid="1453" x="37.9905" y="76.4305" width="31.4072" height="41.9523"/>
+  <object id="127" type="Tree" gid="1453" x="5.89956" y="12.2486" width="31.4072" height="41.9523"/>
+  <object id="128" type="Tree" gid="1453" x="37.9905" y="12.2486" width="31.4072" height="41.9523"/>
+  <object id="129" type="Tree" gid="1453" x="70.0815" y="172.703" width="31.4072" height="41.9523"/>
+  <object id="130" type="Tree" gid="1453" x="102.173" y="172.703" width="31.4072" height="41.9523"/>
+  <object id="131" type="Tree" gid="1453" x="5.89956" y="172.703" width="31.4072" height="41.9523"/>
+  <object id="132" type="Tree" gid="1453" x="37.9905" y="172.703" width="31.4072" height="41.9523"/>
+  <object id="133" type="Tree" gid="1453" x="5.89956" y="140.612" width="31.4072" height="41.9523"/>
+  <object id="134" type="Tree" gid="1453" x="37.9905" y="140.612" width="31.4072" height="41.9523"/>
+  <object id="137" type="Tree" gid="1453" x="134.263" y="172.703" width="31.4072" height="41.9523"/>
+  <object id="143" type="Tree" gid="1452" x="604.096" y="118.049" width="46.6531" height="58.3113"/>
+  <object id="148" type="Tree" gid="1451" x="583.537" y="268.976" width="55.3234" height="70.7005"/>
+  <object id="149" type="Tree" gid="1451" x="538.073" y="258.28" width="55.3234" height="70.7005"/>
+  <object id="156" type="Tree" gid="1451" x="524.034" y="303.825" width="55.3234" height="70.7005"/>
+  <object id="158" type="Tree" gid="1454" x="487.264" y="301.067" width="48.3872" height="60.9227"/>
+  <object id="159" type="Tree" gid="1454" x="439.128" y="301.067" width="48.3872" height="60.9227"/>
+  <object id="161" type="Tree" gid="1446" x="121.728" y="82.777" width="44.6657" height="68.6326"/>
+  <object id="162" type="Tree" gid="1446" x="264.093" y="93.0276" width="44.6657" height="68.6326"/>
+  <object id="163" type="Tree" gid="1446" x="248.68" y="38.8916" width="44.6657" height="68.6326"/>
+  <object id="164" type="Tree" gid="1446" x="127.509" y="42.9403" width="44.6657" height="68.6326"/>
+  <object id="166" type="Tree" gid="1447" x="487.766" y="479.072" width="46.6322" height="57.6635"/>
+  <object id="168" type="Tree" gid="1449" x="439.629" y="351.711" width="45.1279" height="55.1564"/>
+  <object id="169" type="Tree" gid="1449" x="439.629" y="400.349" width="45.1279" height="55.1564"/>
+  <object id="172" type="Tree" gid="1448" x="488.016" y="353.717" width="45.6294" height="58.1649"/>
+  <object id="173" type="Tree" gid="1440" x="532.392" y="351.21" width="49.6407" height="68.1933"/>
+  <object id="174" type="Tree" gid="1440" x="535.401" y="397.34" width="49.6407" height="68.1933"/>
+  <object id="175" type="Tree" gid="1455" x="102.173" y="12.2486" width="30.0853" height="38.9438"/>
+  <object id="176" type="Tree" gid="1455" x="102.173" y="44.3395" width="30.0853" height="38.9438"/>
+  <object id="179" type="Tree" gid="1455" x="102.173" y="76.4305" width="30.0853" height="38.9438"/>
+  <object id="180" type="Tree" gid="1455" x="102.173" y="108.522" width="30.0853" height="38.9438"/>
+  <object id="181" type="Tree" gid="1455" x="134.263" y="108.522" width="30.0853" height="38.9438"/>
+  <object id="182" type="Tree" gid="1447" x="488.267" y="403.357" width="46.6322" height="57.6635"/>
+  <object id="185" gid="1456" x="680.813" y="16.5942" width="31.4224" height="35.2666"/>
  </objectgroup>
 </map>

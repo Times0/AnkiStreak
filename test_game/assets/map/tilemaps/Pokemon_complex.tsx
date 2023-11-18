@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.10.1" name="tilesetcomplet_pokemon" tilewidth="32" tileheight="32" tilecount="21000" columns="140">
- <image source="../tilemaps_png/upscaled.png" width="4480" height="4800"/>
+<tileset version="1.10" tiledversion="1.10.2" name="tilesetcomplet_pokemon" tilewidth="32" tileheight="32" tilecount="21000" columns="140">
+ <image source="../tilemaps_png/shesh.png" width="4480" height="4800"/>
  <tile id="3835">
   <animation>
    <frame tileid="3695" duration="230"/>
