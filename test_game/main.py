@@ -1,13 +1,13 @@
 import os
 import sys
 
+from boring.config import WIDTH, HEIGHT
+import logging
 import pygame
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-
 sys.path.append(os.path.dirname(__file__))
-from boring.config import WIDTH, HEIGHT
-import logging
+
 
 logging.basicConfig(level=logging.INFO, filename="game.log", filemode="w",
                     format="%(asctime)s - %(levelname)s - %(message)s")
@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.INFO, filename="game.log", filemode="w",
 def main():
     pygame.init()
     pygame.display.set_caption("Game")
-    win = pygame.display.set_mode((WIDTH, HEIGHT))
+    win = pygame.display.set_mode((WIDTH, HEIGHT), pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.SCALED)
     from game import Game
     game = Game(win)
     from game import PlantSpot

@@ -54,7 +54,11 @@ class UIElement(AcrylicBackground):
             self.instantiate_button_cross()
 
     def instantiate_button_cross(self):
-        self.btn_close = ButtonPngIcon(cross_btn, Color((181, 200, 71)), opacity=1, onclick_f=self.close, inflate=0)
+        self.btn_close = ButtonPngIcon(cross_btn,
+                                       onclick_f=self.close,
+                                       hover_color=Color((181, 200, 71)),
+                                       opacity=1,
+                                       inflate=0)
 
     def _handle_event(self, event):
         print(f"{self.name}")

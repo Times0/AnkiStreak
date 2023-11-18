@@ -1,4 +1,4 @@
-from test_game.backend.objects import GameObjectNoPos
+from backend.objects import GameObjectNoPos
 from test_game.boring import imgs
 
 

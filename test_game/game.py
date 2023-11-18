@@ -67,9 +67,9 @@ class Game:
 
         # _____________________UI___________________________________#
         self.easy_ui = Group()
-        self.btn_menu = ButtonPngIcon(imgs.btn_inventory, Color("gray"), lambda: self.ui_manager.open("inventory"))
-        self.btn_shop = ButtonPngIcon(imgs.btn_shop, Color("gray"), lambda: self.ui_manager.open("shop"))
-        self.btn_tuxemon = ButtonPngIcon(imgs.btn_tuxemon, Color("gray"), lambda: self.ui_manager.open("tuxemon"))
+        self.btn_menu = ButtonPngIcon(imgs.btn_inventory, lambda: self.ui_manager.open("inventory"), Color("gray"))
+        self.btn_shop = ButtonPngIcon(imgs.btn_shop, lambda: self.ui_manager.open("shop"),Color("gray"))
+        self.btn_tuxemon = ButtonPngIcon(imgs.btn_tuxemon, lambda: self.ui_manager.open("tuxemon"), Color("gray"))
         self.easy_ui.add(self.btn_menu)
         self.easy_ui.add(self.btn_shop)
         self.easy_ui.add(self.btn_tuxemon)
@@ -82,6 +82,11 @@ class Game:
         self.load_anki_data()
 
     def load_anki_data(self):
+        # if not os.path.exists(anki_data_path):
+        #     self.anki_data_json = {"time_ordinal": datetime.today().toordinal(),
+        #                            "nb_cards_to_review_today": 0,
+        #                            "nb_cards_learned_today": 0}
+        #     json.dump(self.anki_data_json, open(anki_data_path, "w"))
         self.anki_data_json = json.load(open(anki_data_path, "r"))
         self.learning_indicator.set_nb_cards_total(self.anki_data_json["nb_cards_to_review_today"])
 
@@ -107,7 +112,8 @@ class Game:
         if not self.ui_manager.active_element:
             self.ptmx.handle_events(events)
             for e in self.ui_elements:
-                e.handle_events(events)
+                for event in events:
+                    e.handle_event(event)
 
         for gw in self.special_ui:
             if gw.isVisible():
@@ -171,8 +177,8 @@ class Game:
         W = win.get_width()
         self.btn_menu.draw(win, W - self.btn_menu.rect.width - 10, 10)
         self.btn_shop.draw(win, W - self.btn_shop.rect.width - 10 - self.btn_menu.rect.width - 10, 10)
-        self.btn_tuxemon.draw(win, W - self.btn_tuxemon.rect.width - 10 -
-                              self.btn_menu.rect.width - 10 - self.btn_shop.rect.width - 10, 10)
+        x = W - self.btn_tuxemon.rect.width - 10 - self.btn_menu.rect.width - 10 - self.btn_shop.rect.width - 10
+        self.btn_tuxemon.draw(win, x, 10)
         self.ui_manager.draw(win)
 
     def dump_save(self):
