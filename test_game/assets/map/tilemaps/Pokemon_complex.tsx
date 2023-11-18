@@ -1,16 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tileset version="1.10" tiledversion="1.10.2" name="tilesetcomplet_pokemon" tilewidth="32" tileheight="32" tilecount="21000" columns="140">
  <image source="../tilemaps_png/shesh.png" width="4480" height="4800"/>
- <tile id="3835">
+ <tile id="3648">
   <animation>
-   <frame tileid="3695" duration="230"/>
-   <frame tileid="3835" duration="230"/>
+   <frame tileid="3648" duration="1000"/>
+   <frame tileid="3660" duration="1000"/>
   </animation>
  </tile>
- <tile id="3836">
+ <tile id="3834">
   <animation>
-   <frame tileid="3836" duration="230"/>
-   <frame tileid="3696" duration="230"/>
+   <frame tileid="3834" duration="200"/>
+   <frame tileid="3554" duration="200"/>
+   <frame tileid="3694" duration="200"/>
+  </animation>
+ </tile>
+ <tile id="3837">
+  <animation>
+   <frame tileid="3837" duration="200"/>
+   <frame tileid="3557" duration="200"/>
+   <frame tileid="3697" duration="200"/>
   </animation>
  </tile>
  <wangsets>

@@ -25,6 +25,7 @@ from frontend.screens.UiPopup import Popup
 from frontend.screens.UiShop import ShopUI
 from frontend.screens.UiTuxemon import TuxemonUI
 from frontend.ui_manager import UIManager
+from test_game.frontend.npc import NPC
 
 cwd = os.path.dirname(__file__)
 logger = logging.getLogger(__name__)
@@ -283,16 +284,20 @@ class Pytmx:
         self.map_layer = pyscroll.BufferedRenderer(pyscroll_data, self.win.get_size(), clamp_camera=True)
         self.farms = []
         self.interactable_objects = []
-        self.special_tiles = []
         self.objects = SortedGroup()
+        self.PATH_POINTS = []
         self.load_objects()
-        self.load_special_tiles()
 
         # Game attributes
         self.map_layer.zoom = START_ZOOM
         self.zoom_target = self.map_layer.zoom
         self.is_scrolling = False
         self.requires_update = False
+
+        # ______________________NPCs_____________________________________#
+        self.npcs: list[NPC] = []
+        for name in ['healer_f', 'healer_m', 'mage_f', 'mage_m', 'ninja_f', 'ninja_m', 'ranger_f', 'ranger_m', 'townfolk1_f', 'townfolk1_m', 'warrior_f', 'warrior_m']:
+            self.npcs.append(NPC(name, self.PATH_POINTS))
 
         self.update_camera(force=True)
 
@@ -301,11 +306,16 @@ class Pytmx:
         for obj_layer in self.data_tmx.objectgroups:
             if obj_layer.name == "Rects":
                 for obj in obj_layer:
-                    # retrieve pytmx rect object
                     points = [PointWithZoom((p.x, p.y)) for p in obj.points]
                     dict_future_rects[obj.name] = points
 
-            if obj_layer.name == "Objects":
+            elif obj_layer.name == "PathPoints":
+                pts = []
+                for obj in obj_layer:
+                    pts.append((obj.x, obj.y))
+                self.PATH_POINTS = pts
+
+            elif obj_layer.name == "Objects":
                 for obj in obj_layer:
                     if obj.type == "Farm":
                         associated_rect = dict_future_rects[obj.name]
@@ -322,19 +332,6 @@ class Pytmx:
                             self.farms.append(farm)
                     else:
                         self.objects.add(GameObject((obj.x, obj.y), (obj.width, obj.height), obj.image))
-
-    def load_special_tiles(self):
-        for layer in self.data_tmx.layers:
-            if layer.name == "Plantations1":
-                for x, y, gid in layer:
-                    if gid != 0:
-                        plant = PlantSpot((x * self.data_tmx.tilewidth, y * self.data_tmx.tileheight))
-                        self.farms[0].add_plant_location(plant)
-            elif layer.name == "Plantations2":
-                for x, y, gid in layer:
-                    if gid != 0:
-                        plant = PlantSpot((x * self.data_tmx.tilewidth, y * self.data_tmx.tileheight))
-                        self.farms[1].add_plant_location(plant)
 
     def handle_events(self, events):
         self.handle_camera_events(events)
@@ -368,7 +365,7 @@ class Pytmx:
                     self.map_layer.center(self.map_layer.view_rect.center)
 
     def update(self, dt):
-        for obj in self.objects.sprites + self.interactable_objects + self.farms:
+        for obj in self.objects.sprites + self.interactable_objects + self.farms + self.npcs:
             obj.update(dt)
 
         self.update_camera()
@@ -376,10 +373,12 @@ class Pytmx:
     def update_camera(self, force=False):
         if abs(self.map_layer.zoom - self.zoom_target) > 10 ** (-3):
             self.map_layer.zoom += (self.zoom_target - self.map_layer.zoom) / 2
+            self.map_layer.zoom = round(self.map_layer.zoom, 2)
+
             self.map_layer.center(self.map_layer.view_rect.center)
             self.requires_update = True
         if self.requires_update or force:
-            for obj in self.objects.sprites + self.interactable_objects:
+            for obj in self.objects.sprites + self.interactable_objects + self.npcs:
                 obj.update_camera(self.map_layer.view_rect)
         else:
             for farm in self.farms:
@@ -387,6 +386,6 @@ class Pytmx:
 
     def draw(self, win):
         self.map_layer.draw(win, win.get_rect())
+        for npc in self.npcs:
+            npc.draw(win)
         self.objects.draw(win)
-        for obj in self.special_tiles:
-            obj.draw(win)

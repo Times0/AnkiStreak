@@ -48,6 +48,7 @@ class GameObjectNoPos:
     def update_camera(self, camera_rect):
         w, h = pygame.display.get_surface().get_size()
         zoom = 1 / (camera_rect.w / w)
+        zoom = round(zoom, 2)
         if zoom not in self.cache:
             self.rect.width = self.size[0] * zoom
             self.rect.height = self.size[1] * zoom
@@ -64,13 +65,13 @@ class GameObject(GameObjectNoImg):
         self.size = size
         self.img = pygame.transform.scale(img, size)
         self.zoom_buffer = img
-
         self.cache = {}
 
     def update_camera(self, camera_rect):
         GameObjectNoImg.update_camera(self, camera_rect)
         w, h = pygame.display.get_surface().get_size()
         zoom = 1 / (camera_rect.w / w)
+        zoom = round(zoom, 2)
         if zoom not in self.cache:
             self.rect.width = self.size[0] * zoom
             self.rect.height = self.size[1] * zoom

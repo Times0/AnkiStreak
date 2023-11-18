@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.INFO, filename="game.log", filemode="w",
 def main():
     pygame.init()
     pygame.display.set_caption("Game")
-    win = pygame.display.set_mode((WIDTH, HEIGHT), pygame.DOUBLEBUF | pygame.HWSURFACE)
+    win = pygame.display.set_mode((WIDTH, HEIGHT), pygame.DOUBLEBUF | pygame.HWSURFACE, vsync=True)
     from game import Game
     game = Game(win)
     from game import PlantSpot

@@ -1,5 +1,6 @@
 import glob
 import os
+from pprint import pprint
 
 import pygame
 
@@ -18,7 +19,7 @@ def load(path, size=None, vertical_size=None, horizontal_size=None):
         img = pygame.transform.scale(img, (img.get_width() * vertical_size // img.get_height(), vertical_size))
     elif horizontal_size:
         img = pygame.transform.scale(img,
-                                           (horizontal_size, img.get_height() * horizontal_size // img.get_width()))
+                                     (horizontal_size, img.get_height() * horizontal_size // img.get_width()))
     return img
 
 
@@ -93,3 +94,32 @@ def scale(img, size):
     h_ratio = h / img.get_height()
     ratio = min(w_ratio, h_ratio)
     return pygame.transform.scale(img, (int(img.get_width() * ratio), int(img.get_height() * ratio)))
+
+
+# _____________________NPCs__________________________________#
+def load_npc_imgs() -> dict[str, dict[str, pygame.Surface]]:
+    WSIZE = 32
+    HSIZE = 36
+    npc_folder = os.path.join(cwd, "..", "assets", "sprites", "npcs")
+    res = {}
+    keys = ["back", "right", "front", "left"]
+
+    for filename in os.listdir(npc_folder):
+        # each file contains a 4x3 grid of images, top,right,bottom,left. We extract each image
+        name = filename.split(".")[0]
+        res[name] = {}
+        filepath = os.path.join(npc_folder, filename)
+        img = load(filepath)
+        for k in keys:
+            res[name][k] = []
+        for i in range(4):
+            for j in range(3):
+                sprite = img.subsurface(j * WSIZE, i * HSIZE, WSIZE, HSIZE)
+                res[name][keys[i]].append(sprite)
+    return res
+
+
+imgs_npc = load_npc_imgs()
+
+if __name__ == '__main__':
+    pprint(load_npc_imgs())
