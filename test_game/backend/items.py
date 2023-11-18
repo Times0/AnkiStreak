@@ -7,6 +7,7 @@ class Item(GameObjectNoPos):
         super().__init__((50, 50), img)
         self.name = name
 
+
     def draw(self, win):
         win.blit(self.zoom_buffer, self.rect)
 

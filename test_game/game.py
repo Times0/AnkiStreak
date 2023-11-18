@@ -68,7 +68,7 @@ class Game:
         # _____________________UI___________________________________#
         self.easy_ui = Group()
         self.btn_menu = ButtonPngIcon(imgs.btn_inventory, lambda: self.ui_manager.open("inventory"), Color("gray"))
-        self.btn_shop = ButtonPngIcon(imgs.btn_shop, lambda: self.ui_manager.open("shop"),Color("gray"))
+        self.btn_shop = ButtonPngIcon(imgs.btn_shop, lambda: self.ui_manager.open("shop"), Color("gray"))
         self.btn_tuxemon = ButtonPngIcon(imgs.btn_tuxemon, lambda: self.ui_manager.open("tuxemon"), Color("gray"))
         self.easy_ui.add(self.btn_menu)
         self.easy_ui.add(self.btn_shop)

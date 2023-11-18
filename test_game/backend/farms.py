@@ -1,10 +1,10 @@
 import pygame
-
 from test_game.backend import objects
 from test_game.backend.inventory import Inventory
 from test_game.backend.items import Item
 from test_game.boring import config
 from test_game.boring import imgs, utils, colors
+from typing import Optional
 
 
 class FarmMenuItem(Item):
@@ -23,7 +23,7 @@ class Menu(objects.GameObjectNoImg):
         y_menu = linked_bat.rect.y - size[1] - 10
         pos = (x_menu, y_menu)
         super().__init__(pos, size)
-        self.items = items
+        self.items: list[FarmMenuItem] = items
         self.is_open = False
 
         self.hovered_item_index = -1
@@ -90,7 +90,6 @@ class Menu(objects.GameObjectNoImg):
                 pygame.draw.rect(win, colors.MENU_SELECTED, self.items_rects[i].inflate(10, 10), border_radius=10)
             img = item.zoom_buffer
             if item.type == FarmMenuItem.seed and item not in self.inventory:
-                # make img black and white
                 img = utils.grayscale(img)
             win.blit(img, self.items_rects[i])
 
@@ -329,9 +328,6 @@ class OnTheMoveItem(objects.GameObject):
             self.index += int(dt * MAXFPS)
             if self.index >= len(self.steps):
                 self.is_arrived = True
-
-
-from typing import Optional
 
 
 class PlantSpot(objects.GameObjectNoImg):

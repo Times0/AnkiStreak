@@ -8,7 +8,6 @@ import pygame
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 sys.path.append(os.path.dirname(__file__))
 
-
 logging.basicConfig(level=logging.INFO, filename="game.log", filemode="w",
                     format="%(asctime)s - %(levelname)s - %(message)s")
 
@@ -20,7 +19,7 @@ def main():
     from game import Game
     game = Game(win)
     from game import PlantSpot
-    PlantSpot.counter = 0
+    PlantSpot.counter = 0  # Avoids conflicts when starting a new game without closing the anki window
     game.run()
     pygame.quit()
 

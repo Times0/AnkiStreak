@@ -47,7 +47,10 @@
             },
             {
                 "id": 11,
-                "plant": null
+                "plant": {
+                    "type": "water",
+                    "development_index": 0
+                }
             },
             {
                 "id": 12,
@@ -639,10 +642,9 @@
     },
     "inventory": {
         "ice fruit": 6,
-        "water seeds": 1,
         "fire fruit": 5
     },
     "cards_learned_today": 0,
-    "time": 738828,
+    "time": 738842,
     "wallet": 450
 }

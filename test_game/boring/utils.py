@@ -105,7 +105,6 @@ def render(text, font, gfcolor=pygame.Color('dodgerblue'), ocolor=(255, 255, 255
     return surf
 
 
-import pygame
 
 
 def grayscale(img: pygame.Surface) -> pygame.Surface:
