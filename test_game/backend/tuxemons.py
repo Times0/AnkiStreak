@@ -75,7 +75,7 @@ class TuxemonInventory:
         tuxemon = self.tuxemons.get(tuxemon_name)
         if tuxemon:
             nb_remaining = self.inventory.get(tuxemon.favorite_fruit(), 0)
-            if nb_remaining > 0:
+            if nb_remaining > 0 and tuxemon.xp < tuxemon.max_xp():
                 self.inventory.consume_item(tuxemon.favorite_fruit(), 1)
                 tuxemon.add_xp(10)
 

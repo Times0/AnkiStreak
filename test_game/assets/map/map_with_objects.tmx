@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="45" height="30" tilewidth="32" tileheight="32" infinite="0" nextlayerid="30" nextobjectid="235">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="45" height="30" tilewidth="32" tileheight="32" infinite="0" nextlayerid="31" nextobjectid="244">
  <tileset firstgid="1" name="simple_pokemon" tilewidth="32" tileheight="32" tilecount="1424" columns="8">
   <image source="tilemaps_png/tile_pokemon.png" width="256" height="5697"/>
  </tileset>
@@ -550,16 +550,19 @@
    <polygon points="0,0 272,2 276,210 227,210 227,182 148,181 145,332 5,335"/>
   </object>
  </objectgroup>
- <objectgroup id="2" name="Objects" visible="0">
+ <objectgroup id="30" name="UnderNpcObjects">
+  <object id="235" type="Bridge" gid="1438" x="703.477" y="284.25" width="50.2727" height="54"/>
+  <object id="236" type="Bridge" gid="1438" x="769" y="283.75" width="42.4091" height="54"/>
+  <object id="237" type="Bridge" gid="1438" x="739.25" y="284" width="43" height="54"/>
+  <object id="238" type="Bridge" gid="1438" x="799.92" y="283.875" width="42.4091" height="54"/>
+  <object id="239" type="Bridge" gid="1438" x="726.199" y="888.438" width="50.2727" height="54"/>
+  <object id="240" type="Bridge" gid="1438" x="791.722" y="887.938" width="42.4091" height="54"/>
+  <object id="241" type="Bridge" gid="1438" x="761.972" y="888.188" width="43" height="54"/>
+  <object id="242" type="Bridge" gid="1438" x="821.392" y="887.563" width="42.4091" height="54"/>
+ </objectgroup>
+ <objectgroup id="2" name="Objects">
   <object id="28" name="Farm1" type="Farm" gid="1425" x="146" y="660" width="130" height="163"/>
   <object id="34" name="Farm2" type="Farm" gid="1433" x="359.25" y="653.583" width="240" height="238.333"/>
-  <object id="36" type="Stairs" gid="1436" x="293.667" y="966.083" width="68" height="140"/>
-  <object id="60" type="Bridge" gid="1438" x="735.333" y="891.666" width="55.6667" height="54"/>
-  <object id="62" type="Bridge" gid="1438" x="785.583" y="891.333" width="43" height="54"/>
-  <object id="63" type="Bridge" gid="1438" x="818" y="891.333" width="48.6667" height="54"/>
-  <object id="64" type="Bridge" gid="1438" x="703" y="284.5" width="43" height="54"/>
-  <object id="66" type="Bridge" gid="1438" x="737.5" y="284.5" width="43" height="54"/>
-  <object id="67" type="Bridge" gid="1438" x="770.5" y="284.5" width="52.3333" height="54"/>
   <object id="68" type="Building" gid="1439" x="1233.67" y="967.833" width="131.833" height="371.334"/>
   <object id="82" type="Tree" gid="1440" x="1152" y="672" width="99" height="136"/>
   <object id="89" type="Building" gid="1444" x="1001.5" y="375.5" width="179.833" height="372.667"/>
@@ -569,8 +572,8 @@
   <object id="97" type="Tree" gid="1446" x="355" y="960.718" width="105.099" height="161.493"/>
   <object id="98" type="Tree" gid="1445" x="458.817" y="959.437" width="106.38" height="161.493"/>
   <object id="100" type="Building" gid="1443" x="320.167" y="252.333" width="206.5" height="268"/>
-  <object id="105" type="Tree" gid="1445" x="309.956" y="254.056" width="90.1644" height="136.876"/>
-  <object id="106" type="Tree" gid="1446" x="445.005" y="253.809" width="93.4233" height="139.773"/>
+  <object id="105" type="Tree" gid="1445" x="308.956" y="255.723" width="90.1644" height="136.876"/>
+  <object id="106" type="Tree" gid="1446" x="444.672" y="255.476" width="93.4233" height="139.773"/>
   <object id="119" type="Tree" gid="1440" x="1152" y="608" width="99" height="136"/>
   <object id="121" type="Tree" gid="1453" x="0" y="96" width="62.6364" height="83.6667"/>
   <object id="122" type="Tree" gid="1453" x="64" y="96" width="62.6364" height="83.6667"/>
@@ -615,16 +618,16 @@
   <object id="211" x="156" y="19">
    <point/>
   </object>
-  <object id="212" x="159" y="251">
+  <object id="212" x="156.333" y="231">
    <point/>
   </object>
-  <object id="213" x="353" y="259">
+  <object id="213" x="355.667" y="252.667">
    <point/>
   </object>
-  <object id="214" x="356" y="557">
+  <object id="214" x="357" y="555">
    <point/>
   </object>
-  <object id="215" x="503" y="558">
+  <object id="215" x="356" y="584">
    <point/>
   </object>
   <object id="216" x="358" y="555">
@@ -633,55 +636,55 @@
   <object id="217" x="355" y="636">
    <point/>
   </object>
-  <object id="218" x="198" y="631">
+  <object id="218" x="198" y="640.333">
    <point/>
   </object>
   <object id="219" x="355" y="634">
    <point/>
   </object>
-  <object id="220" x="355" y="857">
+  <object id="220" x="353" y="851">
    <point/>
   </object>
-  <object id="221" x="721" y="864">
+  <object id="221" x="700.333" y="856">
    <point/>
   </object>
-  <object id="222" x="794" y="850">
+  <object id="222" x="797.546" y="840.303">
    <point/>
   </object>
-  <object id="223" x="876" y="859">
+  <object id="223" x="879" y="846.666">
    <point/>
   </object>
   <object id="224" x="1079" y="850">
    <point/>
   </object>
-  <object id="225" x="1090" y="919">
+  <object id="225" x="1097" y="925.667">
    <point/>
   </object>
-  <object id="226" x="1296" y="918">
+  <object id="226" x="1296" y="922.333">
    <point/>
   </object>
-  <object id="227" x="1299" y="827">
+  <object id="227" x="1294.33" y="827.667">
    <point/>
   </object>
-  <object id="228" x="1295" y="917">
+  <object id="228" x="1294.67" y="925">
    <point/>
   </object>
-  <object id="229" x="1089" y="920">
+  <object id="229" x="1093.33" y="925.667">
    <point/>
   </object>
   <object id="230" x="1090" y="504">
    <point/>
   </object>
-  <object id="231" x="1279" y="378">
+  <object id="231" x="1287" y="392.667">
    <point/>
   </object>
-  <object id="232" x="1102" y="250">
+  <object id="232" x="1107.33" y="396.667">
    <point/>
   </object>
-  <object id="233" x="863" y="245">
+  <object id="233" x="1081.66" y="257">
    <point/>
   </object>
-  <object id="234" x="584" y="244">
+  <object id="234" x="585.333" y="254.333">
    <point/>
   </object>
  </objectgroup>

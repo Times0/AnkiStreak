@@ -1,6 +1,8 @@
 import pygame
+from pygame import Color
 
 from test_game.backend.inventory import Inventory
+from test_game.boring.imgs import load_font
 from test_game.frontend.ui_manager import UIElement
 
 
@@ -11,6 +13,10 @@ class InventoryUI(UIElement):
         self.item_spacing = 10  # Spacing between inventory items
 
         self.inventory_items: Inventory = inventory
+        self.item_images_scaled = {}
+
+        self.font = load_font("blomberg.otf", 20)
+        self.small_font = load_font("title.otf", 30)
 
     def _draw(self, win):
         x, y = self.rect.topleft
@@ -20,31 +26,28 @@ class InventoryUI(UIElement):
         item_y = y + self.border_radius  # Y position of the first item
 
         for item_name, nb in self.inventory_items.items.items():
-            # Draw each item as a rounded rectangle
-            pygame.draw.rect(win, (76, 76, 76), (item_x, item_y, width - 2 * self.border_radius, 50),
-                             border_radius=5)
+            if item_name not in self.item_images_scaled:
+                self.item_images_scaled[item_name] = pygame.transform.scale(self.inventory_items.get_image(item_name),
+                                                                            (60, 60))
+            # Draw the item row
+            item_img = self.item_images_scaled[item_name]
+            item_rect = item_img.get_rect()
+            item_rect.topleft = item_x, item_y
+            win.blit(item_img, item_rect)
 
-            # Draw a subtle gradient on the item rectangle
-            gradient_rect = pygame.Rect(item_x, item_y, width - 2 * self.border_radius, 50)
-            gradient = pygame.Surface((gradient_rect.width, gradient_rect.height))
-            pygame.draw.rect(gradient, (100, 100, 100), gradient.get_rect(top=1, bottom=gradient_rect.height - 2))
-            pygame.draw.rect(gradient, (66, 66, 66), gradient.get_rect(top=0, bottom=1))
-            pygame.draw.rect(win, (0, 0, 0), gradient_rect)
-            win.blit(gradient, gradient_rect)
+            # Draw the item name
+            text = self.font.render(item_name, True, Color("black"))
+            text_rect = text.get_rect(midleft=item_rect.midright).move(30, 0)
+            win.blit(text, text_rect)
+            # draw line at the bottom of the row
+            pygame.draw.line(win, Color("black"), (x, item_y + item_rect.height + 5),
+                             (x + width, item_y + item_rect.height + 5))
+            # Draw the item quantity
+            text = self.small_font.render(str(nb), True, Color("black"))
+            text_rect = text.get_rect(midright=(x + width - self.border_radius * 2, item_rect.centery))
+            win.blit(text, text_rect)
 
-            # Draw the item image and number on the same line
-            font = pygame.font.Font(None, 24)
-            img = self.inventory_items.get_image(item_name)
-            # resize the image to fit the item rectangle
-            img = pygame.transform.scale(img, (40, 40))
-
-            win.blit(img, (item_x + 5, item_y + 5))
-
-            text = font.render(str(nb), True, (255, 255, 255))
-            win.blit(text, (item_x + 50, item_y + 5))
-
-            # Update the item Y position for the next item
-            item_y += 60  # Adjust the spacing between items
+            item_y += item_rect.height + self.item_spacing
 
     def _handle_event(self, events):
         pass

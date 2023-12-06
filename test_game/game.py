@@ -8,7 +8,7 @@ import pyscroll
 import pytmx
 from PygameUIKit import Group
 from PygameUIKit.button import ButtonPngIcon
-from pygame import Color
+from pygame import Color, Vector2
 
 from backend.farms import Farm, PlantSpot
 from backend.inventory import Inventory
@@ -98,7 +98,7 @@ class Game:
         while self.running:
             dt = clock.tick(FPS) / 1000
             self.time_since_last_late_update += dt
-            print(f"\rFPS: {clock.get_fps()}", end="")
+            # print(f"\rFPS: {clock.get_fps()}", end="")
             self.events()
             self.update(dt)
             if self.time_since_last_late_update >= 1000 / LATE_UPDATE_FPS:
@@ -285,8 +285,11 @@ class Pytmx:
         self.farms = []
         self.interactable_objects = []
         self.objects = SortedGroup()
+        self.objects_under_npc = SortedGroup()
+
         self.PATH_POINTS = []
         self.load_objects()
+        self.load_special_tiles()
 
         # Game attributes
         self.map_layer.zoom = START_ZOOM
@@ -296,10 +299,29 @@ class Pytmx:
 
         # ______________________NPCs_____________________________________#
         self.npcs: list[NPC] = []
-        for name in ['healer_f', 'healer_m', 'mage_f', 'mage_m', 'ninja_f', 'ninja_m', 'ranger_f', 'ranger_m', 'townfolk1_f', 'townfolk1_m', 'warrior_f', 'warrior_m']:
+        for name in ['healer_f', 'healer_m', 'mage_f', 'mage_m', 'ninja_f', 'ninja_m', 'ranger_f', 'ranger_m',
+                     'townfolk1_f', 'townfolk1_m', 'warrior_f', 'warrior_m']:
             self.npcs.append(NPC(name, self.PATH_POINTS))
 
+        for npc in self.npcs:
+            self.objects.add(npc)
+
         self.update_camera(force=True)
+
+    def load_special_tiles(self):
+        for layer in self.data_tmx.layers:
+            if layer.name == "Plantations1":
+                for x, y, gid in layer:
+                    if gid != 0:
+                        vec = Vector2(x * self.data_tmx.tilewidth, y * self.data_tmx.tileheight)
+                        plant = PlantSpot(vec)
+                        self.farms[0].add_plant_location(plant)
+            elif layer.name == "Plantations2":
+                for x, y, gid in layer:
+                    if gid != 0:
+                        vec = Vector2(x * self.data_tmx.tilewidth, y * self.data_tmx.tileheight)
+                        plant = PlantSpot(vec)
+                        self.farms[1].add_plant_location(plant)
 
     def load_objects(self):
         dict_future_rects = {}
@@ -319,7 +341,7 @@ class Pytmx:
                 for obj in obj_layer:
                     if obj.type == "Farm":
                         associated_rect = dict_future_rects[obj.name]
-                        farm = Farm((obj.x, obj.y),
+                        farm = Farm(Vector2(obj.x, obj.y),
                                     (obj.width, obj.height),
                                     obj.image,
                                     associated_rect,
@@ -331,7 +353,12 @@ class Pytmx:
                         elif obj.name == "Farm2":
                             self.farms.append(farm)
                     else:
-                        self.objects.add(GameObject((obj.x, obj.y), (obj.width, obj.height), obj.image))
+                        self.objects.add(GameObject(Vector2(obj.x, obj.y), (obj.width, obj.height), obj.image))
+
+            elif obj_layer.name == "UnderNpcObjects":
+                for obj in obj_layer:
+                    self.objects_under_npc.add(GameObject(Vector2(obj.x, obj.y), (obj.width, obj.height),
+                                                          obj.image))
 
     def handle_events(self, events):
         self.handle_camera_events(events)
@@ -342,11 +369,12 @@ class Pytmx:
         for event in events:
             if event.type == pygame.MOUSEWHEEL and ALLOW_SCROLLING:
                 if event.y > 0:
-                    self.zoom_target += 0.05
+                    self.zoom_target *= 1.05
                 elif event.y < 0:
-                    self.zoom_target -= 0.05
+                    self.zoom_target /= 1.05
                 self.zoom_target = clamp(self.zoom_target, MIN_ZOOM, MAX_ZOOM)
-                # self.map_layer.center(self.map_layer.view_rect.center)
+                self.map_layer.zoom = self.zoom_target
+                self.requires_update = True
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.requires_update = True
@@ -358,34 +386,30 @@ class Pytmx:
                     self.is_scrolling = False
 
             if event.type == pygame.MOUSEMOTION:
-                self.requires_update = True
                 if self.is_scrolling:
+                    self.requires_update = True
                     self.map_layer.view_rect.x -= event.rel[0] / self.map_layer.zoom
                     self.map_layer.view_rect.y -= event.rel[1] / self.map_layer.zoom
-                    self.map_layer.center(self.map_layer.view_rect.center)
+
+            if self.requires_update:
+                self.map_layer.center(self.map_layer.view_rect.center)
 
     def update(self, dt):
-        for obj in self.objects.sprites + self.interactable_objects + self.farms + self.npcs:
+        for obj in self.objects.sprites + self.interactable_objects + self.farms + self.objects_under_npc.sprites + self.npcs:
             obj.update(dt)
-
         self.update_camera()
 
     def update_camera(self, force=False):
-        if abs(self.map_layer.zoom - self.zoom_target) > 10 ** (-3):
-            self.map_layer.zoom += (self.zoom_target - self.map_layer.zoom) / 2
-            self.map_layer.zoom = round(self.map_layer.zoom, 2)
-
-            self.map_layer.center(self.map_layer.view_rect.center)
-            self.requires_update = True
+        # Objects that do not need an update if the camera has not moved
         if self.requires_update or force:
-            for obj in self.objects.sprites + self.interactable_objects + self.npcs:
+            for obj in self.objects.sprites + self.interactable_objects + self.farms + self.objects_under_npc.sprites:
                 obj.update_camera(self.map_layer.view_rect)
-        else:
-            for farm in self.farms:
-                farm.update_camera(self.map_layer.view_rect)
+            self.requires_update = False
+        # Objects that need an update even if the camera has not moved
+        for npc in self.npcs + self.farms:
+            npc.update_camera(self.map_layer.view_rect)
 
     def draw(self, win):
         self.map_layer.draw(win, win.get_rect())
-        for npc in self.npcs:
-            npc.draw(win)
+        self.objects_under_npc.draw(win)
         self.objects.draw(win)

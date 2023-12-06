@@ -4,11 +4,18 @@ from pprint import pprint
 
 import pygame
 
+from test_game.boring.config import font_path_dir
+
 if __name__ == "__main__":
     pygame.init()
     win = pygame.display.set_mode((500, 500))
 
 cwd = os.path.dirname(__file__)
+
+
+def load_font(name, size):
+    font_path = os.path.join(font_path_dir, name)
+    return pygame.font.Font(font_path, size)
 
 
 def load(path, size=None, vertical_size=None, horizontal_size=None):

@@ -1,4 +1,6 @@
 import pygame
+from pygame import Vector2
+
 from test_game.backend import objects
 from test_game.backend.inventory import Inventory
 from test_game.backend.items import Item
@@ -34,7 +36,7 @@ class Menu(objects.GameObjectNoImg):
         x_menu = linked_bat.rect.x + (linked_bat.rect.width - size[0]) // 2
         y_menu = linked_bat.rect.y - size[1] - 10
         pos = (x_menu, y_menu)
-        super().__init__(pos, size)
+        super().__init__(Vector2(pos), size)
         self.items: list[FarmMenuItem] = items
         self.is_open = False
 
@@ -191,7 +193,7 @@ class Farm(objects.GameObject, objects.Clickable):
         for plant in self.on_the_move_plants:
             plant.update_camera(camera_rect)
 
-    def draw(self, win, debug=False):
+    def draw(self, win, debug=True):
         selected_tool = self.menu.selected_item
         for plant in self.plants_location.values():
             plant.draw(win)

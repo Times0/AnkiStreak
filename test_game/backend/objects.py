@@ -19,8 +19,8 @@ class GameObjectNoImg:
     Use pos, don't use rect when using the object
     """
 
-    def __init__(self, pos, size):
-        self.pos = pos
+    def __init__(self, pos: pygame.math.Vector2, size):
+        self.pos: pygame.math.Vector2 = pos
         self.size = size
         self.rect = pygame.Rect(pos, size)
 
@@ -131,8 +131,8 @@ class SortedGroup:
 
     def add(self, sprite):
         self.sprites.append(sprite)
-        self.sprites.sort(key=lambda x: x.rect.bottom)
 
     def draw(self, surface):
+        self.sprites.sort(key=lambda x: x.rect.bottom)
         for sprite in self.sprites:
             sprite.draw(surface)

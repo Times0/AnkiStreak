@@ -6,10 +6,11 @@ import pygame
 from pygame import Vector2
 
 from test_game.backend.objects import GameObject
+from test_game.boring import config
 from test_game.boring.config import WIDTH, HEIGHT
 from test_game.boring.imgs import imgs_npc, scale_by
 
-ANIM_PER_SEC = 2
+ANIM_PER_SEC = 4
 NPC_SPEED = 50
 
 
@@ -42,6 +43,7 @@ class NPC:
                 self.imgs_cache[zoom][k] = [
                     pygame.transform.scale(img, (int(self.size[0] * zoom), int(self.size[1] * zoom))) for img in imgs]
         self.current_imgs = self.imgs_cache[zoom]
+        self.rect = self.current_imgs[self.direction_str][self.anim_index].get_rect(center=self.rect.topleft)
 
     def update(self, dt):
         if not self.target:
@@ -89,4 +91,6 @@ class NPC:
 
     def draw(self, win):
         img = self.current_imgs[self.direction_str][self.anim_index]
-        win.blit(img, img.get_rect(bottomright=self.rect.center)) # all possible rects are : t
+        win.blit(img, self.rect)
+        if config.DEBUG:
+            pygame.draw.rect(win, pygame.Color("red"), self.rect, 1)
