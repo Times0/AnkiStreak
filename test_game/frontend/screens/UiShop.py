@@ -1,9 +1,11 @@
 import pygame
 from PygameUIKit import button
+from PygameUIKit.button import ButtonText
 from pygame import Color
 
 from test_game.backend.shop import Shop
-from test_game.boring import utils
+from test_game.boring import utils, imgs
+from test_game.boring.imgs import load_font
 from test_game.frontend.ui_manager import UIElement
 
 
@@ -14,38 +16,61 @@ class ShopUI(UIElement):
 
         # Position of the shopUI
         self.border_radius = 15  # Border radius of the shopUI
-        self.item_spacing = 50  # Spacing between shopUI items
+        self.item_spacing = 0  # Spacing between shopUI items
 
         # Calculate the width and height of each cell based on the size of the grid
-        self.cell_width = 100
+        self.cell_width = 700 // len(self.shop.items)
         self.cell_height = 100
 
-        self.font = pygame.font.SysFont("Arial", 15, bold=True)
+        self.font = load_font("blomberg.otf", 20)
+        self.btn_font = load_font("farm_font.ttf", 30)
 
         self.buy_buttons: list[button.ButtonText] = []
         self.init_buy_buttons()
 
+        self.scaled_images = {}
+        self.coin_img = pygame.transform.scale(imgs.coin, (20, 20))
+
     def init_buy_buttons(self):
         for item_name, item in self.shop.items.items():
-            f = lambda i=item: self.shop.buy(i)  # Very important to use = in lambda for variable scope (idk why)
-            self.buy_buttons.append(button.ButtonText("Buy",
-                                                      f,
-                                                      Color("green"),
-                                                      border_radius=5,
-                                                      font=self.font))
+            self.buy_buttons.append(button.ButtonText("      ",
+                                                      lambda i=item: self.shop.buy(i),
+                                                      Color("darkgreen"), border_radius=5,
+                                                      font=self.btn_font))
 
     def _draw(self, window):
         x, y = self.rect.topleft
         # Draw the shop items
-        item_x = x + self.border_radius  # X position of the first item
-        item_y = y + self.border_radius  # Y position of the first item
+        item_x = x + self.cell_width // 2  # X position of the first item
 
         for i, (item_name, item) in enumerate(self.shop.items.items()):
-            item_rect = pygame.Rect(item_x, item_y, self.cell_width, self.cell_height)
-            self.draw_item(window, item, item_x, item_y)
-            self.buy_buttons[i].draw(window, *self.buy_buttons[i].surface.get_rect(
-                midtop=item_rect.midbottom).topleft)
-            item_x += self.cell_width + self.item_spacing  # Adjust the spacing between items
+            if item_name not in self.scaled_images:
+                self.scaled_images[item_name] = pygame.transform.scale(item.img, (80, 80))
+            item_y = y + self.border_radius  # Y position of the first item
+
+            # Draw the item name
+            nb = self.shop.inventory.items.get(item_name, 0)
+            text = self.font.render(f"{item_name} ({nb})", True, Color("black"))
+            text_rect = text.get_rect(midtop=(item_x, item_y))
+            window.blit(text, text_rect)
+
+            item_y += text_rect.height + 5
+
+            # Draw the item image
+            img = self.scaled_images[item_name]
+            img_rect = img.get_rect(midtop=(item_x, item_y))
+            window.blit(img, img_rect)
+
+            # Draw the buy button under the item image
+            btn: ButtonText = self.buy_buttons[i]
+            btn.draw(window, *btn.surface.get_rect(midtop=(item_x, item_y + img_rect.height + 5)).topleft)
+            # draw the price next to the buy button and the coin img
+            text = self.font.render(str(item.price), True, Color("white"))
+            text_rect = text.get_rect(midleft=btn.rect.midleft).move(5, 0)
+            window.blit(text, text_rect)
+            window.blit(self.coin_img, self.coin_img.get_rect(midleft=text_rect.midright).move(5, 0))
+
+            item_x += self.cell_width
 
     def draw_item(self, window, item, x, y):
         img = pygame.transform.scale(item.img, (self.cell_width - 10, self.cell_height - 10))

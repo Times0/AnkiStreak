@@ -135,7 +135,12 @@ class UIManager:
 
     def handle_event(self, event):
         if self.active_element:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.active_element.close()
+                    return
             self.active_element.handle_event(event)
+
         else:
             for element in self.perma_elements.values():
                 element.handle_event(event)
