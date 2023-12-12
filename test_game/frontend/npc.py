@@ -11,7 +11,9 @@ from test_game.boring.config import WIDTH, HEIGHT
 from test_game.boring.imgs import imgs_npc, scale_by
 
 ANIM_PER_SEC = 4
-NPC_SPEED = 50
+
+NPC_MIN_SPEED = 20
+NPC_MAX_SPEED = 40
 
 
 class NPC:
@@ -26,7 +28,7 @@ class NPC:
 
         self.target: Optional[tuple[int, int]] = None
         self.direction: Optional[Vector2] = None
-        self.speed = NPC_SPEED
+        self.speed = random.randint(NPC_MIN_SPEED, NPC_MAX_SPEED)
         self.path = path
         self.path_index = random.randint(1, len(path) - 2)
         self.pos = Vector2(path[self.path_index])

@@ -81,6 +81,8 @@ class Game:
         self.anki_data_json = None
         self.load_save()
         self.load_anki_data()
+        self.tuxemon_inventory.add_default_tuxemons()
+
 
     def load_anki_data(self):
         # if not os.path.exists(anki_data_path):

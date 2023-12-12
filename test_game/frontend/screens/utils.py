@@ -4,22 +4,20 @@ import pygame
 class Hoverable:
     def __init__(self, rect: pygame.Rect, inflate=10):
         self.hovered = False
-        self.rect_default = rect
-        self.rect_inflated = rect.inflate(inflate, inflate)
         self.rect = rect
+        self.inflate = inflate
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEMOTION:
-
-            if self.rect.collidepoint(event.pos):
+            if self.rect.collidepoint(event.pos) and not self.hovered:
                 self.on_hover()
-            else:
+            elif not self.rect.collidepoint(event.pos) and self.hovered:
                 self.on_unhover()
 
     def on_hover(self):
         self.hovered = True
-        self.rect = self.rect_inflated
+        self.rect = self.rect.inflate(self.inflate, self.inflate)
 
     def on_unhover(self):
         self.hovered = False
-        self.rect = self.rect_default
+        self.rect = self.rect.inflate(-self.inflate, -self.inflate)
