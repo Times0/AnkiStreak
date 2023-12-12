@@ -1,0 +1,50 @@
+{
+    "snowrilla": {
+        "xp": 0,
+        "level": 1
+    },
+    "metesaur": {
+        "xp": 0,
+        "level": 1
+    },
+    "fribbit": {
+        "xp": 0,
+        "level": 1
+    },
+    "eruptibus": {
+        "xp": 0,
+        "level": 1
+    },
+    "grinflare": {
+        "xp": 0,
+        "level": 1
+    },
+    "hectapod": {
+        "xp": 0,
+        "level": 1
+    },
+    "qetzlrokilus": {
+        "xp": 0,
+        "level": 1
+    },
+    "fuzzlet": {
+        "xp": 0,
+        "level": 1
+    },
+    "aardorn": {
+        "xp": 0,
+        "level": 1
+    },
+    "agnigon": {
+        "xp": 30,
+        "level": 2
+    },
+    "cardinale": {
+        "xp": 50,
+        "level": 2
+    },
+    "noctalo": {
+        "xp": 0,
+        "level": 2
+    }
+}
