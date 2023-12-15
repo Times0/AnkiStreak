@@ -5,7 +5,7 @@ import pygame.sprite
 import pyscroll
 import pytmx
 from PygameUIKit import Group
-from PygameUIKit.button import ButtonPngIcon
+from PygameUIKit.button import ButtonPngIcon, ButtonText
 from pygame import Color, Vector2
 
 from backend.farms import Farm, PlantSpot
@@ -22,6 +22,7 @@ from frontend.screens.UiInventory import InventoryUI
 from frontend.screens.UiPopup import Popup
 from frontend.screens.UiTuxemon import TuxemonUI
 from frontend.ui_manager import UIManager
+from test_game.boring.imgs import load_font
 from test_game.frontend.npc import NPC
 from test_game.frontend.screens.UiShop import ShopUI
 import datetime
@@ -99,10 +100,16 @@ class Game:
         ])
 
         # _____________________UI___________________________________#
+        btn_font = load_font("title.otf", 40)
         self.easy_ui = Group()
         self.btn_menu = ButtonPngIcon(imgs.btn_inventory, lambda: self.ui_manager.open("inventory"), Color("gray"))
         self.btn_shop = ButtonPngIcon(imgs.btn_shop, lambda: self.ui_manager.open("shop"), Color("gray"))
         self.btn_tuxemon = ButtonPngIcon(imgs.btn_tuxemon, lambda: self.ui_manager.open("tuxemon"), Color("gray"))
+        self.button_start_learning = ButtonText("Start learning", font=btn_font, rect_color=Color(124, 197, 96),
+                                                font_color=Color("white"), border_radius=10)
+        self.button_start_learning.connect(self.start_learning)
+
+        self.easy_ui.add(self.button_start_learning)
         self.easy_ui.add(self.btn_menu)
         self.easy_ui.add(self.btn_shop)
         self.easy_ui.add(self.btn_tuxemon)
@@ -113,6 +120,9 @@ class Game:
         self.anki_data_json = None
         self.load_save()
         self.load_anki_data()
+
+    def start_learning(self):
+        self.running = False
 
     def load_anki_data(self):
         # if not os.path.exists(anki_data_path):
@@ -185,7 +195,7 @@ class Game:
         self.anki_data_json = json.load(open(anki_data_path, "r"))
         data = self.anki_data_json
         if "time_ordinal" not in data:
-            return  # no assets yet
+            return
         if data["time_ordinal"] != datetime.datetime.today().toordinal():
             self.learning_indicator.set_nb_cards_learned(0)
             return
@@ -198,6 +208,7 @@ class Game:
                 # We water all the plants based on the percentage of cards learned
                 max_watering = config.MAX_WATERING
                 learned_today = data["nb_cards_learned_today"]
+                print(f"learned {learned_today} cards today")
                 learned_since_last_connection = learned_today - prev
                 percentage = (learned_since_last_connection / self.learning_indicator.nb_cards_total)
                 nb_watering = int(percentage * max_watering) + 1
@@ -206,7 +217,9 @@ class Game:
                 for farm in self.ptmx.farms:
                     farm.water_all(nb_watering)
 
-                self.create_popup(f"You learned {learned_since_last_connection} cards ! +{nb_watering} watering !")
+                self.create_popup("Good Job !",
+                                  f"You learned {learned_since_last_connection} since last time !\n"
+                                  f"Your plants have been watered accordingly !")
 
     def create_popup(self, title, text):
         popup = Popup(title=title, text=text, manager=self.ui_manager)
@@ -220,10 +233,13 @@ class Game:
 
     def draw_ui(self, win):
         W = win.get_width()
+        H = win.get_height()
         self.btn_menu.draw(win, W - self.btn_menu.rect.width - 10, 10)
         self.btn_shop.draw(win, W - self.btn_shop.rect.width - 10 - self.btn_menu.rect.width - 10, 10)
         x = W - self.btn_tuxemon.rect.width - 10 - self.btn_menu.rect.width - 10 - self.btn_shop.rect.width - 10
         self.btn_tuxemon.draw(win, x, 10)
+        self.button_start_learning.draw(win, W - self.button_start_learning.rect.width - 10,
+                                        H // 2 - self.button_start_learning.rect.height // 2)
         self.ui_manager.draw(win)
 
     def dump_save(self):

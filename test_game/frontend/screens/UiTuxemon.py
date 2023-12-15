@@ -162,6 +162,12 @@ class TuxemonUI(UIElement):
                              ocolor=Color("black"), opx=1)
         win.blit(label, label.get_rect(center=(x, y1 - 10)))
 
+        # Drw tuxemon name
+        text = big_tuxemon.name
+        label = utils.render(text, pygame.font.SysFont("Arial", 40),
+                             gfcolor=Color(big_tuxemon.favorite_color()),
+                             ocolor=Color("black"), opx=1)
+        win.blit(label, label.get_rect(midtop=(self.tuxemon_part_rect.centerx, self.tuxemon_part_rect.top + 10)))
         # Draw button to feed the big_tuxemon
         surf = self.btn_feed.surface
         pos = surf.get_rect(center=self.bottomright_rect.center).topleft

@@ -1,3 +1,18 @@
+# AnkiStreak Version 0.4 Ui Improvements
+
+## New Features
+
+- Improved the overall assets quality of the game. The game now looks much better.
+- Added animated tiles for the water
+- Added npcs walking randomly around the map (no interaction with them yet)
+- Added 9 new tuxemons (total of 12 tuxemons now)
+- Improved caching system. The game now loads much faster. The zooming in and out is also much faster.
+
+
+- Improved all the uis (Shop, Inventory, Tuxemon and Popup)
+- Added rewards depending on the streak. Right now it is 100 money * streak number every day.
+- Added a button to start learning and quit the game.
+
 # AnkiStreak Version 0.3 (Tuxemons)
 
 ## New Features
