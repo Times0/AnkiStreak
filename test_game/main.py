@@ -1,7 +1,6 @@
 import os
 import sys
-
-from boring.config import WIDTH, HEIGHT
+from test_game.boring.config import WIDTH, HEIGHT
 import logging
 import pygame
 
