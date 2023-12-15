@@ -15,6 +15,7 @@ cwd = os.path.dirname(__file__)
 
 def load_font(name, size):
     font_path = os.path.join(font_path_dir, name)
+    print(f"loading font {font_path}")
     return pygame.font.Font(font_path, size)
 
 

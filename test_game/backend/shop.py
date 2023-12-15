@@ -30,7 +30,7 @@ class Wallet:
         self.money -= amount
         self.ui.update_money(self.money)
 
-    def gain_money(self, amount):
+    def add_money(self, amount):
         self.money += amount
         self.ui.update_money(self.money)
 

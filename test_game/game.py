@@ -1,8 +1,6 @@
 import json
 import logging
 import os.path
-from datetime import datetime
-
 import pygame.sprite
 import pyscroll
 import pytmx
@@ -22,13 +20,47 @@ from boring.utils import *
 from frontend.indicators import CardIndicators, CoinsIndicator
 from frontend.screens.UiInventory import InventoryUI
 from frontend.screens.UiPopup import Popup
-from frontend.screens.UiShop import ShopUI
 from frontend.screens.UiTuxemon import TuxemonUI
 from frontend.ui_manager import UIManager
 from test_game.frontend.npc import NPC
+from test_game.frontend.screens.UiShop import ShopUI
+import datetime
+
+if not DEBUG:
+    import aqt.utils
+    from aqt import gui_hooks, mw
 
 cwd = os.path.dirname(__file__)
 logger = logging.getLogger(__name__)
+
+today_ord = datetime.date.today().toordinal() + 1  #
+
+
+def enhance_numbers(n):
+    if n == 1:
+        return "1st"
+    elif n == 2:
+        return "2nd"
+    elif n == 3:
+        return "3rd"
+    else:
+        return f"{n}th"
+
+
+def get_new_streak() -> tuple[int, int]:
+    if not mw.col.conf.get("streak"):
+        return 1, today_ord
+
+    today_ordinal = today_ord
+    streak, last_day_ordinal = mw.col.conf["streak"]
+
+    if today_ordinal == last_day_ordinal:
+        pass
+    elif today_ordinal == last_day_ordinal + 1:
+        streak += 1
+    else:
+        streak = 1
+    return streak, today_ordinal
 
 
 class Game:
@@ -81,8 +113,6 @@ class Game:
         self.anki_data_json = None
         self.load_save()
         self.load_anki_data()
-        self.tuxemon_inventory.add_default_tuxemons()
-
 
     def load_anki_data(self):
         # if not os.path.exists(anki_data_path):
@@ -94,6 +124,20 @@ class Game:
         self.learning_indicator.set_nb_cards_total(self.anki_data_json["nb_cards_to_review_today"])
 
         self.update_learned_cards()
+        if not config.DEBUG:
+            self.check_for_streak_earnings()
+
+    def check_for_streak_earnings(self):
+        previous_streak, _ = mw.col.conf.get("streak", (-float('inf'), 0))
+        streak, ordinal = get_new_streak()
+        mw.col.conf["streak"] = streak, ordinal
+
+        if streak > previous_streak:
+            # Give the player some money depending on the streak
+            money = 100 * streak
+            self.wallet.add_money(money)
+            self.create_popup("Good Job !",
+                              f"You have a {streak} day(s) streak !\n Here is a little reward !\n +{money} coins !")
 
     def run(self):
         clock = pygame.time.Clock()
@@ -140,11 +184,9 @@ class Game:
     def update_learned_cards(self):
         self.anki_data_json = json.load(open(anki_data_path, "r"))
         data = self.anki_data_json
-        if not "time_ordinal" in data:
+        if "time_ordinal" not in data:
             return  # no assets yet
-        if data["time_ordinal"] != datetime.today().toordinal():
-            logger.warning(f"Weird, the ordinal date is not today's date ({data['time_ordinal']} "
-                           f"!= {datetime.today().toordinal()})")
+        if data["time_ordinal"] != datetime.datetime.today().toordinal():
             self.learning_indicator.set_nb_cards_learned(0)
             return
         else:
@@ -166,8 +208,8 @@ class Game:
 
                 self.create_popup(f"You learned {learned_since_last_connection} cards ! +{nb_watering} watering !")
 
-    def create_popup(self, text):
-        popup = Popup(text=text, manager=self.ui_manager)
+    def create_popup(self, title, text):
+        popup = Popup(title=title, text=text, manager=self.ui_manager)
         self.ui_manager.add_popop(popup)
 
     def draw(self, win):
@@ -207,7 +249,7 @@ class Game:
 
             # save time
             try:
-                data["time"] = datetime.now().toordinal()
+                data["time"] = datetime.datetime.now().toordinal()
             except Exception as e:
                 raise RuntimeError(f"Error while dumping time assets: {str(e)}")
 
@@ -231,8 +273,8 @@ class Game:
 
     def dump_tuxemon(self):
         data = self.tuxemon_inventory.dump()
-        with open(os.path.join(config.save_folder, "tuxemon.json"), "w") as f:
-            json.dump(data, f, indent=4)
+        with open(os.path.join(config.save_folder, "tuxemon.json"), "w+") as f:
+            json.dump(data, f)
 
     def load_save(self):
         try:
@@ -254,7 +296,7 @@ class Game:
 
         # load learning indicator state
         if "cards_learned_today" in data.keys():
-            if data["time"] != datetime.now().toordinal():
+            if data["time"] != datetime.datetime.now().toordinal():
                 self.learning_indicator.set_nb_cards_learned(0)
             else:
                 self.learning_indicator.set_nb_cards_learned(data["cards_learned_today"])
@@ -270,12 +312,11 @@ class Game:
         try:
             with open(os.path.join(config.save_folder, "tuxemon.json"), "r") as f:
                 data = json.load(f)
+                self.tuxemon_inventory.load(data)
+
         except FileNotFoundError:
-            # Handle the case when the file is not found
             print("File not found. Initializing with default assets.")
-            data = {}
-        print(data)
-        self.tuxemon_inventory.load(data)
+            self.tuxemon_inventory.add_default_tuxemons()
 
 
 class Pytmx:
@@ -380,11 +421,11 @@ class Pytmx:
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.requires_update = True
-                if event.button == 2:
+                if event.button == 2 or event.button == 3:
                     self.is_scrolling = True
 
             if event.type == pygame.MOUSEBUTTONUP:
-                if event.button == 2:
+                if event.button == 2 or event.button == 3:
                     self.is_scrolling = False
 
             if event.type == pygame.MOUSEMOTION:

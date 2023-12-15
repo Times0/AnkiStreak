@@ -1,5 +1,6 @@
 import os
 import sys
+
 from test_game.boring.config import WIDTH, HEIGHT
 import logging
 import pygame
@@ -13,12 +14,14 @@ logging.basicConfig(level=logging.INFO, filename="game.log", filemode="w",
 
 def main():
     pygame.init()
-    pygame.display.set_caption("Game")
+    pygame.display.set_caption("AnkiStreak")
     win = pygame.display.set_mode((WIDTH, HEIGHT), pygame.DOUBLEBUF | pygame.HWSURFACE, vsync=True)
     from game import Game
     game = Game(win)
     from game import PlantSpot
-    PlantSpot.counter = 0  # Avoids starting id counter at 43 when starting a new game without closing the anki window
+    from test_game.backend.tuxemons import Tuxemon
+    PlantSpot.counter = 0  # reset class counter (used as id) there is probably a better way to do this
+    Tuxemon.counter = 0
     game.run()
     pygame.quit()
 

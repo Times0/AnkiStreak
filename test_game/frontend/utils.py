@@ -34,19 +34,11 @@ def blit_acrylic_surface(screen_in, screen_out, pos, surface, blur_radius=5):
     bg_rect = pygame.Rect(pos, surface.get_size())
     bg_subsurface = screen_in.subsurface(bg_rect).copy()
 
-    pygame.image.save(bg_subsurface, "bg_subsurface.png")
-
-    # Convertir cette sous-surface en tableau numpy pour le traitement
     np_surface = pygame.surfarray.pixels3d(bg_subsurface).transpose((1, 0, 2))
 
-    # Appliquer le flou gaussien
     for i in range(3):  # Pour chaque canal R, G, B
         np_surface[..., i] = gaussian_filter(np_surface[..., i], sigma=blur_radius)
 
-    # Convertir le tableau numpy en surface pygame
     blurred_subsurface = pygame.surfarray.make_surface(np_surface.transpose((1, 0, 2)))
-
-    # Dessiner la surface floue sur l'écran
     screen_out.blit(blurred_subsurface, (0, 0))
-    # Dessiner la surface originale dessus (vous pouvez ajuster son alpha si nécessaire)
     screen_out.blit(surface, (0, 0))

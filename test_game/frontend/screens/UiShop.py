@@ -23,6 +23,7 @@ class ShopUI(UIElement):
         self.cell_height = 100
 
         self.font = load_font("blomberg.otf", 20)
+        self.price_font = pygame.font.SysFont("Arial", 20)
         self.btn_font = load_font("farm_font.ttf", 30)
 
         self.buy_buttons: list[button.ButtonText] = []
@@ -35,8 +36,10 @@ class ShopUI(UIElement):
         for item_name, item in self.shop.items.items():
             self.buy_buttons.append(button.ButtonText("      ",
                                                       lambda i=item: self.shop.buy(i),
-                                                      Color("darkgreen"), border_radius=5,
-                                                      font=self.btn_font))
+                                                      Color(124, 197, 96), border_radius=5,
+                                                      font=self.btn_font,
+                                                      )
+                                    )
 
     def _draw(self, window):
         x, y = self.rect.topleft
@@ -50,7 +53,7 @@ class ShopUI(UIElement):
 
             # Draw the item name
             nb = self.shop.inventory.items.get(item_name, 0)
-            text = self.font.render(f"{item_name} ({nb})", True, Color("black"))
+            text = self.price_font.render(f"{item_name} ({nb})", True, Color("black"))
             text_rect = text.get_rect(midtop=(item_x, item_y))
             window.blit(text, text_rect)
 
@@ -65,37 +68,12 @@ class ShopUI(UIElement):
             btn: ButtonText = self.buy_buttons[i]
             btn.draw(window, *btn.surface.get_rect(midtop=(item_x, item_y + img_rect.height + 5)).topleft)
             # draw the price next to the buy button and the coin img
-            text = self.font.render(str(item.price), True, Color("white"))
+            text = self.price_font.render(str(item.price), True, Color("white"))
             text_rect = text.get_rect(midleft=btn.rect.midleft).move(5, 0)
             window.blit(text, text_rect)
             window.blit(self.coin_img, self.coin_img.get_rect(midleft=text_rect.midright).move(5, 0))
 
             item_x += self.cell_width
-
-    def draw_item(self, window, item, x, y):
-        img = pygame.transform.scale(item.img, (self.cell_width - 10, self.cell_height - 10))
-        img_rect = img.get_rect(topleft=(x, y))
-
-        # Draw the item rectangle
-        pygame.draw.rect(window, (76, 76, 76), (x, y, self.cell_width, self.cell_height),
-                         border_radius=5)
-
-        # Draw a subtle gradient on the item rectangle
-        gradient_rect = pygame.Rect(x, y, self.cell_width, self.cell_height)
-        gradient = pygame.Surface((gradient_rect.width, gradient_rect.height))
-        pygame.draw.rect(gradient, (100, 100, 100), gradient.get_rect(top=1, bottom=gradient_rect.height - 2))
-        pygame.draw.rect(gradient, (66, 66, 66), gradient.get_rect(top=0, bottom=1))
-        pygame.draw.rect(window, (0, 0, 0), gradient_rect)
-
-        window.blit(gradient, gradient_rect)
-        window.blit(img, img_rect)
-
-        label = utils.render(item.name, self.font, gfcolor=Color("black"), ocolor=Color("white"), opx=1)
-        window.blit(label, label.get_rect(center=img_rect.center))
-
-        # Price
-        label = utils.render(str(item.price), self.font, gfcolor=Color("black"), ocolor=Color("white"), opx=0)
-        window.blit(label, label.get_rect(bottomright=img_rect.bottomright))
 
     def _handle_event(self, event):
         for btn in self.buy_buttons:

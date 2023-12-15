@@ -193,7 +193,7 @@ class Farm(objects.GameObject, objects.Clickable):
         for plant in self.on_the_move_plants:
             plant.update_camera(camera_rect)
 
-    def draw(self, win, debug=True):
+    def draw(self, win):
         selected_tool = self.menu.selected_item
         for plant in self.plants_location.values():
             plant.draw(win)
@@ -206,7 +206,7 @@ class Farm(objects.GameObject, objects.Clickable):
             win.blit(img, img.get_rect(center=pygame.mouse.get_pos()))
 
         points = [p.coords for p in self.farm_zone]
-        if debug:
+        if config.DEBUG:
             pygame.draw.polygon(win, colors.RED, points, 2)
 
         for plant in self.on_the_move_plants:

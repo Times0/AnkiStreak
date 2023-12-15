@@ -62,8 +62,8 @@ class TuxemonUI(UIElement):
         self.init_cards()
 
         self.btn_feed = button.ButtonText("Feed", NotImplemented, Color("green"), border_radius=5,
-                                          font=pygame.font.SysFont("Arial", 15, bold=True),
-                                          font_color=Color("black"))
+                                          font_color=Color("black"),
+                                          font=pygame.font.SysFont("Arial", 15))
 
         self.tuxemons_images_big = {}  # key is tuxemon name and value is the image
         self.fruits_images = {}
@@ -124,10 +124,20 @@ class TuxemonUI(UIElement):
             pygame.draw.rect(win, Color("red"), self.tuxemon_part_rect, 5)
             pygame.draw.rect(win, Color("blue"), self.bottomright_rect, 5)
 
+        # Draw separator
+        pygame.draw.line(win, Color("black"), (self.tuxemon_part_rect.left, self.rect.top),
+                         (self.tuxemon_part_rect.left, self.rect.bottom), 5)
+
         # Draw big big_tuxemon
         big_tuxemon = self.focused_card.tuxemon
         img = self.tuxemons_images_big[big_tuxemon.name]
         win.blit(img, img.get_rect(center=self.tuxemon_part_rect.center))
+
+        # Draw tuxemon level on top left
+        text = f"Level {big_tuxemon.level}"
+        label = utils.render(text, pygame.font.SysFont("Arial", 15, bold=True), gfcolor=Color("white"),
+                             ocolor=Color("black"), opx=1)
+        win.blit(label, label.get_rect(center=(self.tuxemon_part_rect.left + 40, self.tuxemon_part_rect.top + 20)))
 
         # Draw vertical health bar with label xp : x/x
         off = 30
@@ -172,10 +182,9 @@ class TuxemonUI(UIElement):
     def _handle_event(self, event):
         for card in self.cards:
             card.handle_event(event)
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             for card in self.cards:
                 if card.rect.collidepoint(event.pos):
-                    print(card.tuxemon.name)
                     self.expand(card)
 
         if self.expanded:
