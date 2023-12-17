@@ -199,31 +199,19 @@
             },
             {
                 "id": 48,
-                "plant": {
-                    "type": "ice",
-                    "development_index": 0
-                }
+                "plant": null
             },
             {
                 "id": 49,
-                "plant": {
-                    "type": "ice",
-                    "development_index": 0
-                }
+                "plant": null
             },
             {
                 "id": 50,
-                "plant": {
-                    "type": "ice",
-                    "development_index": 0
-                }
+                "plant": null
             },
             {
                 "id": 51,
-                "plant": {
-                    "type": "ice",
-                    "development_index": 0
-                }
+                "plant": null
             },
             {
                 "id": 52,
@@ -239,17 +227,11 @@
             },
             {
                 "id": 55,
-                "plant": {
-                    "type": "water",
-                    "development_index": 0
-                }
+                "plant": null
             },
             {
                 "id": 56,
-                "plant": {
-                    "type": "water",
-                    "development_index": 0
-                }
+                "plant": null
             },
             {
                 "id": 57,
@@ -261,10 +243,7 @@
             },
             {
                 "id": 59,
-                "plant": {
-                    "type": "ice",
-                    "development_index": 0
-                }
+                "plant": null
             },
             {
                 "id": 60,
@@ -614,9 +593,10 @@
         ]
     },
     "inventory": {
-        "water fruit": 9
+        "water fruit": 11,
+        "ice fruit": 5
     },
     "cards_learned_today": 0,
-    "time": 738869,
+    "time": 738871,
     "wallet": 19980
 }

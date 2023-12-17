@@ -6,6 +6,7 @@
 - Added animated tiles for the water
 - Added npcs walking randomly around the map (no interaction with them yet)
 - Added 9 new tuxemons (total of 12 tuxemons now)
+- Tuxemons can now evolve (only 1 evolution stage for now for almost all tuxemons)
 - Improved caching system. The game now loads much faster. The zooming in and out is also much faster.
 
 

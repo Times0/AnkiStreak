@@ -1,7 +1,8 @@
 import os
 import shutil
 
-anki_ext_dir = r"C:\Users\Dorian\AppData\Roaming\Anki2\addons21\ankistreak"
+anki_ext_dir = os.path.join(os.getenv('APPDATA'), 'Anki2', 'addons21', 'ankistreak')
+print(anki_ext_dir)
 
 if os.path.exists(os.path.join(anki_ext_dir, "test_game")):
     shutil.rmtree(os.path.join(anki_ext_dir, "test_game"))

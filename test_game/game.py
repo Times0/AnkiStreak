@@ -8,6 +8,7 @@ from PygameUIKit import Group
 from PygameUIKit.button import ButtonPngIcon, ButtonText
 from pygame import Color, Vector2
 
+from PygameUIKit.slider import Slider
 from backend.farms import Farm, PlantSpot
 from backend.inventory import Inventory
 from backend.objects import GameObject, SortedGroup, PointWithZoom
@@ -64,6 +65,10 @@ def get_new_streak() -> tuple[int, int]:
     return streak, today_ordinal
 
 
+def change_music_volume(value):
+    pygame.mixer.music.set_volume(value / 100)
+
+
 class Game:
     def __init__(self, win):
         self.time_since_last_late_update = 1000  # 1000 for late update now
@@ -108,6 +113,7 @@ class Game:
         self.button_start_learning = ButtonText("Start learning", font=btn_font, rect_color=Color(124, 197, 96),
                                                 font_color=Color("white"), border_radius=10)
         self.button_start_learning.connect(self.start_learning)
+        self.slider_music = Slider(0, 100, 1, ui_group=self.easy_ui)
 
         self.easy_ui.add(self.button_start_learning)
         self.easy_ui.add(self.btn_menu)
@@ -120,6 +126,12 @@ class Game:
         self.anki_data_json = None
         self.load_save()
         self.load_anki_data()
+
+        # Music
+        pygame.mixer.music.load(os.path.join(cwd, "assets", "music", "music.mp3"))
+        pygame.mixer.music.play(-1)
+        self.slider_music.current_value = 100
+        self.slider_music.connect(lambda: change_music_volume(self.slider_music.get_value()))
 
     def start_learning(self):
         self.running = False
@@ -240,6 +252,7 @@ class Game:
         self.btn_tuxemon.draw(win, x, 10)
         self.button_start_learning.draw(win, W - self.button_start_learning.rect.width - 10,
                                         H // 2 - self.button_start_learning.rect.height // 2)
+        self.slider_music.draw(win, 10, H - self.slider_music.rect.height - 10, 200, 10)
         self.ui_manager.draw(win)
 
     def dump_save(self):
