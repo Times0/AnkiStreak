@@ -37,14 +37,16 @@ logger = logging.getLogger(__name__)
 
 today_ord = datetime.date.today().toordinal() + 1  #
 
+cool_numbers = {
+    1: "1st",
+    2: "2nd",
+    3: "3rd"
+}
+
 
 def enhance_numbers(n):
-    if n == 1:
-        return "1st"
-    elif n == 2:
-        return "2nd"
-    elif n == 3:
-        return "3rd"
+    if n in cool_numbers:
+        return cool_numbers[n]
     else:
         return f"{n}th"
 

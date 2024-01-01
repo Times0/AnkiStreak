@@ -73,9 +73,9 @@ plants = {
 }
 
 # _____________________UI___________________________________#
-btn_inventory = load("sprites/ui/inventory.png", vertical_size=75)
-btn_tuxemon = load("sprites/ui/tuxemon.png", vertical_size=75)
-btn_shop = load("sprites/ui/shop.png", vertical_size=75)
+btn_inventory = load("sprites/ui/inventory_border.png", vertical_size=75)
+btn_tuxemon = load("sprites/ui/tuxemon_border.png", vertical_size=75)
+btn_shop = load("sprites/ui/cart_border.png", vertical_size=75)
 card = load("sprites/ui/anki_card.png")
 coin = load("sprites/ui/coin.png")
 cross = load("sprites/ui/cross.png")

@@ -329,7 +329,6 @@ class OnTheMoveItem(objects.GameObject):
         for i in range(steps + 1):
             t = i / steps
             positions.append(pos.lerp(self.dest, self.speed_function(t)))
-
         return positions
 
     def update(self, dt):

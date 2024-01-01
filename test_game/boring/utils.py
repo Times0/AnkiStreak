@@ -46,13 +46,6 @@ def speed_func(x):
     return (3 * x ** 2 - 2 * x ** 3) ** 4
 
 
-def render_multiples_texts(win, renders):
-    x = 10
-    for render in renders:
-        win.blit(render, (x, 10))
-        x += render.get_width()
-
-
 _circle_cache = {}
 
 

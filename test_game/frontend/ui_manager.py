@@ -104,7 +104,6 @@ class UIElement(AcrylicBackground):
 
 
 class UIManager:
-    from test_game.frontend.screens.UiPopup import Popup
     def __init__(self, elements=None):
         self.elements: dict[str, UIElement] = {}
         self.perma_elements: dict[str, UIElement] = {}
@@ -152,6 +151,6 @@ class UIManager:
         for element in self.perma_elements.values():
             element.update(dt)
 
-    def add_popop(self, popup: Popup):
+    def add_popop(self, popup: "Popup"):
         self.elements[popup.name] = popup
         self.open(popup.name)
