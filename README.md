@@ -1,5 +1,9 @@
 # AnkiStreak
 
+
+https://github.com/Times0/AnkiStreak/assets/45049767/7273d494-6562-44d9-a4f8-c58063264d92
+
+
 ![img.png](img.png)
 
 # How to run
