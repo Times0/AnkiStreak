@@ -46,6 +46,6 @@ def on_profile_open():
 gui_hooks.profile_did_open.append(on_profile_open)
 gui_hooks.reviewer_did_answer_card.append(process_file)
 
-action = aqt.qt.QAction("Start game", mw)
+action = aqt.qt.QAction("Start AnkiStreak", mw)
 action.triggered.connect(start_game)
 mw.form.menuTools.addAction(action)

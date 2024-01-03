@@ -113,8 +113,8 @@ class Game:
         self.btn_shop = ButtonPngIcon(imgs.btn_shop, lambda: self.ui_manager.open("shop"), Color("gray"))
         self.btn_tuxemon = ButtonPngIcon(imgs.btn_tuxemon, lambda: self.ui_manager.open("tuxemon"), Color("gray"))
         self.button_start_learning = ButtonText("Start learning", font=btn_font, rect_color=Color(124, 197, 96),
-                                                font_color=Color("white"), border_radius=10)
-        self.button_start_learning.connect(self.start_learning)
+                                                font_color=Color("white"), border_radius=10,
+                                                onclick_f=self.start_learning)
         self.slider_music = Slider(0, 100, 1, ui_group=self.easy_ui)
 
         self.easy_ui.add(self.button_start_learning)
@@ -175,6 +175,7 @@ class Game:
                 self.time_since_last_late_update = 0
                 self.late_update()
             self.draw(self.win)
+        self.dump_save()
 
     def events(self):
         events = pygame.event.get()
@@ -195,7 +196,6 @@ class Game:
             self.ui_manager.handle_event(event)
             if event.type == pygame.QUIT:
                 self.running = False
-                self.dump_save()
 
     def update(self, dt):
         self.ptmx.update(dt)
