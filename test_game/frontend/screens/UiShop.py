@@ -53,7 +53,7 @@ class ShopUI(UIElement):
 
             # Draw the item name
             nb = self.shop.inventory.items.get(item_name, 0)
-            text = self.price_font.render(f"{item_name} ({nb})", True, Color("black"))
+            text = self.font.render(f"{item_name} ({nb})", True, Color("black"))
             text_rect = text.get_rect(midtop=(item_x, item_y))
             window.blit(text, text_rect)
 
