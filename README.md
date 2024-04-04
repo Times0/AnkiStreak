@@ -1,6 +1,6 @@
 # AnkiStreak
 
-![img.png](img.png)
+[demoAnkiStreak.webm](https://github.com/Times0/AnkiStreak/assets/45049767/ee002cde-0114-483c-9d73-aec44172f509)
 
 https://github.com/Times0/AnkiStreak/assets/45049767/7273d494-6562-44d9-a4f8-c58063264d92
 
